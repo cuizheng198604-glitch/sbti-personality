@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SBTI × Big Five 抽卡模拟器</title>
+<style>
+:root {
+  --common:#8a8a8a; --rare:#3b82f6; --special:#9333ea; --legendary:#f59e0b;
+  --bg:#0f0f1a; --card-bg:#1a1a2e; --text:#e2e8f0; --muted:#64748b; --border:#2d2d4a;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body {
+  font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+  background:var(--bg); color:var(--text); min-height:100vh;
+}
+header {
+  text-align:center; padding:1.6rem 1rem 1rem;
+  background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);
+  border-bottom:1px solid var(--border);
+}
+header h1 {
+  font-size:1.6rem;
+  background:linear-gradient(90deg,#60a5fa,#a78bfa,#f472b6);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+header p { color:var(--muted); font-size:0.78rem; margin-top:0.3rem; }
+
+main {
+  max-width:1080px; margin:0 auto; padding:1.5rem 1rem;
+  display:grid; grid-template-columns:310px 1fr; gap:1.5rem; align-items:start;
+}
+@media(max-width:768px){main{grid-template-columns:1fr;}}
+
+.panel {
+  background:var(--card-bg); border:1px solid var(--border);
+  border-radius:12px; padding:1.2rem;
+}
+.panel-title {
+  font-size:0.72rem; font-weight:700; letter-spacing:0.12em;
+  color:var(--muted); text-transform:uppercase;
+  margin-bottom:0.9rem; padding-bottom:0.5rem; border-bottom:1px solid var(--border);
+}
+.score-row {
+  display:flex; align-items:center; gap:0.5rem; margin-bottom:0.45rem;
+}
+.score-label { font-size:0.76rem; color:var(--muted); width:80px; flex-shrink:0; }
+input[type=range] {
+  flex:1; height:4px; -webkit-appearance:none;
+  background:var(--border); border-radius:2px; outline:none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance:none; width:14px; height:14px;
+  border-radius:50%; background:#60a5fa; cursor:pointer;
+}
+.score-val { font-size:0.7rem; color:#60a5fa; width:26px; text-align:right; }
+.dim-hint { font-size:0.6rem; color:#2d3a4f; margin:-0.1rem 0 0.45rem 80px; }
+
+.sbti-badge {
+  display:block; background:#0f0f1a; border:1px solid var(--border);
+  border-radius:8px; padding:0.5rem; font-size:1.25rem;
+  font-weight:800; letter-spacing:0.1em; text-align:center; margin-top:0.65rem; color:#e2e8f0;
+}
+
+.sec-title {
+  font-size:0.8rem; font-weight:600; color:#94a3b8;
+  margin:1rem 0 0.55rem;
+}
+.sec-title:first-of-type{margin-top:0}
+
+.btn-group{display:flex;gap:0.45rem;margin-top:1rem;}
+.btn{
+  flex:1; padding:0.6rem 0.3rem; border:none; border-radius:8px;
+  font-size:0.8rem; font-weight:600; cursor:pointer;
+  transition:opacity 0.2s,transform 0.1s; color:#fff;
+}
+.btn:active{transform:scale(0.97)}
+.btn-draw{background:linear-gradient(135deg,#3b82f6,#6366f1);flex:2;}
+.btn-draw10{background:linear-gradient(135deg,#9333ea,#db2777);flex:2;}
+.btn-reset{background:#1e293b;border:1px solid var(--border);color:var(--muted);flex:1;}
+
+.stats-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0.4rem;margin-top:0.9rem;}
+.stat-item{
+  background:#0f0f1a;border:1px solid var(--border);border-radius:8px;
+  padding:0.4rem 0.2rem;text-align:center;
+}
+.stat-val{font-size:1.15rem;font-weight:700;color:#60a5fa;}
+.stat-label{font-size:0.6rem;color:var(--muted);margin-top:0.08rem;}
+
+/* 右侧 */
+.collection-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:0.9rem;flex-wrap:wrap;gap:0.4rem;
+}
+.collection-header h2{
+  font-size:0.75rem;font-weight:700;color:var(--muted);
+  letter-spacing:0.1em;text-transform:uppercase;
+}
+.filter-tabs{display:flex;gap:0.3rem;flex-wrap:wrap;}
+.filter-tab{
+  padding:0.22rem 0.6rem;border-radius:20px;border:1px solid var(--border);
+  background:transparent;color:var(--muted);font-size:0.7rem;
+  cursor:pointer;transition:all 0.15s;
+}
+.filter-tab.active{background:#1e293b;color:#e2e8f0;border-color:#60a5fa;}
+
+.card-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:0.8rem;min-height:80px;
+}
+.empty-state{
+  grid-column:1/-1;text-align:center;padding:2.5rem;
+  color:var(--muted);font-size:0.85rem;
+}
+
+/* 卡牌 */
+.card{
+  background:#13132a;border-radius:10px;overflow:hidden;
+  position:relative;transition:transform 0.2s,box-shadow 0.2s;
+  border:2px solid transparent;cursor:pointer;
+}
+.card:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(0,0,0,0.5);}
+.card.common{border-color:var(--common);}
+.card.rare{border-color:var(--rare);}
+.card.special{border-color:var(--special);}
+.card.legendary{border-color:var(--legendary);box-shadow:0 0 18px rgba(245,158,11,0.2);}
+
+.card-banner{height:6px;}
+.card.common    .card-banner{background:var(--common);}
+.card.rare      .card-banner{background:linear-gradient(90deg,#1d4ed8,#3b82f6);}
+.card.special   .card-banner{background:linear-gradient(90deg,#7c3aed,#a855f7);}
+.card.legendary .card-banner{background:linear-gradient(90deg,#f59e0b,#ec4899,#6366f1);}
+
+.card-body{padding:0.65rem 0.7rem;}
+.card-type-row{display:flex;align-items:center;justify-content:space-between;}
+.card-type{font-size:1.1rem;font-weight:800;letter-spacing:0.05em;}
+.card.rare      .card-type{color:var(--rare);}
+.card.special   .card-type{color:var(--special);}
+.card.legendary .card-type{color:var(--legendary);}
+.card-element{font-size:0.6rem;background:rgba(0,0,0,0.35);padding:0.1rem 0.35rem;border-radius:4px;color:var(--muted);}
+.card-role{font-size:0.68rem;color:var(--muted);margin-top:0.08rem;}
+.card-stars{font-size:0.63rem;letter-spacing:0.05em;margin-top:0.18rem;}
+.csl0{color:var(--common);}.csl1{color:var(--rare);}.csl2{color:var(--special);}.csl3{color:var(--legendary);}
+
+.card-attrs{
+  display:grid;grid-template-columns:1fr 1fr;gap:0.18rem 0.4rem;
+  margin-top:0.5rem;font-size:0.66rem;color:#475569;
+}
+.card-attrs span{color:#94a3b8;}
+
+.card-skills{margin-top:0.4rem;font-size:0.62rem;color:var(--muted);line-height:1.55;}
+.card-skills .sn{color:#a78bfa;font-weight:600;}
+
+.card-id{font-size:0.57rem;color:#1e293b;margin-top:0.32rem;}
+
+.rarity-legend{
+  display:flex;gap:0.85rem;font-size:0.7rem;color:var(--muted);
+  flex-wrap:wrap;justify-content:center;margin-top:1rem;
+  padding-top:0.7rem;border-top:1px solid var(--border);
+}
+.rarity-legend span::before{
+  content:'';display:inline-block;width:9px;height:9px;
+  border-radius:50%;margin-right:3px;vertical-align:middle;
+}
+.rl0::before{background:var(--common);}
+.rl1::before{background:var(--rare);}
+.rl2::before{background:var(--special);}
+.rl3::before{background:var(--legendary);}
+
+/* 弹窗 */
+#drawModal{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,0.88);z-index:200;
+  justify-content:center;align-items:center;flex-direction:column;gap:0.9rem;padding:1rem;
+}
+#drawModal.show{display:flex;}
+.modal-tt{
+  font-size:0.8rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;
+}
+.draw-cards{display:flex;flex-wrap:wrap;gap:0.55rem;justify-content:center;max-width:860px;}
+
+.draw-card-anim{
+  opacity:0;transform:scale(0.4) rotateY(100deg);
+  animation:flipIn 0.42s ease-out forwards;
+}
+@keyframes flipIn{
+  0%  {opacity:0;transform:scale(0.4) rotateY(100deg);}
+  65% {opacity:1;transform:scale(1.07) rotateY(0deg);}
+  100%{opacity:1;transform:scale(1) rotateY(0deg);}
+}
+.dca:nth-child(1){animation-delay:0.04s}
+.dca:nth-child(2){animation-delay:0.10s}
+.dca:nth-child(3){animation-delay:0.16s}
+.dca:nth-child(4){animation-delay:0.22s}
+.dca:nth-child(5){animation-delay:0.28s}
+.dca:nth-child(6){animation-delay:0.34s}
+.dca:nth-child(7){animation-delay:0.40s}
+.dca:nth-child(8){animation-delay:0.46s}
+.dca:nth-child(9){animation-delay:0.52s}
+.dca:nth-child(10){animation-delay:0.60s}
+
+.mini-card{
+  width:145px;background:#13132a;border-radius:8px;
+  overflow:hidden;border:2px solid transparent;
+}
+.mini-card.common{border-color:var(--common);}
+.mini-card.rare{border-color:var(--rare);}
+.mini-card.special{border-color:var(--special);}
+.mini-card.legendary{border-color:var(--legendary);box-shadow:0 0 14px rgba(245,158,11,0.25);}
+.mini-banner{height:5px;}
+.mini-card.common    .mini-banner{background:var(--common);}
+.mini-card.rare      .mini-banner{background:linear-gradient(90deg,#1d4ed8,#3b82f6);}
+.mini-card.special   .mini-banner{background:linear-gradient(90deg,#7c3aed,#a855f7);}
+.mini-card.legendary .mini-banner{background:linear-gradient(90deg,#f59e0b,#ec4899,#6366f1);}
+.mini-body{padding:0.45rem 0.55rem;}
+.mini-type{font-size:0.92rem;font-weight:800;}
+.mini-card.rare      .mini-type{color:var(--rare);}
+.mini-card.special   .mini-type{color:var(--special);}
+.mini-card.legendary .mini-type{color:var(--legendary);}
+.mini-info{font-size:0.6rem;color:var(--muted);margin-top:0.08rem;}
+.mini-stats{font-size:0.6rem;color:#475569;margin-top:0.28rem;line-height:1.65;}
+.mini-stats b{color:#64748b;}
+.mini-sk{font-size:0.6rem;color:#a78bfa;margin-top:0.22rem;line-height:1.5;}
+
+.btn-confirm{
+  padding:0.5rem 2rem;background:#1e293b;border:1px solid var(--border);
+  color:#94a3b8;border-radius:8px;cursor:pointer;font-size:0.83rem;transition:all 0.15s;
+}
+.btn-confirm:hover{background:#2d3a4f;color:#e2e8f0;}
+
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>SBTI × Big Five 抽卡模拟器</h1>
+  <p>人格类型 × 战斗属性 × 稀有度抽卡</p>
+</header>
+
+<main>
+  <!-- 左侧 -->
+  <aside class="panel">
+    <div class="panel-title">人格测评输入</div>
+
+    <div class="sec-title">SBTI 四维（0–100）</div>
+
+    <div class="score-row">
+      <span class="score-label">Energy</span>
+      <input type="range" min="0" max="100" value="35" id="sl-energy">
+      <span class="score-val" id="vl-energy">35</span>
+    </div>
+    <div class="dim-hint">← I 内向 &nbsp;&nbsp;&nbsp;E 外向 →</div>
+
+    <div class="score-row">
+      <span class="score-label">Awareness</span>
+      <input type="range" min="0" max="100" value="75" id="sl-awareness">
+      <span class="score-val" id="vl-awareness">75</span>
+    </div>
+    <div class="dim-hint">S 务实 ← &nbsp;&nbsp;&nbsp;N 直觉 →</div>
+
+    <div class="score-row">
+      <span class="score-label">Decision</span>
+      <input type="range" min="0" max="100" value="30" id="sl-decision">
+      <span class="score-val" id="vl-decision">30</span>
+    </div>
+    <div class="dim-hint">T 理性 ← &nbsp;&nbsp;&nbsp;F 情感 →</div>
+
+    <div class="score-row">
+      <span class="score-label">Execution</span>
+      <input type="range" min="0" max="100" value="40" id="sl-execution">
+      <span class="score-val" id="vl-execution">40</span>
+    </div>
+    <div class="dim-hint">J 计划 ← &nbsp;&nbsp;&nbsp;P 灵活 →</div>
+
+    <div class="sbti-badge" id="sbtiType">INTJ</div>
+
+    <div class="sec-title">Big Five 人格（0–100）</div>
+
+    <div class="score-row">
+      <span class="score-label">Openness</span>
+      <input type="range" min="0" max="100" value="85" id="sl-openness">
+      <span class="score-val" id="vl-openness">85</span>
+    </div>
+    <div class="score-row">
+      <span class="score-label">Conscientious.</span>
+      <input type="range" min="0" max="100" value="80" id="sl-conscientiousness">
+      <span class="score-val" id="vl-conscientiousness">80</span>
+    </div>
+    <div class="score-row">
+      <span class="score-label">Extraversion</span>
+      <input type="range" min="0" max="100" value="30" id="sl-extraversion">
+      <span class="score-val" id="vl-extraversion">30</span>
+    </div>
+    <div class="score-row">
+      <span class="score-label">Agreeableness</span>
+      <input type="range" min="0" max="100" value="45" id="sl-agreeableness">
+      <span class="score-val" id="vl-agreeableness">45</span>
+    </div>
+    <div class="score-row">
+      <span class="score-label">Neuroticism</span>
+      <input type="range" min="0" max="100" value="50" id="sl-neuroticism">
+      <span class="score-val" id="vl-neuroticism">50</span>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-draw" id="btnDraw">单抽</button>
+      <button class="btn btn-draw10" id="btnDraw10">十连</button>
+      <button class="btn btn-reset" id="btnReset">清空</button>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-item"><div class="stat-val" id="statTotal">0</div><div class="stat-label">累计</div></div>
+      <div class="stat-item"><div class="stat-val" id="statSSR">0</div><div class="stat-label">SSR</div></div>
+      <div class="stat-item"><div class="stat-val" id="statSR">0</div><div class="stat-label">SR</div></div>
+      <div class="stat-item"><div class="stat-val" id="statR">0</div><div class="stat-label">R</div></div>
+    </div>
+  </aside>
+
+  <!-- 右侧 -->
+  <section class="panel">
+    <div class="collection-header">
+      <h2>我的卡组</h2>
+      <div class="filter-tabs">
+        <button class="filter-tab active" data-f="all">全部</button>
+        <button class="filter-tab" data-f="Legendary">SSR</button>
+        <button class="filter-tab" data-f="Special">SR</button>
+        <button class="filter-tab" data-f="Rare">R</button>
+        <button class="filter-tab" data-f="Common">N</button>
+      </div>
+    </div>
+    <div class="card-grid" id="cardGrid">
+      <div class="empty-state">还没有抽到任何卡牌，试试单抽或十连吧！</div>
+    </div>
+    <div class="rarity-legend">
+      <span class="rl0">N 普通 50%</span>
+      <span class="rl1">R 稀有 25%</span>
+      <span class="rl2">SR 特判 15%</span>
+      <span class="rl3">SSR 传奇 10%</span>
+    </div>
+  </section>
+</main>
+
+<!-- 弹窗 -->
+<div id="drawModal">
+  <div class="modal-tt" id="modalTitle">单抽结果</div>
+  <div class="draw-cards" id="drawCards"></div>
+  <button class="btn-confirm" id="btnConfirm">收入囊中</button>
+</div>
+
+<script>
+// ─── 配置 ───────────────────────────────────────────
+const RCFG={
+  Common:   {p:0.50,b:0,  s:0,st:'★★☆☆☆'},
+  Rare:     {p:0.25,b:30, s:1,st:'★★★☆☆'},
+  Special:  {p:0.15,b:60, s:2,st:'★★★★☆'},
+  Legendary:{p:0.10,b:100,s:3,st:'★★★★★'},
+};
+const TM={
+  ENTP:{r:'发明家',e:'风',k:['齿轮','星空','漂浮']},
+  ENTJ:{r:'指挥官',e:'火',k:['棋子','剑','精密']},
+  ENFP:{r:'冒险家',e:'光',k:['羽毛','画笔','彩虹']},
+  ENFJ:{r:'导师',  e:'光',k:['光环','羽翼','暖光']},
+  ESFP:{r:'表演者',e:'火',k:['聚光灯','舞者','花瓣']},
+  ESFJ:{r:'执政官',e:'土',k:['徽章','盾牌','秩序']},
+  ESTP:{r:'企业家',e:'火',k:['金币','地图','骏马']},
+  ESTJ:{r:'管理者',e:'土',k:['天平','法典','石柱']},
+  INTP:{r:'建筑师',e:'水',k:['蓝图','水晶','理性']},
+  INTJ:{r:'策划者',e:'水',k:['建筑','月亮','冷光']},
+  INFP:{r:'理想者',e:'风',k:['羽翼','光芒','梦幻']},
+  INFJ:{r:'预言家',e:'水',k:['月亮','书卷','星空']},
+  ISFP:{r:'艺术家',e:'风',k:['画架','旅途','异国']},
+  ISFJ:{r:'守护者',e:'土',k:['花藤','心形','柔光']},
+  ISTP:{r:'匠人',  e:'火',k:['锤子','工具箱','熔炉']},
+  ISTJ:{r:'审计官',e:'土',k:['天平','账簿','秩序']},
+};
+const POOLS={
+  Common:   ['ESFJ','ISFJ','ESTJ','ISTP','ISTJ','ESFP'],
+  Rare:     ['ENFP','INTP','ENTJ','ISFP','ESTP','ENFJ'],
+  Special:  ['INFP','INFJ','INTJ','ENTP'],
+  Legendary:['INTJ','INFJ','ENTJ','INTP'],
+};
+const SSKL={
+  E:['高光时刻','攻击时30%概率提升下次攻击50%伤害'],
+  I:['深度聚焦','每损失10%生命值，防御力+5%'],
+  S:['稳扎稳打','暴击率+5%，暴击伤害-10%'],
+  N:['灵感迸发','速度低于对方时，25%概率追击'],
+  T:['冷静分析','受到攻击时，15%概率减免30%伤害'],
+  F:['情感共鸣','治疗量+20%，队友受伤时分担5%伤害'],
+  J:['计划执行','行动开始时若本回合未受伤，攻击力+15%'],
+  P:['随机应变','闪避率+8%，攻击时20%概率连击'],
+};
+const BSKL={
+  Openness:{h:['无限可能','暴击伤害+30%，但暴击率-5%'],m:['灵感迸发','速度低于对方时，25%概率追击']},
+  Conscientiousness:{h:['精确打击','暴击率+10%，每战斗限1次'],m:['稳扎稳打','暴击率+5%，暴击伤害-10%']},
+  Extraversion:{h:['气场压制','攻击时20%概率令敌人速度-10%'],m:['高光时刻','攻击时30%概率提升下次攻击50%伤害']},
+  Agreeableness:{h:['守护之心','替队友承受一次致命伤害（每战斗1次）'],m:['情感共鸣','治疗量+20%，队友受伤时分担5%伤害']},
+  Neuroticism:{h:['情绪爆发','生命值<30%时，攻击力+40%持续3回合'],m:['冷静分析','受到攻击时，15%概率减免30%伤害']},
+};
+
+// ─── 状态 ───────────────────────────────────────────
+let idCtr=0, cards=[], curF='all';
+
+// ─── 工具 ───────────────────────────────────────────
+function mbti(s){
+  return(s.E>50?'E':'I')+(s.A>50?'N':'S')+(s.D>50?'F':'T')+(s.EX>50?'P':'J');
+}
+function stats(bf,b){
+  const o=bf.O/100,c=bf.C/100,e=bf.Ex/100,a=bf.A/100,n=(100-bf.N)/100,B=300;
+  return{
+    a:Math.min(Math.round(B+(o*2+c)*200/3)+b,999),
+    d:Math.min(Math.round(B+(a*2+c)*200/3)+b,999),
+    h:Math.min(Math.round(B+(n+e*0.5)*300)+b,999),
+    s:Math.min(Math.round(B+(e+o*0.8)*200)+b,999),
+    c:Math.min(Math.round((o+n)*12*10)/10,50),
+    k:Math.min(Math.round((1-e+o)*10*10)/10,50),
+  };
+}
+function skls(bf,sbti,rar){
+  const out=[], sl=RCFG[rar].s;
+  const dm=[{v:Math.abs(sbti.E-50),p:sbti.E>50?'E':'I'},
+            {v:Math.abs(sbti.A-50), p:sbti.A>50?'N':'S'},
+            {v:Math.abs(sbti.D-50), p:sbti.D>50?'F':'T'},
+            {v:Math.abs(sbti.EX-50),p:sbti.EX>50?'P':'J'}];
+  dm.sort((x,y)=>y.v-x.v);
+  if(SSKL[dm[0].p]) out.push(SSKL[dm[0].p]);
+  const bk=['Openness','Conscientiousness','Extraversion','Agreeableness','Neuroticism'];
+  const bv=[bf.O,bf.C,bf.Ex,bf.A,bf.N];
+  bk.forEach((k,i)=>{
+    if(bv[i]>=70&&out.length<sl+2){
+      if(bv[i]>=80&&BSKL[k]) out.push(BSKL[k].h);
+      else if(BSKL[k]) out.push(BSKL[k].m);
+    }
+  });
+  return out.slice(0,4);
+}
+function rUp(r,t){
+  if(t>=400) return{Common:'Rare',Rare:'Special',Special:'Legendary'}[r]||r;
+  if(t<=150) return{Special:'Rare',Rare:'Common'}[r]||r;
+  return r;
+}
+function drawOne(sbti,bf){
+  let roll=Math.random(),cu=0,rar='Common';
+  for(const [r,c]of Object.entries(RCFG)){cu+=c.p;if(roll<=cu){rar=r;break;}}
+  const tot=bf.O+bf.C+bf.Ex+bf.A+bf.N;
+  rar=rUp(rar,tot);
+  const pool=rar==='Legendary'?[...POOLS.Legendary,...POOLS.Special]:POOLS[rar];
+  const act=mbti(sbti);
+  const tp=Math.random()<0.6&&pool.includes(act)?act:pool[Math.floor(Math.random()*pool.length)];
+  const mt=TM[tp]||{r:'神秘者',e:'混沌',k:['混沌']};
+  idCtr++;
+  return{
+    id:`#${String(idCtr).padStart(4,'0')}-${tp}`,t:tp,rar,
+    st:RCFG[rar].st,role:mt.r,el:mt.e,kw:mt.k,
+    tot,bs:stats(bf,RCFG[rar].b),
+    sk:skls(bf,sbti,rar),
+  };
+}
+function drawX10(sbti,bf){
+  const arr=Array.from({length:10},()=>drawOne(sbti,bf));
+  if(!arr.some(c=>['Rare','Special','Legendary'].includes(c.rar))){
+    const c=arr[9],cfg=RCFG.Rare;
+    Object.assign(c,{rar:'Rare',st:cfg.st,bs:stats(bf,cfg.b),sk:skls(bf,sbti,'Rare')});
+  }
+  return arr;
+}
+
+// ─── 渲染 ───────────────────────────────────────────
+function sc(r){return({Rare:'csl1',Special:'csl2',Legendary:'csl3'})[r]||'csl0';}
+
+function cardHTML(c){
+  const s=sc(c.rar);
+  return`<div class="card ${c.rar}">
+    <div class="card-banner"></div>
+    <div class="card-body">
+      <div class="card-type-row">
+        <span class="card-type">${c.t}</span>
+        <span class="card-element">${c.el}</span>
+      </div>
+      <div class="card-role">${c.role}</div>
+      <div class="card-stars ${s}">${c.st}</div>
+      <div class="card-attrs">
+        <div>攻击 <span>${c.bs.a}</span></div>
+        <div>防御 <span>${c.bs.d}</span></div>
+        <div>生命 <span>${c.bs.h}</span></div>
+        <div>速度 <span>${c.bs.s}</span></div>
+        <div>暴击 <span>${c.bs.c}%</span></div>
+        <div>闪避 <span>${c.bs.k}%</span></div>
+      </div>
+      <div class="card-skills">${c.sk.map(([n,d])=>`<div class="sn">◆ ${n}</div><div style="color:#475569;font-size:0.59rem;margin-left:7px;">${d}</div>`).join('')}</div>
+      <div class="card-id">${c.id}</div>
+    </div>
+  </div>`;
+}
+
+function miniHTML(c){
+  const s=sc(c.rar);
+  return`<div class="mini-card ${c.rar}">
+    <div class="mini-banner"></div>
+    <div class="mini-body">
+      <div class="mini-type">${c.t}</div>
+      <div class="mini-info">${c.role} ${c.st}</div>
+      <div class="mini-stats"><b>攻</b>${c.bs.a} <b>防</b>${c.bs.d} <b>命</b>${c.bs.h} <b>速</b>${c.bs.s}</div>
+      <div class="mini-sk">${c.sk.slice(0,2).map(([n])=>`◆ ${n}`).join('<br>')}</div>
+    </div>
+  </div>`;
+}
+
+function renderGrid(){
+  const g=document.getElementById('cardGrid');
+  const fc=curF==='all'?cards:cards.filter(x=>x.rar===curF);
+  g.innerHTML=fc.length?fc.map(cardHTML).join(''):'<div class="empty-state">此稀有度暂无卡牌，继续抽卡吧！</div>';
+}
+
+function updateStats(){
+  document.getElementById('statTotal').textContent=cards.length;
+  document.getElementById('statSSR').textContent=cards.filter(x=>x.rar==='Legendary').length;
+  document.getElementById('statSR').textContent=cards.filter(x=>x.rar==='Special').length;
+  document.getElementById('statR').textContent=cards.filter(x=>x.rar==='Rare').length;
+}
+
+function showModal(drawn,is10){
+  document.getElementById('modalTitle').textContent=is10?'十连抽卡结果':'单抽结果';
+  const dc=document.getElementById('drawCards');
+  dc.innerHTML=drawn.map(c=>`<div class="draw-card-anim dca">${miniHTML(c)}</div>`).join('');
+  document.getElementById('drawModal').classList.add('show');
+}
+
+// ─── 事件 ───────────────────────────────────────────
+['energy','awareness','decision','execution'].forEach(id=>{
+  const sl=document.getElementById(`sl-${id}`);
+  const vl=document.getElementById(`vl-${id}`);
+  sl.addEventListener('input',()=>{
+    vl.textContent=sl.value;
+    const s=getSBTI();
+    document.getElementById('sbtiType').textContent=mbti(s);
+  });
+});
+['openness','conscientiousness','extraversion','agreeableness','neuroticism'].forEach(id=>{
+  const sl=document.getElementById(`sl-${id}`);
+  const vl=document.getElementById(`vl-${id}`);
+  sl.addEventListener('input',()=>vl.textContent=sl.value);
+});
+
+function getSBTI(){
+  return{
+    E:getVal('energy'),A:getVal('awareness'),
+    D:getVal('decision'),EX:getVal('execution'),
+  };
+}
+function getBF(){
+  return{
+    O:getVal('openness'),C:getVal('conscientiousness'),
+    Ex:getVal('extraversion'),A:getVal('agreeableness'),N:getVal('neuroticism'),
+  };
+}
+function getVal(id){return parseInt(document.getElementById(`sl-${id}`).value);}
+
+document.getElementById('btnDraw').addEventListener('click',()=>{
+  const drawn=[drawOne(getSBTI(),getBF())];
+  showModal(drawn,false);
+  document.getElementById('btnConfirm').onclick=()=>{
+    cards.push(...drawn);
+    updateStats(); renderGrid();
+    document.getElementById('drawModal').classList.remove('show');
+  };
+});
+
+document.getElementById('btnDraw10').addEventListener('click',()=>{
+  showModal(drawX10(getSBTI(),getBF()),true);
+  document.getElementById('btnConfirm').onclick=()=>{
+    document.getElementById('drawModal').classList.remove('show');
+  };
+});
+
+document.getElementById('btnReset').addEventListener('click',()=>{
+  if(!confirm('确定清空所有卡牌？'))return;
+  cards=[]; idCtr=0; updateStats(); renderGrid();
+});
+
+document.querySelectorAll('.filter-tab').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.filter-tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    curF=btn.dataset.f;
+    renderGrid();
+  });
+});
+</script>
+</body>
+</html>

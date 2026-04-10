@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="refresh" content="0;url=personality_test.html">
+<title>跳转中...</title>
+<style>
+  body { font-family: sans-serif; background: #0f0f1a; color: #e2e8f0; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; flex-direction: column; gap: 1rem; }
+  a { color: #60a5fa; text-decoration: none; font-size: 1.1rem; }
+  .cards { display: flex; gap: 1rem; margin-top: 1rem; }
+  .card { background: #1a1a2e; border: 1px solid #2d2d4a; border-radius: 12px; padding: 1rem 1.5rem; text-align: center; transition: transform 0.2s; }
+  .card:hover { transform: translateY(-3px); }
+  .card-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.3rem; }
+  .card-desc { font-size: 0.8rem; color: #64748b; }
+  .card-link { display: block; margin-top: 0.5rem; color: #60a5fa; font-size: 0.85rem; }
+</style>
+</head>
+<body>
+  <div style="text-align:center">
+    <div style="font-size:1.5rem;font-weight:700;margin-bottom:0.3rem">SBTI × Big Five</div>
+    <div style="color:#64748b;font-size:0.9rem">人格测试系统</div>
+  </div>
+  <div class="cards">
+    <div class="card">
+      <div class="card-title">人格测试</div>
+      <div class="card-desc">36题情境问卷</div>
+      <a class="card-link" href="personality_test.html">开始测试 →</a>
+    </div>
+    <div class="card">
+      <div class="card-title">手动评估</div>
+      <div class="card-desc">滑块输入 + 报告</div>
+      <a class="card-link" href="personality_eval.html">立即体验 →</a>
+    </div>
+    <div class="card">
+      <div class="card-title">抽卡模拟</div>
+      <div class="card-desc">Gacha 风格</div>
+      <a class="card-link" href="gacha_frontend.html">开始抽卡 →</a>
+    </div>
+  </div>
+</body>
+</html>

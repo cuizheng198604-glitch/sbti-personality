@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SBTI × Big Five 人格评估</title>
+<style>
+:root {
+  --bg:#0f0f1a; --card-bg:#13132a; --panel:#1a1a2e;
+  --text:#e2e8f0; --muted:#64748b; --border:#2d2d4a;
+  --c:#8a8a8a; --r:#3b82f6; --s:#9333ea; --l:#f59e0b;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body {
+  font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+  background:var(--bg); color:var(--text); min-height:100vh;
+}
+header {
+  text-align:center; padding:1.5rem 1rem 1rem;
+  background:linear-gradient(135deg,#1a1a2e,#16213e);
+  border-bottom:1px solid var(--border);
+}
+header h1 {
+  font-size:1.5rem;
+  background:linear-gradient(90deg,#60a5fa,#a78bfa,#f472b6);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+header p { color:var(--muted); font-size:0.78rem; margin-top:0.3rem; }
+
+main {
+  max-width:860px; margin:0 auto; padding:1.5rem 1rem;
+  display:grid; grid-template-columns:290px 1fr; gap:1.5rem; align-items:start;
+}
+@media(max-width:700px){main{grid-template-columns:1fr;}}
+
+.panel {
+  background:var(--panel); border:1px solid var(--border);
+  border-radius:14px; padding:1.2rem;
+}
+.panel-title {
+  font-size:0.7rem; font-weight:700; letter-spacing:0.12em;
+  color:var(--muted); text-transform:uppercase;
+  margin-bottom:1rem; padding-bottom:0.5rem; border-bottom:1px solid var(--border);
+}
+.sec-title {
+  font-size:0.8rem; font-weight:600; color:#94a3b8; margin:0.9rem 0 0.45rem;
+}
+.sec-title:first-of-type{margin-top:0}
+
+.score-row {
+  display:flex; align-items:center; gap:0.45rem; margin-bottom:0.4rem;
+}
+.score-label { font-size:0.74rem; color:var(--muted); width:76px; flex-shrink:0; }
+input[type=range] {
+  flex:1; height:4px; -webkit-appearance:none;
+  background:var(--border); border-radius:2px; outline:none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance:none; width:13px; height:13px;
+  border-radius:50%; background:#60a5fa; cursor:pointer;
+}
+.score-val { font-size:0.7rem; color:#60a5fa; width:26px; text-align:right; }
+.dim-hint { font-size:0.6rem; color:#2d3a4f; margin:-0.08rem 0 0.38rem 76px; }
+
+.sbti-badge {
+  display:block; text-align:center; font-size:1.3rem; font-weight:800;
+  letter-spacing:0.1em; padding:0.5rem; margin-top:0.55rem;
+  background:var(--card-bg); border:1px solid var(--border);
+  border-radius:8px; color:var(--text);
+}
+
+.btn-eval {
+  width:100%; padding:0.7rem; margin-top:1rem;
+  background:linear-gradient(135deg,#3b82f6,#6366f1);
+  border:none; border-radius:9px; color:#fff;
+  font-size:0.9rem; font-weight:700; cursor:pointer;
+  letter-spacing:0.05em; transition:opacity 0.2s,transform 0.1s;
+}
+.btn-eval:hover{opacity:0.88}
+.btn-eval:active{transform:scale(0.98)}
+
+/* 右侧 */
+.placeholder {
+  background:var(--panel); border:1px solid var(--border);
+  border-radius:14px; padding:1.2rem;
+  display:flex; align-items:center; justify-content:center;
+  min-height:320px; color:var(--muted); font-size:0.9rem;
+  text-align:center; line-height:2;
+}
+
+/* 结果卡 */
+.persona-card {
+  background:var(--card-bg); border:1px solid var(--border);
+  border-radius:14px; padding:1.4rem;
+  animation:fadeUp 0.4s ease-out;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+.r-tag {
+  display:inline-block; padding:0.18rem 0.65rem; border-radius:20px;
+  font-size:0.73rem; font-weight:700; letter-spacing:0.08em; margin-bottom:0.5rem;
+}
+.rt-common   {background:rgba(138,138,138,0.12); color:var(--c); border:1px solid var(--c);}
+.rt-rare     {background:rgba(59,130,246,0.12);  color:var(--r); border:1px solid var(--r);}
+.rt-special  {background:rgba(147,51,234,0.12);  color:var(--s); border:1px solid var(--s);}
+.rt-legendary{background:rgba(245,158,11,0.12);  color:var(--l); border:1px solid var(--l);}
+
+.pc-top { display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.8rem; }
+.pc-left .r-tag{display:block;margin-bottom:0.3rem}
+.pc-type { font-size:1.9rem; font-weight:900; letter-spacing:0.06em; line-height:1; }
+.pc-role { font-size:0.78rem; color:var(--muted); margin-top:0.2rem; }
+.pc-right{text-align:right}
+.pc-stars{font-size:0.95rem; letter-spacing:0.08em;}
+.cs0{color:var(--c)}.cs1{color:var(--r)}.cs2{color:var(--s)}.cs3{color:var(--l)}
+.pc-prob{font-size:0.65rem;color:var(--muted);margin-top:0.15rem}
+.pc-kw{font-size:0.68rem;color:#475569;margin-top:0.35rem;line-height:1.6}
+
+.pc-desc {
+  font-size:0.83rem; color:#94a3b8; line-height:1.85; margin-bottom:1rem;
+  padding:0.75rem 0.9rem; background:rgba(255,255,255,0.02);
+  border-radius:8px; border-left:3px solid var(--border);
+  white-space:pre-line;
+}
+
+/* 维度条 */
+.dim-bars{margin-bottom:1rem}
+.dim-row{margin-bottom:0.5rem}
+.dim-lbl{display:flex;justify-content:space-between;font-size:0.7rem;color:var(--muted);margin-bottom:0.18rem}
+.dim-track{height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.dim-fill{height:100%;border-radius:3px;transition:width 0.5s}
+
+/* 属性 */
+.attr-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.35rem;margin-bottom:1rem}
+.ac{background:rgba(0,0,0,0.18);border:1px solid var(--border);border-radius:8px;padding:0.45rem 0.3rem;text-align:center}
+.an{font-size:0.62rem;color:var(--muted)}
+.av{font-size:0.95rem;font-weight:700;color:var(--text);margin:0.08rem 0 0.2rem}
+.ab{height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.af{height:100%;border-radius:2px}
+
+/* 技能 */
+.sk-title{font-size:0.68rem;font-weight:700;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.45rem}
+.sk-item{
+  display:flex;gap:0.5rem;align-items:flex-start;
+  background:rgba(147,51,234,0.06);border:1px solid rgba(147,51,234,0.18);
+  border-radius:8px;padding:0.45rem 0.6rem;margin-bottom:0.3rem;
+}
+.sk-name{font-size:0.77rem;font-weight:700;color:#a78bfa;flex-shrink:0}
+.sk-desc{font-size:0.71rem;color:#64748b;line-height:1.5}
+
+/* bf明细 */
+.bf-title{font-size:0.68rem;font-weight:700;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin:0.9rem 0 0.45rem}
+.bf-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.35rem}
+.bf-item{background:rgba(0,0,0,0.12);border:1px solid var(--border);border-radius:8px;padding:0.4rem 0.55rem}
+.bf-n{font-size:0.63rem;color:var(--muted)}
+.bf-v{font-size:0.88rem;font-weight:700;color:#60a5fa;margin:0.1rem 0}
+.bf-tr{font-size:0.61rem;color:#334155;line-height:1.5}
+
+/* 稀有度说明 */
+.rn{margin-top:0.9rem;padding:0.65rem 0.85rem;border-radius:8px;font-size:0.75rem;line-height:1.75}
+.rn-common   {background:rgba(138,138,138,0.07);border:1px solid rgba(138,138,138,0.18);color:#6b7280}
+.rn-rare     {background:rgba(59,130,246,0.07); border:1px solid rgba(59,130,246,0.18); color:#93c5fd}
+.rn-special  {background:rgba(147,51,234,0.07);border:1px solid rgba(147,51,234,0.18);color:#c4b5fd}
+.rn-legendary{background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.18);color:#fcd34d}
+
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>SBTI × Big Five 人格评估</h1>
+  <p>输入人格维度，获取稀有度评级与游戏风格性格描述</p>
+</header>
+
+<main>
+  <!-- 左侧 -->
+  <aside class="panel">
+    <div class="panel-title">人格维度输入</div>
+
+    <div class="sec-title">SBTI 四维（0–100）</div>
+
+    <div class="score-row">
+      <span class="score-label">Energy</span>
+      <input type="range" min="0" max="100" value="35" id="sl-e">
+      <span class="score-val" id="vl-e">35</span>
+    </div>
+    <div class="dim-hint">← I 内向 &nbsp;&nbsp;&nbsp;E 外向 →</div>
+
+    <div class="score-row">
+      <span class="score-label">Awareness</span>
+      <input type="range" min="0" max="100" value="75" id="sl-a">
+      <span class="score-val" id="vl-a">75</span>
+    </div>
+    <div class="dim-hint">S 务实 ← &nbsp;&nbsp;&nbsp;N 直觉 →</div>
+
+    <div class="score-row">
+      <span class="score-label">Decision</span>
+      <input type="range" min="0" max="100" value="30" id="sl-d">
+      <span class="score-val" id="vl-d">30</span>
+    </div>
+    <div class="dim-hint">T 理性 ← &nbsp;&nbsp;&nbsp;F 情感 →</div>
+
+    <div class="score-row">
+      <span class="score-label">Execution</span>
+      <input type="range" min="0" max="100" value="40" id="sl-ex">
+      <span class="score-val" id="vl-ex">40</span>
+    </div>
+    <div class="dim-hint">J 计划 ← &nbsp;&nbsp;&nbsp;P 灵活 →</div>
+
+    <div class="sbti-badge" id="sbtiType">INTJ</div>
+
+    <div class="sec-title">Big Five 人格（0–100）</div>
+
+    <div class="score-row">
+      <span class="score-label">Openness</span>
+      <input type="range" min="0" max="100" value="85" id="sl-o">
+      <span class="score-val" id="vl-o">85</span>
+    </div>
+    <div class="score-row">
+      <span class="score-label">Conscientious.</span>
+      <input type="range" min="0" max="100" value="80" id="sl-c">
+      <span class="score-val" id="vl-c">80</span>
+    </div>
+    <div class="score-row">
+      <span class="score-label">Extraversion</span>
+      <input type="range" min="0" max="100" value="30" id="sl-x">
+      <span class="score-val" id="vl-x">30</span>
+    </div>
+    <div class="score-row">
+      <span class="score-label">Agreeableness</span>
+      <input type="range" min="0" max="100" value="45" id="sl-ag">
+      <span class="score-val" id="vl-ag">45</span>
+    </div>
+    <div class="score-row">
+      <span class="score-label">Neuroticism</span>
+      <input type="range" min="0" max="100" value="50" id="sl-n">
+      <span class="score-val" id="vl-n">50</span>
+    </div>
+
+    <button class="btn-eval" id="btnEval">生成人格报告</button>
+  </aside>
+
+  <!-- 右侧 -->
+  <section id="resultArea">
+    <div class="placeholder">
+      调整左侧滑块后<br>点击「生成人格报告」<br>即可获得稀有度评级与性格分析
+    </div>
+  </section>
+</main>
+
+<script>
+const TM={
+  ENTP:{r:'发明家',   e:'风', kw:['齿轮','星空','漂浮元素'],   cl:'#60a5fa'},
+  ENTJ:{r:'指挥官',   e:'火', kw:['棋子','剑','精密机械'],     cl:'#f97316'},
+  ENFP:{r:'冒险家',   e:'光', kw:['羽毛','画笔','彩虹'],       cl:'#f472b6'},
+  ENFJ:{r:'导师',     e:'光', kw:['光环','羽翼','暖光'],       cl:'#fbbf24'},
+  ESFP:{r:'表演者',   e:'火', kw:['聚光灯','舞者','花瓣'],     cl:'#fb923c'},
+  ESFJ:{r:'执政官',   e:'土', kw:['徽章','盾牌','秩序光'],     cl:'#a3a3a3'},
+  ESTP:{r:'企业家',   e:'火', kw:['金币','地图','骏马'],        cl:'#fbbf24'},
+  ESTJ:{r:'管理者',   e:'土', kw:['天平','法典','石柱'],        cl:'#737373'},
+  INTP:{r:'建筑师',   e:'水', kw:['蓝图','水晶','理性光'],     cl:'#38bdf8'},
+  INTJ:{r:'策划者',   e:'水', kw:['建筑','月亮','冷色光效'],   cl:'#818cf8'},
+  INFP:{r:'理想者',   e:'风', kw:['羽翼','光芒','梦幻粒子'],   cl:'#c084fc'},
+  INFJ:{r:'预言家',   e:'水', kw:['月亮','书卷','星空长袍'],   cl:'#a78bfa'},
+  ISFP:{r:'艺术家',   e:'风', kw:['画架','旅途','异国元素'],   cl:'#f0abfc'},
+  ISFJ:{r:'守护者',   e:'土', kw:['花藤','心形','柔和的光'],   cl:'#86efac'},
+  ISTP:{r:'匠人',     e:'火', kw:['锤子','工具箱','熔炉'],     cl:'#f87171'},
+  ISTJ:{r:'审计官',   e:'土', kw:['天平','账簿','秩序感'],     cl:'#94a3b8'},
+};
+const RC={
+  Common:   {cls:'rt-common',   sc:'cs0', st:'★★☆☆☆', prob:'50%', fill:'#8a8a8a',
+    desc:'你的性格组合在人群中较为常见，属于基数最大的类型。这类人踏实可靠，是社会的稳定力量。'},
+  Rare:     {cls:'rt-rare',     sc:'cs1', st:'★★★☆☆', prob:'25%', fill:'#3b82f6',
+    desc:'你的性格组合稀有度较高，属于较少见的类型。这种特质组合在人群中只占约四分之一。'},
+  Special:  {cls:'rt-special',  sc:'cs2', st:'★★★★☆', prob:'15%', fill:'#9333ea',
+    desc:'你的性格组合相当罕见，属于百里挑一的类型。这种特质组合仅在少数人身上完整体现。'},
+  Legendary:{cls:'rt-legendary',sc:'cs3', st:'★★★★★', prob:'10%', fill:'#f59e0b',
+    desc:'你的性格组合属于传奇级别！极为罕见，每十人中只有一人具备这种稀有的特质组合。'},
+};
+const BFN={Openness:'开放性',Conscientiousness:'尽责性',Extraversion:'外向性',Agreeableness:'宜人性',Neuroticism:'神经质'};
+const BFT={
+  Openness:['富有想象力','偏好艺术与新事物','对美学敏感'],
+  Conscientiousness:['高度自律','做事有条理','强烈的责任感'],
+  Extraversion:['社交活跃','从外部世界获得能量','喜欢刺激'],
+  Agreeableness:['信任他人','乐于助人','重视合作'],
+  Neuroticism:['情绪波动较大','对压力敏感','焦虑倾向较强'],
+};
+const BSK={
+  Openness:{h:['无限可能','暴击伤害+30%，但暴击率-5%'],m:['灵感迸发','速度低于对方时，25%概率追击']},
+  Conscientiousness:{h:['精确打击','暴击率+10%，每战斗限1次'],m:['稳扎稳打','暴击率+5%，暴击伤害-10%']},
+  Extraversion:{h:['气场压制','攻击时20%概率令敌人速度-10%'],m:['高光时刻','攻击时30%概率提升下次攻击50%伤害']},
+  Agreeableness:{h:['守护之心','替队友承受一次致命伤害（每战斗1次）'],m:['情感共鸣','治疗量+20%，队友受伤时分担5%伤害']},
+  Neuroticism:{h:['情绪爆发','生命值<30%时，攻击力+40%持续3回合'],m:['冷静分析','受到攻击时，15%概率减免30%伤害']},
+};
+const SSK={
+  E:['高光时刻','攻击时30%概率提升下次攻击50%伤害'],
+  I:['深度聚焦','每损失10%生命值，防御力+5%'],
+  S:['稳扎稳打','暴击率+5%，暴击伤害-10%'],
+  N:['灵感迸发','速度低于对方时，25%概率追击'],
+  T:['冷静分析','受到攻击时，15%概率减免30%伤害'],
+  F:['情感共鸣','治疗量+20%，队友受伤时分担5%伤害'],
+  J:['计划执行','行动开始时若本回合未受伤，攻击力+15%'],
+  P:['随机应变','闪避率+8%，攻击时20%概率连击'],
+};
+const ROLE_DESC={
+  INTJ:'如同幕后的建筑师，在脑海中构建精密的世界运转模型，沉默而深远。',
+  INTP:'如同逻辑迷宫里的探险家，追逐每一个悖论的真相。',
+  INFJ:'宛若预言家，能感知文字背后未曾言说的情感暗流。',
+  INFP:'如同理想主义的吟游诗人，内心燃烧着改变世界的微弱火光。',
+  ISTJ:'如同运转精确的齿轮，每个齿轮牙都严丝合缝。',
+  ISFJ:'如同深夜为迷路者留的一盏灯，安静而坚定。',
+  ISTP:'如同荒野中的独行匠人，任何问题都能用工具解决。',
+  ISFP:'如同漂泊的画师，用色彩和瞬间编织存在的意义。',
+  ENTJ:'如同战争中的指挥官，天生为赢而生，调度资源如臂使指。',
+  ENTP:'如同疯狂的炼金术士，把任何规则拆解成新的可能性。',
+  ENFJ:'如同舞台上的灵魂导师，燃尽自己照亮他人的路。',
+  ENFP:'如同永不停歇的火焰，每一次呼吸都在寻找新的热情。',
+  ESTJ:'如同秩序社会的基石，用铁律建造稳固的王国。',
+  ESFJ:'如同节日里的组织者，所有人因你而连接在一起。',
+  ESTP:'如同竞技场的战士，每一秒都在争夺胜利。',
+  ESFP:'如同舞台中央的明星，享受此刻即是生命的意义。',
+};
+
+function mbti(s){return(s.E>50?'E':'I')+(s.A>50?'N':'S')+(s.D>50?'F':'T')+(s.EX>50?'P':'J');}
+
+function rarity(sbti,bf){
+  const tot=bf.O+bf.C+bf.Ex+bf.A+bf.N;
+  const exts=[Math.abs(sbti.E-50),Math.abs(sbti.A-50),Math.abs(sbti.D-50),Math.abs(sbti.EX-50)];
+  const maxE=Math.max(...exts);
+  const cntE=exts.filter(v=>v>=35).length;
+  const hi=[bf.O,bf.C,bf.Ex,bf.A,bf.N].filter(v=>v>=75).length;
+  if(tot>=400||(cntE>=3&&maxE>=40)||(sbti.A>50&&hi>=3)||(tot>=340&&maxE>=38)) return'Legendary';
+  if(tot>=300||(cntE>=2&&maxE>=30)||(sbti.A>50&&hi>=2)||(tot>=240&&maxE>=25)) return'Special';
+  if(tot>=220||(cntE>=1&&maxE>=25)||hi>=1||tot>=180) return'Rare';
+  return'Common';
+}
+
+function st(bf){
+  const o=bf.O/100,c=bf.C/100,e=bf.Ex/100,a=bf.A/100,n=(100-bf.N)/100,B=320;
+  return{
+    a:Math.min(Math.round(B+(o*2+c)*200/3),999),
+    d:Math.min(Math.round(B+(a*2+c)*200/3),999),
+    h:Math.min(Math.round(B+(n+e*0.5)*300),999),
+    s:Math.min(Math.round(B+(e+o*0.8)*200),999),
+    c:Math.min(Math.round((o+n)*12*10)/10,50),
+    k:Math.min(Math.round((1-e+o)*10*10)/10,50),
+  };
+}
+
+function gSkills(bf,sbti){
+  const o=[];
+  const dm=[{v:Math.abs(sbti.E-50),p:sbti.E>50?'E':'I'},
+            {v:Math.abs(sbti.A-50), p:sbti.A>50?'N':'S'},
+            {v:Math.abs(sbti.D-50), p:sbti.D>50?'F':'T'},
+            {v:Math.abs(sbti.EX-50),p:sbti.EX>50?'P':'J'}];
+  dm.sort((x,y)=>y.v-x.v);
+  if(SSK[dm[0].p]) o.push(SSK[dm[0].p]);
+  const bk=['Openness','Conscientiousness','Extraversion','Agreeableness','Neuroticism'];
+  const bv=[bf.O,bf.C,bf.Ex,bf.A,bf.N];
+  bk.forEach((k,i)=>{
+    if(bv[i]>=70&&o.length<3){
+      if(bv[i]>=80&&BSK[k]) o.push(BSK[k].h);
+      else if(BSK[k]) o.push(BSK[k].m);
+    }
+  });
+  return o.slice(0,3);
+}
+
+function dCol(v){
+  if(v>=75)return'#f59e0b';
+  if(v>=50)return'#3b82f6';
+  if(v>=30)return'#9333ea';
+  return'#8a8a8a';
+}
+
+function genDesc(tp,bf,sbti,rar){
+  const hi=[],lo=[];
+  if(bf.O>=70)hi.push('极高开放性，创意无限');
+  if(bf.C>=70)hi.push('超强的自律与执行力');
+  if(bf.Ex>=70)hi.push('出色的社交能力');
+  if(bf.A>=70)hi.push('强烈的共情能力');
+  if(bf.N<35)hi.push('情绪稳定，心态平和');
+  if(bf.O<35)lo.push('务实保守');
+  if(bf.C<35)lo.push('行事随意');
+  if(bf.Ex<30)hi.push('独处中汲取能量');
+  if(bf.A>=85)lo.push('难以拒绝他人');
+  if(bf.N>=70)lo.push('情绪敏感，波动较大');
+  const str=hi.length?('\n核心优势：'+hi.join('、')+'。'):'';
+  const wkl=lo.length?('\n成长盲区：'+lo.join('、')+'。'):'';
+  return ROLE_DESC[tp]+str+wkl;
+}
+
+function render(sbti,bf){
+  const tp=mbti(sbti);
+  const meta=TM[tp]||{r:'神秘者',e:'混沌',kw:['混沌'],cl:'#fff'};
+  const rar=rarity(sbti,bf);
+  const rc=RC[rar];
+  const stats=st(bf);
+  const skills=gSkills(bf,sbti);
+  const bfTot=bf.O+bf.C+bf.Ex+bf.A+bf.N;
+
+  const sbtiBars=[
+    {n:'Energy',v:sbti.E},
+    {n:'Awareness',v:sbti.A},
+    {n:'Decision',v:sbti.D},
+    {n:'Execution',v:sbti.EX},
+  ];
+  const bfBars=[
+    {n:'Openness',v:bf.O,k:'Openness'},
+    {n:'Conscientiousness',v:bf.C,k:'Conscientiousness'},
+    {n:'Extraversion',v:bf.Ex,k:'Extraversion'},
+    {n:'Agreeableness',v:bf.A,k:'Agreeableness'},
+    {n:'Neuroticism',v:bf.N,k:'Neuroticism'},
+  ];
+  const attr=[
+    {n:'攻击',v:stats.a,mx:999,col:'#f87171'},
+    {n:'防御',v:stats.d,mx:999,col:'#60a5fa'},
+    {n:'生命',v:stats.h,mx:999,col:'#4ade80'},
+    {n:'速度',v:stats.s,mx:999,col:'#facc15'},
+    {n:'暴击',v:stats.c,mx:50, col:'#f472b6',u:'%'},
+    {n:'闪避',v:stats.k,mx:50, col:'#a78bfa',u:'%'},
+  ];
+
+  let h=`<div class="persona-card">`;
+
+  // 顶部
+  h+=`<div class="pc-top">
+    <div class="pc-left">
+      <span class="r-tag ${rc.cls}">${rar}</span>
+      <div class="pc-type" style="color:${meta.cl}">${tp}</div>
+      <div class="pc-role">${meta.r} · ${meta.e}元素</div>
+    </div>
+    <div class="pc-right">
+      <div class="pc-stars ${rc.sc}">${rc.st}</div>
+      <div class="pc-prob">出现概率 ${rc.prob}</div>
+      <div class="pc-kw">${meta.kw.join(' · ')}</div>
+    </div>
+  </div>`;
+
+  // 性格描述
+  h+=`<div class="pc-desc">${genDesc(tp,bf,sbti,rar)}</div>`;
+
+  // SBTI 维度条
+  h+=`<div class="dim-bars">`;
+  sbtiBars.forEach(d=>{
+    h+=`<div class="dim-row">
+      <div class="dim-lbl"><span>${d.n}</span><span>${d.v}</span></div>
+      <div class="dim-track"><div class="dim-fill" style="width:${d.v}%;background:${dCol(d.v)}"></div></div>
+    </div>`;
+  });
+  h+=`</div>`;
+
+  // 属性
+  h+=`<div class="attr-grid">`;
+  attr.forEach(a=>{
+    h+=`<div class="ac">
+      <div class="an">${a.n}</div>
+      <div class="av">${a.v}${a.u||''}</div>
+      <div class="ab"><div class="af" style="width:${Math.round(a.v/a.mx*100)}%;background:${a.col}"></div></div>
+    </div>`;
+  });
+  h+=`</div>`;
+
+  // 技能
+  if(skills.length){
+    h+=`<div class="sk-title">天赋技能</div>`;
+    skills.forEach(([n,d])=>{
+      h+=`<div class="sk-item">
+        <div class="sk-name">◆ ${n}</div>
+        <div class="sk-desc">${d}</div>
+      </div>`;
+    });
+  }
+
+  // BF 明细
+  h+=`<div class="bf-title">Big Five 人格明细</div><div class="bf-grid">`;
+  bfBars.forEach(d=>{
+    h+=`<div class="bf-item">
+      <div class="bf-n">${BFN[d.k]}</div>
+      <div class="bf-v">${d.v}</div>
+      <div class="bf-tr">${BFT[d.k].join(' / ')}</div>
+    </div>`;
+  });
+  h+=`</div>`;
+
+  // 稀有度说明
+  h+=`<div class="rn rn-${rar.toLowerCase()}">${rc.desc}</div>`;
+
+  h+=`</div>`;
+  document.getElementById('resultArea').innerHTML=h;
+}
+
+// 滑块联动
+function setupSliders(){
+  const pairs=[
+    ['e','vl-e','energy'],['a','vl-a','awareness'],['d','vl-d','decision'],['ex','vl-ex','execution'],
+    ['o','vl-o','openness'],['c','vl-c','conscientiousness'],['x','vl-x','extraversion'],
+    ['ag','vl-ag','agreeableness'],['n','vl-n','neuroticism'],
+  ];
+  pairs.forEach(([sid,vid])=>{
+    const sl=document.getElementById('sl-'+sid);
+    const vl=document.getElementById(vid);
+    sl.addEventListener('input',()=>{
+      vl.textContent=sl.value;
+      updateBadge();
+    });
+  });
+}
+
+function updateBadge(){
+  const sbti={E:+document.getElementById('sl-e').value,A:+document.getElementById('sl-a').value,
+               D:+document.getElementById('sl-d').value,EX:+document.getElementById('sl-ex').value};
+  document.getElementById('sbtiType').textContent=mbti(sbti);
+}
+
+function getSBTI(){
+  return{E:+document.getElementById('sl-e').value,
+         A:+document.getElementById('sl-a').value,
+         D:+document.getElementById('sl-d').value,
+         EX:+document.getElementById('sl-ex').value};
+}
+function getBF(){
+  return{O:+document.getElementById('sl-o').value,
+         C:+document.getElementById('sl-c').value,
+         Ex:+document.getElementById('sl-x').value,
+         A:+document.getElementById('sl-ag').value,
+         N:+document.getElementById('sl-n').value};
+}
+
+document.getElementById('btnEval').addEventListener('click',()=>{
+  render(getSBTI(),getBF());
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+setupSliders();
+updateBadge();
+</script>
+</body>
+</html>

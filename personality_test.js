@@ -1,0 +1,303 @@
+const QUESTIONS = [
+  {section:'SBTI · 能量倾向',type:'sbti',dim:'Energy',text:'周末你通常更喜欢？',opts:[{l:'A',t:'和一大群朋友聚会，社交充电',s:5},{l:'B',t:'和几个亲密的朋友小聚',s:4},{l:'C',t:'一个人安静地待着，阅读或发呆',s:2},{l:'D',t:'能不说话就不说话',s:1}]},
+  {section:'SBTI · 能量倾向',type:'sbti',dim:'Energy',text:'在社交场合中，你往往？',opts:[{l:'A',t:'主动发起话题，成为全场焦点',s:5},{l:'B',t:'自然地参与交谈',s:4},{l:'C',t:'安静倾听，适时回应',s:2},{l:'D',t:'倾向于做个旁观者',s:1}]},
+  {section:'SBTI · 能量倾向',type:'sbti',dim:'Energy',text:'你更倾向于？',opts:[{l:'A',t:'从外部世界获取能量和动力',s:5},{l:'B',t:'在独处和社交之间找到平衡',s:3},{l:'C',t:'从独处中获得内心的平静',s:2},{l:'D',t:'完全不需要外界互动',s:1}]},
+  {section:'SBTI · 能量倾向',type:'sbti',dim:'Energy',text:'假期你更喜欢？',opts:[{l:'A',t:'去热门目的地打卡，参加热闹活动',s:5},{l:'B',t:'周边短途，有社交也有休息',s:3},{l:'C',t:'在安静的咖啡馆或书店度过',s:2},{l:'D',t:'在家追剧、看书，深度宅',s:1}]},
+  {section:'SBTI · 信息感知',type:'sbti',dim:'Awareness',text:'当你阅读小说时，更被什么吸引？',opts:[{l:'A',t:'背后的隐喻、象征和深层含义',s:5},{l:'B',t:'有趣的情节和出乎意料的转折',s:4},{l:'C',t:'真实细腻的人物刻画',s:2},{l:'D',t:'准确的事实和真实的历史细节',s:1}]},
+  {section:'SBTI · 信息感知',type:'sbti',dim:'Awareness',text:'解决一个问题时，你更依赖？',opts:[{l:'A',t:'直觉和灵感，突然想到解决方案',s:5},{l:'B',t:'观察规律，从过往经验中推断',s:3},{l:'C',t:'具体的证据和实际的数据',s:1},{l:'D',t:'一步步逻辑推理',s:2}]},
+  {section:'SBTI · 信息感知',type:'sbti',dim:'Awareness',text:'面对一个新项目，你更关注？',opts:[{l:'A',t:'可能性和长远愿景',s:5},{l:'B',t:'具体的执行步骤和资源',s:2},{l:'C',t:'现实条件和限制因素',s:1},{l:'D',t:'各方利益相关者的反应',s:3}]},
+  {section:'SBTI · 信息感知',type:'sbti',dim:'Awareness',text:'你更相信？',opts:[{l:'A',t:'抽象的理论和发展规律',s:5},{l:'B',t:'眼前的现实和具体经验',s:1},{l:'C',t:'两者结合，实践出真知',s:3},{l:'D',t:'直觉告诉我的答案',s:4}]},
+  {section:'SBTI · 决策方式',type:'sbti',dim:'Decision',text:'在做重大决定时，你最看重？',opts:[{l:'A',t:'是否符合我的价值观和内心感受',s:5},{l:'B',t:'对相关人的影响是否正向',s:4},{l:'C',t:'客观的利弊分析和最优解',s:1},{l:'D',t:'逻辑是否自洽，前后一致',s:2}]},
+  {section:'SBTI · 决策方式',type:'sbti',dim:'Decision',text:'当你强烈不同意朋友的某个决定时，你会？',opts:[{l:'A',t:'直接说出我的顾虑和感受',s:5},{l:'B',t:'温和地表达，希望对方理解',s:4},{l:'C',t:'理性分析利弊，客观陈述',s:2},{l:'D',t:'尊重对方的选择，不过多干涉',s:1}]},
+  {section:'SBTI · 决策方式',type:'sbti',dim:'Decision',text:'你认为自己更偏向？',opts:[{l:'A',t:'情感型，总会考虑人的感受',s:5},{l:'B',t:'在情感和理性之间平衡',s:3},{l:'C',t:'理性型，逻辑优先',s:2},{l:'D',t:'极度理性，一切以事实为依据',s:1}]},
+  {section:'SBTI · 决策方式',type:'sbti',dim:'Decision',text:'一个高效但缺乏人情味的管理者，你怎么看？',opts:[{l:'A',t:'难以接受，缺乏温度和人情味',s:5},{l:'B',t:'可以理解，但不太欣赏',s:4},{l:'C',t:'欣赏其效率和公正',s:2},{l:'D',t:'只要结果好，方式无所谓',s:1}]},
+  {section:'SBTI · 执行方式',type:'sbti',dim:'Execution',text:'你更喜欢以什么方式完成工作？',opts:[{l:'A',t:'按计划一步步推进，有条不紊',s:1},{l:'B',t:'有大致方向，边做边调整',s:3},{l:'C',t:'保持灵活，随机应变',s:5},{l:'D',t:'先思考全局，再决定怎么干',s:2}]},
+  {section:'SBTI · 执行方式',type:'sbti',dim:'Execution',text:'出远门旅行，你的习惯是？',opts:[{l:'A',t:'提前做好攻略，酒店交通全订好',s:1},{l:'B',t:'订好大框架，细节随机应变',s:3},{l:'C',t:'订好机票，其他到了再说',s:4},{l:'D',t:'说走就走，完全不规划',s:5}]},
+  {section:'SBTI · 执行方式',type:'sbti',dim:'Execution',text:'面对一个 deadline，你会？',opts:[{l:'A',t:'提前规划，分阶段完成',s:1},{l:'B',t:'在压力下集中完成，效率更高',s:4},{l:'C',t:'按部就班，刚好按时完成',s:2},{l:'D',t:'最后几天疯狂冲刺',s:5}]},
+  {section:'SBTI · 执行方式',type:'sbti',dim:'Execution',text:'你更喜欢？',opts:[{l:'A',t:'有计划、有结构的工作方式',s:1},{l:'B',t:'有目标但灵活执行',s:3},{l:'C',t:'完全开放，随时调整方向',s:5},{l:'D',t:'先把事情想清楚再动手',s:2}]},
+  {section:'Big Five · 开放性',type:'bf',dim:'Openness',text:'你通常对新事物、新观念的態度是？',opts:[{l:'A',t:'非常感兴趣，主动尝试',s:5},{l:'B',t:'有兴趣，但不一定行动',s:4},{l:'C',t:'视情况而定，谨慎观望',s:3},{l:'D',t:'不太感兴趣，保持熟悉更舒服',s:1}]},
+  {section:'Big Five · 开放性',type:'bf',dim:'Openness',text:'你容易被抽象概念或艺术作品打动吗？',opts:[{l:'A',t:'经常被深深触动和启发',s:5},{l:'B',t:'偶尔，有些作品能打动我',s:4},{l:'C',t:'很少，更关注实用性',s:2},{l:'D',t:'几乎不会',s:1}]},
+  {section:'Big Five · 开放性',type:'bf',dim:'Openness',text:'你更喜欢的工作内容是？',opts:[{l:'A',t:'需要创意、探索未知的任务',s:5},{l:'B',t:'有一定创意空间的执行工作',s:4},{l:'C',t:'按流程执行的常规任务',s:2},{l:'D',t:'完全不需要创意的重复性工作',s:1}]},
+  {section:'Big Five · 开放性',type:'bf',dim:'Openness',text:'你去一个陌生地方，更希望？',opts:[{l:'A',t:'探索小众目的地，感受当地独特文化',s:5},{l:'B',t:'经典打卡，但也愿意尝试新路线',s:3},{l:'C',t:'走常规路线，安全可控',s:2},{l:'D',t:'有明确目标，不跑冤枉路',s:1}]},
+  {section:'Big Five · 尽责性',type:'bf',dim:'Conscientiousness',text:'你通常如何对待承诺和截止日期？',opts:[{l:'A',t:'一定会按时甚至提前完成',s:5},{l:'B',t:'尽量按时，偶尔拖延',s:3},{l:'C',t:'经常在最后一刻赶完',s:2},{l:'D',t:'经常逾期，觉得还有时间',s:1}]},
+  {section:'Big Five · 尽责性',type:'bf',dim:'Conscientiousness',text:'你的工作 / 学习环境通常？',opts:[{l:'A',t:'整洁有序，所有物品各归其位',s:5},{l:'B',t:'大致整洁，偶尔乱一点',s:4},{l:'C',t:'比较随意，关键时候能找到',s:2},{l:'D',t:'乱一点反而更有效率',s:1}]},
+  {section:'Big Five · 尽责性',type:'bf',dim:'Conscientiousness',text:'你是一个有计划的人吗？',opts:[{l:'A',t:'非常自律，一切按计划进行',s:5},{l:'B',t:'有大致计划，但会随机应变',s:3},{l:'C',t:'很少做计划，走一步看一步',s:2},{l:'D',t:'计划对我来说没有意义',s:1}]},
+  {section:'Big Five · 尽责性',type:'bf',dim:'Conscientiousness',text:'面对一个困难任务，你会？',opts:[{l:'A',t:'坚持到底，绝不半途而废',s:5},{l:'B',t:'努力完成，但也会适时调整目标',s:3},{l:'C',t:'遇到困难容易放弃',s:1},{l:'D',t:'先判断可行性，再决定是否开始',s:2}]},
+  {section:'Big Five · 外向性',type:'bf',dim:'Extraversion',text:'在一场聚会中，你通常？',opts:[{l:'A',t:'主动社交，精力充沛',s:5},{l:'B',t:'能自然地参与聊天',s:4},{l:'C',t:'和一两个人深度交流',s:2},{l:'D',t:'尽量待在角落，早走早好',s:1}]},
+  {section:'Big Five · 外向性',type:'bf',dim:'Extraversion',text:'你的社交能量主要来源是？',opts:[{l:'A',t:'和人群在一起时获得能量',s:5},{l:'B',t:'都能给我能量，平衡就好',s:3},{l:'C',t:'独处时更能充电',s:2},{l:'D',t:'社交只会消耗我的能量',s:1}]},
+  {section:'Big Five · 外向性',type:'bf',dim:'Extraversion',text:'你通常给人的印象是？',opts:[{l:'A',t:'充满活力，积极主动',s:5},{l:'B',t:'友善随和，容易接近',s:4},{l:'C',t:'比较安静，需要时间熟悉',s:2},{l:'D',t:'沉默寡言，特立独行',s:1}]},
+  {section:'Big Five · 外向性',type:'bf',dim:'Extraversion',text:'你喜欢在团队中扮演什么角色？',opts:[{l:'A',t:'领导者或协调者，主动推动事情',s:5},{l:'B',t:'核心参与者，积极贡献想法',s:4},{l:'C',t:'默默完成自己的任务就好',s:2},{l:'D',t:'观察者，在一旁默默分析',s:1}]},
+  {section:'Big Five · 宜人性',type:'bf',dim:'Agreeableness',text:'当团队中出现冲突时，你通常会？',opts:[{l:'A',t:'主动调解，寻求双方和解',s:5},{l:'B',t:'参与讨论，帮助找到折中方案',s:4},{l:'C',t:'保持中立，让当事人自己解决',s:2},{l:'D',t:'回避冲突，不直接介入',s:1}]},
+  {section:'Big Five · 宜人性',type:'bf',dim:'Agreeableness',text:'你对「信任陌生人」这件事的态度是？',opts:[{l:'A',t:'倾向于信任，人心本善',s:5},{l:'B',t:'初步信任，出了问题再调整',s:4},{l:'C',t:'保持谨慎，需要时间验证',s:2},{l:'D',t:'基本不信任，保持高度警惕',s:1}]},
+  {section:'Big Five · 宜人性',type:'bf',dim:'Agreeableness',text:'你更容易对他人的什么产生共鸣？',opts:[{l:'A',t:'他人的情感、处境和感受',s:5},{l:'B',t:'逻辑和事实',s:1},{l:'C',t:'视情况两者都有',s:3},{l:'D',t:'对两者的敏感度都不太高',s:2}]},
+  {section:'Big Five · 宜人性',type:'bf',dim:'Agreeableness',text:'当朋友需要帮助时，你通常？',opts:[{l:'A',t:'毫不犹豫，第一时间伸出援手',s:5},{l:'B',t:'愿意帮忙，但会考虑自己的情况',s:3},{l:'C',t:'需要帮，但会设定边界',s:2},{l:'D',t:'不太想帮，找借口拒绝',s:1}]},
+  {section:'Big Five · 神经质性',type:'bf',dim:'Neuroticism',text:'面对压力时，你通常会？',opts:[{l:'A',t:'感到焦虑和不安，难以平静',s:5},{l:'B',t:'有些担心，但能正常应对',s:3},{l:'C',t:'保持冷静，理性分析问题',s:2},{l:'D',t:'完全不受影响，冷静如水',s:1}]},
+  {section:'Big Five · 神经质性',type:'bf',dim:'Neuroticism',text:'你对自己的评价更接近？',opts:[{l:'A',t:'经常自我怀疑，容易感到沮丧',s:5},{l:'B',t:'偶尔不自信，但总体良好',s:3},{l:'C',t:'大多数时候对自己有信心',s:2},{l:'D',t:'非常自信，很少动摇',s:1}]},
+  {section:'Big Five · 神经质性',type:'bf',dim:'Neuroticism',text:'面对批评，你的反应通常是？',opts:[{l:'A',t:'容易受伤，需要很长时间消化',s:5},{l:'B',t:'会难过，但能较快调整',s:3},{l:'C',t:'会反思，但不会太往心里去',s:2},{l:'D',t:'完全不在意，批评是成长的养分',s:1}]},
+  {section:'Big Five · 神经质性',type:'bf',dim:'Neuroticism',text:'你的情绪波动程度是？',opts:[{l:'A',t:'起伏较大，经常被情绪左右',s:5},{l:'B',t:'有些波动，但能控制',s:3},{l:'C',t:'相对稳定，很少大起大落',s:2},{l:'D',t:'非常稳定，平静如水',s:1}]},
+];
+
+const TYPES={
+  ENTP:{r:'发明家',   e:'风', kw:['齿轮','星空','漂浮元素'],   cl:'#60a5fa'},
+  ENTJ:{r:'指挥官',   e:'火', kw:['棋子','剑','精密机械'],     cl:'#f97316'},
+  ENFP:{r:'冒险家',   e:'光', kw:['羽毛','画笔','彩虹'],       cl:'#f472b6'},
+  ENFJ:{r:'导师',     e:'光', kw:['光环','羽翼','暖光'],       cl:'#fbbf24'},
+  ESFP:{r:'表演者',   e:'火', kw:['聚光灯','舞者','花瓣'],     cl:'#fb923c'},
+  ESFJ:{r:'执政官',   e:'土', kw:['徽章','盾牌','秩序光'],     cl:'#a3a3a3'},
+  ESTP:{r:'企业家',   e:'火', kw:['金币','地图','骏马'],        cl:'#fbbf24'},
+  ESTJ:{r:'管理者',   e:'土', kw:['天平','法典','石柱'],        cl:'#737373'},
+  INTP:{r:'建筑师',   e:'水', kw:['蓝图','水晶','理性光'],     cl:'#38bdf8'},
+  INTJ:{r:'策划者',   e:'水', kw:['建筑','月亮','冷色光效'],   cl:'#818cf8'},
+  INFP:{r:'理想者',   e:'风', kw:['羽翼','光芒','梦幻粒子'],   cl:'#c084fc'},
+  INFJ:{r:'预言家',   e:'水', kw:['月亮','书卷','星空长袍'],   cl:'#a78bfa'},
+  ISFP:{r:'艺术家',   e:'风', kw:['画架','旅途','异国元素'],   cl:'#f0abfc'},
+  ISFJ:{r:'守护者',   e:'土', kw:['花藤','心形','柔和的光'],   cl:'#86efac'},
+  ISTP:{r:'匠人',     e:'火', kw:['锤子','工具箱','熔炉'],     cl:'#f87171'},
+  ISTJ:{r:'审计官',   e:'土', kw:['天平','账簿','秩序感'],     cl:'#94a3b8'},
+};
+const RC={
+  Common:   {cls:'rt-common',   sc:'hs0', st:'★★☆☆☆', prob:'50%', fill:'#8a8a8a',
+    desc:'你的性格组合在人群中较为常见，属于基数最大的类型。这类人踏实可靠，是社会的稳定力量。'},
+  Rare:     {cls:'rt-rare',     sc:'hs1', st:'★★★☆☆', prob:'25%', fill:'#3b82f6',
+    desc:'你的性格组合稀有度较高，属于较少见的类型。这种特质组合在人群中只占约四分之一。'},
+  Special:  {cls:'rt-special',  sc:'hs2', st:'★★★★☆', prob:'15%', fill:'#9333ea',
+    desc:'你的性格组合相当罕见，属于百里挑一的类型。这种特质组合仅在少数人身上完整体现。'},
+  Legendary:{cls:'rt-legendary',sc:'hs3', st:'★★★★★', prob:'10%', fill:'#f59e0b',
+    desc:'你的性格组合属于传奇级别！极为罕见，每十人中只有一人具备这种稀有的特质组合。'},
+};
+const BFN={Openness:'开放性',Conscientiousness:'尽责性',Extraversion:'外向性',Agreeableness:'宜人性',Neuroticism:'神经质'};
+const BFT={
+  Openness:['富有想象力','偏好艺术与新事物','对美学敏感'],
+  Conscientiousness:['高度自律','做事有条理','强烈的责任感'],
+  Extraversion:['社交活跃','从外部世界获得能量','喜欢刺激'],
+  Agreeableness:['信任他人','乐于助人','重视合作'],
+  Neuroticism:['情绪波动较大','对压力敏感','焦虑倾向较强'],
+};
+const BSK={
+  Openness:{h:['无限可能','暴击伤害+30%，但暴击率-5%'],m:['灵感迸发','速度低于对方时，25%概率追击']},
+  Conscientiousness:{h:['精确打击','暴击率+10%，每战斗限1次'],m:['稳扎稳打','暴击率+5%，暴击伤害-10%']},
+  Extraversion:{h:['气场压制','攻击时20%概率令敌人速度-10%'],m:['高光时刻','攻击时30%概率提升下次攻击50%伤害']},
+  Agreeableness:{h:['守护之心','替队友承受一次致命伤害（每战斗1次）'],m:['情感共鸣','治疗量+20%，队友受伤时分担5%伤害']},
+  Neuroticism:{h:['情绪爆发','生命值<30%时，攻击力+40%持续3回合'],m:['冷静分析','受到攻击时，15%概率减免30%伤害']},
+};
+const SSK={
+  E:['高光时刻','攻击时30%概率提升下次攻击50%伤害'],
+  I:['深度聚焦','每损失10%生命值，防御力+5%'],
+  S:['稳扎稳打','暴击率+5%，暴击伤害-10%'],
+  N:['灵感迸发','速度低于对方时，25%概率追击'],
+  T:['冷静分析','受到攻击时，15%概率减免30%伤害'],
+  F:['情感共鸣','治疗量+20%，队友受伤时分担5%伤害'],
+  J:['计划执行','行动开始时若本回合未受伤，攻击力+15%'],
+  P:['随机应变','闪避率+8%，攻击时20%概率连击'],
+};
+const ROLE_DESC={
+  INTJ:'如同幕后的建筑师，在脑海中构建精密的世界运转模型，沉默而深远。',
+  INTP:'如同逻辑迷宫里的探险家，追逐每一个悖论的真相。',
+  INFJ:'宛若预言家，能感知文字背后未曾言说的情感暗流。',
+  INFP:'如同理想主义的吟游诗人，内心燃烧着改变世界的微弱火光。',
+  ISTJ:'如同运转精确的齿轮，每个齿轮牙都严丝合缝。',
+  ISFJ:'如同深夜为迷路者留的一盏灯，安静而坚定。',
+  ISTP:'如同荒野中的独行匠人，任何问题都能用工具解决。',
+  ISFP:'如同漂泊的画师，用色彩和瞬间编织存在的意义。',
+  ENTJ:'如同战争中的指挥官，天生为赢而生，调度资源如臂使指。',
+  ENTP:'如同疯狂的炼金术士，把任何规则拆解成新的可能性。',
+  ENFJ:'如同舞台上的灵魂导师，燃尽自己照亮他人的路。',
+  ENFP:'如同永不停歇的火焰，每一次呼吸都在寻找新的热情。',
+  ESTJ:'如同秩序社会的基石，用铁律建造稳固的王国。',
+  ESFJ:'如同节日里的组织者，所有人因你而连接在一起。',
+  ESTP:'如同竞技场的战士，每一秒都在争夺胜利。',
+  ESFP:'如同舞台中央的明星，享受此刻即是生命的意义。',
+};
+
+function calcScore(answers) {
+  const scores = {};
+  const dims = ['Energy','Awareness','Decision','Execution','Openness','Conscientiousness','Extraversion','Agreeableness','Neuroticism'];
+  dims.forEach(d => scores[d] = 0);
+  const counts = {};
+  dims.forEach(d => counts[d] = 0);
+  QUESTIONS.forEach((q, i) => {
+    if (answers[i] !== null) {
+      const s = q.opts[answers[i]].s;
+      scores[q.dim] = (scores[q.dim] || 0) + s;
+      counts[q.dim] = (counts[q.dim] || 0) + 1;
+    }
+  });
+  // 转换为0-100
+  const result = {};
+  dims.forEach(d => {
+    if (counts[d] > 0) result[d] = Math.round((scores[d] / (counts[d] * 5)) * 100);
+  });
+  return result;
+}
+
+function toMBTI(s) {
+  return (s.Energy>50?'E':'I')+(s.Awareness>50?'N':'S')+(s.Decision>50?'F':'T')+(s.Execution>50?'P':'J');
+}
+
+function rarity(s) {
+  const tot = (s.Openness+s.Conscientiousness+s.Extraversion+s.Agreeableness+s.Neuroticism);
+  const exts = [Math.abs(s.Energy-50),Math.abs(s.Awareness-50),Math.abs(s.Decision-50),Math.abs(s.Execution-50)];
+  const maxE = Math.max(...exts);
+  const cntE = exts.filter(v=>v>=35).length;
+  const hi = [s.Openness,s.Conscientiousness,s.Extraversion,s.Agreeableness,s.Neuroticism].filter(v=>v>=75).length;
+  if (tot>=400||(cntE>=3&&maxE>=40)||(s.Awareness>50&&hi>=3)||(tot>=340&&maxE>=38)) return 'Legendary';
+  if (tot>=300||(cntE>=2&&maxE>=30)||(s.Awareness>50&&hi>=2)||(tot>=240&&maxE>=25)) return 'Special';
+  if (tot>=220||(cntE>=1&&maxE>=25)||hi>=1||tot>=180) return 'Rare';
+  return 'Common';
+}
+
+function st(s) {
+  const o=s.Openness/100,c=s.Conscientiousness/100,e=s.Extraversion/100,a=s.Agreeableness/100,n=(100-s.Neuroticism)/100,B=320;
+  return{
+    a:Math.min(Math.round(B+(o*2+c)*200/3),999),
+    d:Math.min(Math.round(B+(a*2+c)*200/3),999),
+    h:Math.min(Math.round(B+(n+e*0.5)*300),999),
+    s:Math.min(Math.round(B+(e+o*0.8)*200),999),
+    c:Math.min(Math.round((o+n)*12*10)/10,50),
+    k:Math.min(Math.round((1-e+o)*10*10)/10,50),
+  };
+}
+
+function gSkills(s) {
+  const o=[];
+  const dm=[
+    {v:Math.abs(s.Energy-50),p:s.Energy>50?'E':'I'},
+    {v:Math.abs(s.Awareness-50),p:s.Awareness>50?'N':'S'},
+    {v:Math.abs(s.Decision-50),p:s.Decision>50?'F':'T'},
+    {v:Math.abs(s.Execution-50),p:s.Execution>50?'P':'J'},
+  ];
+  dm.sort((x,y)=>y.v-x.v);
+  if(SSK[dm[0].p]) o.push(SSK[dm[0].p]);
+  const bk=['Openness','Conscientiousness','Extraversion','Agreeableness','Neuroticism'];
+  const bv=[s.Openness,s.Conscientiousness,s.Extraversion,s.Agreeableness,s.Neuroticism];
+  bk.forEach((k,i)=>{
+    if(bv[i]>=70&&o.length<3){
+      if(bv[i]>=80&&BSK[k]) o.push(BSK[k].h);
+      else if(BSK[k]) o.push(BSK[k].m);
+    }
+  });
+  return o.slice(0,3);
+}
+
+function dCol(v){
+  if(v>=75) return'#f59e0b';
+  if(v>=50) return'#3b82f6';
+  if(v>=30) return'#9333ea';
+  return'#8a8a8a';
+}
+
+function attrColor(v,mx,p){
+  const pct=Math.round(v/mx*100);
+  return'<div class="ab"><div class="af" style="width:'+pct+'%;background:'+p+'"></div></div>';
+}
+
+function genDesc(tp,s){
+  const hi=[],lo=[];
+  if(s.Openness>=70)hi.push('极高开放性，创意无限');
+  if(s.Conscientiousness>=70)hi.push('超强自律与执行力');
+  if(s.Extraversion>=70)hi.push('出色社交能力');
+  if(s.Agreeableness>=70)hi.push('强烈共情能力');
+  if(s.Neuroticism<35)hi.push('情绪稳定，心态平和');
+  if(s.Openness<35)lo.push('务实保守');
+  if(s.Conscientiousness<35)lo.push('行事随意');
+  if(s.Extraversion<30)hi.push('独处中汲取能量');
+  if(s.Agreeableness>=85)lo.push('难以拒绝他人');
+  if(s.Neuroticism>=70)lo.push('情绪敏感，波动较大');
+  const str=hi.length?('\n核心优势：'+hi.join('、')+'。'):'';
+  const wkl=lo.length?('\n成长盲区：'+lo.join('、')+'。'):'';
+  return ROLE_DESC[tp]+str+wkl;
+}
+
+function renderResult(answers) {
+  const s = calcScore(answers);
+  const tp = toMBTI(s);
+  const meta = TYPES[tp]||{r:'神秘者',e:'混沌',kw:['混沌'],cl:'#fff'};
+  const rar = rarity(s);
+  const rc = RC[rar];
+  const stats = st(s);
+  const skills = gSkills(s);
+
+  const sbtiBars=[
+    {n:'Energy',v:s.Energy},{n:'Awareness',v:s.Awareness},
+    {n:'Decision',v:s.Decision},{n:'Execution',v:s.Execution},
+  ];
+  const bfBars=[
+    {n:'Openness',v:s.Openness,k:'Openness'},
+    {n:'Conscientiousness',v:s.Conscientiousness,k:'Conscientiousness'},
+    {n:'Extraversion',v:s.Extraversion,k:'Extraversion'},
+    {n:'Agreeableness',v:s.Agreeableness,k:'Agreeableness'},
+    {n:'Neuroticism',v:s.Neuroticism,k:'Neuroticism'},
+  ];
+  const attrData=[
+    {n:'攻击',v:stats.a,mx:999,col:'#f87171'},
+    {n:'防御',v:stats.d,mx:999,col:'#60a5fa'},
+    {n:'生命',v:stats.h,mx:999,col:'#4ade80'},
+    {n:'速度',v:stats.s,mx:999,col:'#facc15'},
+    {n:'暴击',v:stats.c,mx:50,col:'#f472b6',u:'%'},
+    {n:'闪避',v:stats.k,mx:50,col:'#a78bfa',u:'%'},
+  ];
+
+  let h = '<div class="result-hero">';
+  h += '<div class="hero-type" style="color:'+meta.cl+'">'+tp+'</div>';
+  h += '<div class="hero-role">'+meta.r+' · '+meta.e+'元素</div>';
+  h += '<div class="hero-rarity">';
+  h += '<span class="r-tag '+rc.cls+'">'+rar+'</span>';
+  h += '</div>';
+  h += '<div class="hero-stars '+rc.sc+'">'+rc.st+'</div>';
+  h += '<div class="hero-prob">出现概率 '+rc.prob+'</div>';
+  h += '<div class="hero-desc">'+genDesc(tp,s)+'</div>';
+  h += '</div>';
+
+  h += '<div class="result-grid">';
+
+  // 左侧：SBTI维度+属性
+  h += '<div class="rcard">';
+  h += '<div class="rcard-title">SBTI 四维倾向</div>';
+  sbtiBars.forEach(d=>{
+    h += '<div class="dim-row">';
+    h += '<div class="dim-lbl"><span>'+d.n+'</span><span>'+d.v+'</span></div>';
+    h += '<div class="dim-track"><div class="dim-fill" style="width:'+d.v+'%;background:'+dCol(d.v)+'"></div></div>';
+    h += '</div>';
+  });
+  h += '<div class="rcard-title" style="margin-top:0.9rem">战斗属性</div>';
+  h += '<div class="attr-grid">';
+  attrData.forEach(a=>{
+    const pct=Math.round(a.v/a.mx*100);
+    h += '<div class="ac"><div class="an">'+a.n+'</div><div class="av">'+a.v+(a.u||'')+'</div>';
+    h += '<div class="ab"><div class="af" style="width:'+pct+'%;background:'+a.col+'"></div></div></div>';
+  });
+  h += '</div></div>';
+
+  // 右侧：技能+BF
+  h += '<div class="rcard">';
+  if(skills.length){
+    h += '<div class="rcard-title">天赋技能</div>';
+    skills.forEach(([n,d])=>{
+      h += '<div class="sk-item"><div class="sk-name">'+n+'</div><div class="sk-desc">'+d+'</div></div>';
+    });
+  }
+  h += '<div class="rcard-title" style="margin-top:0.9rem">Big Five 人格明细</div>';
+  h += '<div class="bf-grid">';
+  bfBars.forEach(d=>{
+    h += '<div class="bf-item"><div class="bf-n">'+BFN[d.k]+'</div><div class="bf-v">'+d.v+'</div><div class="bf-tr">'+BFT[d.k].join(' / ')+'</div></div>';
+  });
+  h += '</div></div></div>';
+
+  // 稀有度说明
+  h += '<div class="rn-box">'+rc.desc+'</div>';
+
+  // 立绘关键词
+  h += '<div class="rcard"><div class="rcard-title">立绘风格关键词</div>';
+  h += '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.3rem">';
+  meta.kw.forEach(k=>{
+    h += '<span style="background:rgba(96,165,250,0.08);border:1px solid rgba(96,165,250,0.2);color:#60a5fa;padding:0.3rem 0.7rem;border-radius:20px;font-size:0.78rem">'+k+'</span>';
+  });
+  h += '</div></div>';
+
+  // 重测
+  h += '<div class="retest-row">';
+  h += '<button class="retest-btn" onclick="location.reload()">重新测试</button>';
+  h += '</div>';
+
+  document.getElementById('resultContent').innerHTML = h;
+}

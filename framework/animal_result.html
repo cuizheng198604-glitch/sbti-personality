@@ -196,7 +196,7 @@ function getDefaultResult() {
   };
 }
 
-const cfg = window.ANIMAL_CONFIG;
+const cfg = window.ANIMAL_CONFIG || { animals: [{id:'fox',name:'狐狸',emoji:'🦊',rarity:'common',traits:['聪明','灵活'],description:'狐狸',strength:'聪明',weakness:'有时狡猾',bestMatch:[],worstMatch:[],profile:{Openness:70,Conscientiousness:60,Extraversion:65,Agreeableness:55,Neuroticism:45}}], rarities: { common:{name:'普通',stars:1,color:'#888'}, rare:{name:'稀有',stars:3,color:'#4ade80'}, epic:{name:'史诗',stars:4,color:'#a78bfa'}, legendary:{name:'传说',stars:5,color:'#fbbf24'} } };
 
 // ── 渲染结果 ──
 function renderResult(result) {
@@ -483,10 +483,16 @@ function showAlert(msg, type) {
 }
 
 // ── 启动 ──
-document.addEventListener('DOMContentLoaded', () => {
-  const result = getResultFromURL();
-  window._animalResult = result;
-  renderResult(result);
+document.addEventListener('DOMContentLoaded', function() {
+  try {
+    var result = getResultFromURL();
+    window._animalResult = result;
+    document.getElementById('resultScreen').innerHTML = '<div style="color:#fff;padding:2rem;text-align:center;font-size:1.2rem">正在加载结果...</div>';
+    renderResult(result);
+  } catch(e) {
+    console.error('Result error:', e);
+    document.getElementById('resultScreen').innerHTML = '<div style="color:#fff;padding:2rem;text-align:center;font-size:1.2rem">加载失败：' + e.message + '</div>';
+  }
 });
 </script>
 </body>

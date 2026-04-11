@@ -196,7 +196,7 @@ function doLogin() {
   const pw = document.getElementById('passwordInput').value;
   if (!pw) { document.getElementById('loginErr').textContent = '请输入密码'; return; }
   document.getElementById('loginErr').textContent = '';
-  fetch('https://sbtinew.onrender.com/api/admin/results', { headers: { 'X-Admin-Password': pw } })
+  fetch('https://fbti-new.onrender.com/api/admin/results', { headers: { 'X-Admin-Password': pw } })
     .then(r => { if (!r.ok) throw new Error('密码错误'); return r.json(); })
     .then(data => {
       allResults = data.results || [];
@@ -349,7 +349,7 @@ function resetFilters() { document.getElementById('filterRarity').value=''; docu
 
 function deleteResult(id) {
   if (!confirm('确定删除这条记录？')) return;
-  fetch('https://sbtinew.onrender.com/api/admin/results/' + id, { method: 'DELETE', headers: { 'X-Admin-Password': document.getElementById('passwordInput').value } })
+  fetch('https://fbti-new.onrender.com/api/admin/results/' + id, { method: 'DELETE', headers: { 'X-Admin-Password': document.getElementById('passwordInput').value } })
     .then(r => r.json()).then(() => {
       allResults = allResults.filter(r => r.id !== id);
       document.getElementById('totalCount').textContent = '共 ' + allResults.length + ' 条';
@@ -363,7 +363,7 @@ function deleteResult(id) {
 function clearAll() {
   if (!confirm('⚠️ 确定要清空全部 ' + allResults.length + ' 条数据？此操作不可恢复！')) return;
   if (!confirm('再次确认：清空后数据无法恢复，确定继续？')) return;
-  fetch('https://sbtinew.onrender.com/api/admin/results', { method: 'DELETE', headers: { 'X-Admin-Password': document.getElementById('passwordInput').value } })
+  fetch('https://fbti-new.onrender.com/api/admin/results', { method: 'DELETE', headers: { 'X-Admin-Password': document.getElementById('passwordInput').value } })
     .then(r => r.json()).then(() => {
       allResults = [];
       document.getElementById('totalCount').textContent = '共 0 条';

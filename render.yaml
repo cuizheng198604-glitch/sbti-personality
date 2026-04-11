@@ -1,0 +1,36 @@
+# Render 付费版部署配置
+
+## Static Site（前端）
+databases:
+  - name: sbti-postgres
+    plan: starter  # 付费版可选 PostgreSQL
+
+services:
+  # ── 前端静态站 ──────────────────────────────
+  - type: web
+    name: sbti-animal-quiz
+    runtime: static
+    buildCommand: ""
+    staticPublishPath: public
+    headers:
+      - path: "/*"
+        name: Cache-Control
+        value: public, max-age=0, must-revalidate
+    envVars:
+      - key: ADMIN_PASSWORD
+        value: "sbti-admin-2026"
+
+  # ── 后端 API（付费版 Node.js）─────────────────
+  - type: web
+    name: sbti-api
+    runtime: node
+    region: singapore
+    plan: starter
+    buildCommand: npm install
+    startCommand: node api/server.js
+    healthCheckPath: /health
+    envVars:
+      - key: ADMIN_PASSWORD
+        value: "sbti-admin-2026"
+      - key: NODE_ENV
+        value: production

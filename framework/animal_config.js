@@ -220,7 +220,7 @@ const ANIMAL_CONFIG = {
   traffic: {
     enabled: true,
     showMode: "resultOnly",
-    entries: [{ name:"公众号", icon:"📮", title:"关注公众号", desc:"解锁完整版动物性格分析", qrCode:"", url:"" }]
+    entries: [{ name:"公众号", icon:"📮", title:"关注公众号", desc:"回复【动物】获取完整性格报告", qrCode:"", url:"" }]
   },
 
   // ==================== 分享配置 ====================

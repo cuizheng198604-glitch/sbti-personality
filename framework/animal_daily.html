@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>每日抽卡 · 动物集邮</title>
+<style>
+:root{--bg:#0a0f1a;--panel:#0d1525;--card:#111d32;--border:#1e3050;--text:#e8edf5;--muted:#5a7a9a;--dim:#8ba5c0;--primary:#f59e0b;--accent:#3b82f6;--rare:#4ade80;--epic:#a78bfa;--legendary:#fbbf24;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;outline:none}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;outline:none}
+body{font-family:Segoe UI,PingFang SC,Microsoft YaHei,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.back-btn{position:fixed;top:1rem;left:1rem;background:var(--card);border:1px solid var(--border);color:var(--muted);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;cursor:pointer;z-index:100;text-decoration:none}
+.main{padding:5rem 1rem 3rem;max-width:600px;margin:0 auto;text-align:center}
+.title{font-size:1.5rem;font-weight:900;margin-bottom:0.3rem}
+.subtitle{color:var(--muted);font-size:0.85rem;margin-bottom:1.5rem}
+
+/* 倒计时 */
+.countdown-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:0.8rem 1.5rem;display:inline-flex;align-items:center;gap:0.6rem;margin-bottom:1.5rem;font-size:0.85rem;color:var(--muted)}
+.countdown-box .time{background:var(--panel);border-radius:6px;padding:0.2rem 0.5rem;font-weight:700;color:var(--primary);font-size:1rem;min-width:2.2rem;display:inline-block}
+
+/* 抽卡区 */
+.draw-area{margin:2rem 0}
+.draw-btn{width:180px;height:180px;border-radius:50%;border:3px solid var(--primary);background:linear-gradient(135deg,#1a1208,#2a1a05);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.3rem;cursor:pointer;transition:all 0.3s;margin:0 auto;font-size:0.85rem;color:var(--primary);font-weight:700;position:relative;overflow:hidden}
+.draw-btn::before{content:'';position:absolute;inset:-50%;background:conic-gradient(transparent,rgba(245,158,11,0.3),transparent 30%);animation:spin 3s linear infinite}
+.draw-btn::after{content:'';position:absolute;inset:3px;background:linear-gradient(135deg,#1a1208,#2a1a05);border-radius:50%;z-index:0}
+.draw-btn span{z-index:1}
+.draw-btn .draw-icon{font-size:2.5rem;z-index:1}
+.draw-btn:hover{transform:scale(1.05);box-shadow:0 0 30px rgba(245,158,11,0.3)}
+.draw-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.draw-hint{color:var(--muted);font-size:0.78rem;margin-top:1rem}
+
+/* 抽卡动画遮罩 */
+.draw-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.9);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:200;gap:1rem}
+.draw-overlay.show{display:flex}
+.draw-card{background:linear-gradient(135deg,#0d1525,#111d32);border:2px solid var(--border);border-radius:20px;padding:2rem 3rem;text-align:center;animation:popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both}
+.draw-card.legendary{border-color:var(--legendary);box-shadow:0 0 40px rgba(251,191,36,0.3)}
+.draw-card.epic{border-color:var(--epic);box-shadow:0 0 30px rgba(167,139,250,0.3)}
+.draw-card.rare{border-color:var(--rare);box-shadow:0 0 20px rgba(74,222,128,0.2)}
+@keyframes popIn{from{opacity:0;transform:scale(0.5) rotate(-10deg)}to{opacity:1;transform:none}}
+.draw-emoji{font-size:5rem;margin-bottom:0.5rem;animation:bounce 0.6s ease 0.3s both}
+@keyframes bounce{from{transform:translateY(-20px)}to{transform:none}}
+.draw-animal-name{font-size:1.5rem;font-weight:900;margin-bottom:0.3rem}
+.draw-rarity{font-size:0.8rem;padding:0.2rem 0.8rem;border-radius:20px;display:inline-block;margin-bottom:0.8rem}
+.draw-rarity.legendary{background:rgba(251,191,36,0.15);color:var(--legendary)}
+.draw-rarity.epic{background:rgba(167,139,250,0.15);color:var(--epic)}
+.draw-rarity.rare{background:rgba(74,222,128,0.15);color:var(--rare)}
+.draw-rarity.common{background:rgba(139,164,192,0.15);color:var(--dim)}
+.draw-trait{color:var(--dim);font-size:0.85rem;margin-bottom:1rem}
+.draw-btns{display:flex;gap:0.8rem;margin-top:1rem}
+.draw-btns button{flex:1;padding:0.7rem;border-radius:10px;font-size:0.85rem;cursor:pointer;border:none;font-weight:700;transition:all 0.15s}
+.btn-share{background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff}
+.btn-close{background:var(--panel);border:1px solid var(--border);color:var(--muted)}
+.draw-new{background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.4);border-radius:6px;padding:0.3rem 0.8rem;font-size:0.72rem;color:var(--primary);margin-bottom:0.5rem;display:inline-block}
+
+/* 收集册 */
+.collection-section{margin-top:2rem}
+.collection-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.collection-title{font-size:1rem;font-weight:800}
+.collection-count{font-size:0.78rem;color:var(--muted)}
+.collection-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:0.5rem}
+.col-animal{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.5rem 0.2rem;text-align:center;position:relative}
+.col-animal.owned{border-color:var(--primary);background:rgba(245,158,11,0.05)}
+.col-animal.locked{opacity:0.3}
+.col-animal .c-emoji{font-size:1.5rem}
+.col-animal .c-name{font-size:0.6rem;color:var(--muted);margin-top:0.1rem}
+.col-animal .c-rarity{position:absolute;top:2px;right:2px;font-size:0.5rem;background:var(--panel);padding:1px 3px;border-radius:3px}
+.col-animal.legendary-owned{border-color:var(--legendary);background:rgba(251,191,36,0.08)}
+.col-animal.epic-owned{border-color:var(--epic);background:rgba(167,139,250,0.08)}
+.col-animal.rare-owned{border-color:var(--rare);background:rgba(74,222,128,0.08)}
+.stats-row{display:flex;gap:0.5rem;margin-top:1.5rem;justify-content:center}
+.stat-box{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.6rem 1rem;text-align:center;flex:1}
+.stat-num{font-size:1.2rem;font-weight:900;color:var(--primary)}
+.stat-label{font-size:0.65rem;color:var(--muted)}
+.tip-box{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:0.8rem;margin-top:1rem;font-size:0.75rem;color:var(--muted);text-align:left}
+.tip-box strong{color:var(--primary)}
+</style>
+</head>
+<body>
+
+<a href="animal_result.html" class="back-btn">←</a>
+
+<div class="main">
+  <div class="title">🎰 每日抽卡</div>
+  <div class="subtitle">集齐17种动物，召唤最强性格</div>
+
+  <div class="countdown-box" id="countdownBox">
+    下次抽卡：
+    <span class="time" id="cdH">00</span>:<span class="time" id="cdM">00</span>:<span class="time" id="cdS">00</span>
+  </div>
+
+  <div class="draw-area">
+    <button class="draw-btn" id="drawBtn" onclick="doDraw()">
+      <span class="draw-icon">🎰</span>
+      <span>抽取今日动物</span>
+    </button>
+    <div class="draw-hint" id="drawHint">每天可免费抽取1次 · 分享获取额外抽取次数</div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-box">
+      <div class="stat-num" id="statOwned">0</div>
+      <div class="stat-label">已收集</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num" id="statToday">0</div>
+      <div class="stat-label">今日抽卡</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num" id="statRare">0</div>
+      <div class="stat-label">稀有获得</div>
+    </div>
+  </div>
+
+  <div class="collection-section">
+    <div class="collection-header">
+      <div class="collection-title">📚 动物图鉴</div>
+      <div class="collection-count" id="colCount">0/17</div>
+    </div>
+    <div class="collection-grid" id="collectionGrid"></div>
+  </div>
+
+  <div class="tip-box">
+    <strong>💡 获得稀有动物技巧：</strong><br>
+    · 分享到群聊，每次+1抽卡机会<br>
+    · 连续登录3天，必出稀有<br>
+    · 累计抽取20次，必出传说
+  </div>
+</div>
+
+<!-- 抽卡结果弹窗 -->
+<div class="draw-overlay" id="drawOverlay">
+  <div class="draw-card" id="drawCard">
+    <div class="draw-new" id="drawNewTag" style="display:none">首次获得！</div>
+    <div class="draw-emoji" id="drawEmoji">🐲</div>
+    <div class="draw-animal-name" id="drawName">龙</div>
+    <div class="draw-rarity" id="drawRarity">传说</div>
+    <div class="draw-trait" id="drawTrait">关键词：掌控全局</div>
+    <div class="draw-btns">
+      <button class="btn-share" onclick="shareDraw()">📤 炫耀一下</button>
+      <button class="btn-close" onclick="closeDraw()">关闭</button>
+    </div>
+  </div>
+</div>
+
+<script src="animal_config.js"></script>
+<script>
+// ── 动物数据 ──
+var allAnimals = [
+  {id:'dragon',emoji:'🐲',name:'龙',rarity:'legendary',rarityName:'传说',trait:'掌控全局',prob:5},
+  {id:'phoenix',emoji:'🔥',name:'凤凰',rarity:'legendary',rarityName:'传说',trait:'浴火重生',prob:5},
+  {id:'tiger',emoji:'🐯',name:'白虎',rarity:'epic',rarityName:'史诗',trait:'威猛正义',prob:5},
+  {id:'unicorn',emoji:'🦄',name:'独角兽',rarity:'epic',rarityName:'史诗',trait:'纯净善良',prob:5},
+  {id:'whale',emoji:'🐋',name:'鲸鱼',rarity:'epic',rarityName:'史诗',trait:'深邃包容',prob:5},
+  {id:'wolf',emoji:'🐺',name:'狼',rarity:'rare',rarityName:'稀有',trait:'忠诚团队',prob:14},
+  {id:'eagle',emoji:'🦅',name:'鹰',rarity:'rare',rarityName:'稀有',trait:'眼光敏锐',prob:14},
+  {id:'leopard',emoji:'🐆',name:'豹',rarity:'rare',rarityName:'稀有',trait:'速度敏捷',prob:14},
+  {id:'dolphin',emoji:'🐬',name:'海豚',rarity:'rare',rarityName:'稀有',trait:'活泼友善',prob:14},
+  {id:'owl',emoji:'🦉',name:'猫头鹰',rarity:'rare',rarityName:'稀有',trait:'智慧深邃',prob:14},
+  {id:'giraffe',emoji:'🦒',name:'长颈鹿',rarity:'rare',rarityName:'稀有',trait:'高瞻远瞩',prob:14},
+  {id:'cat',emoji:'🐱',name:'猫',rarity:'common',rarityName:'普通',trait:'独立神秘',prob:8},
+  {id:'dog',emoji:'🐶',name:'狗',rarity:'common',rarityName:'普通',trait:'忠诚友善',prob:8},
+  {id:'rabbit',emoji:'🐰',name:'兔子',rarity:'common',rarityName:'普通',trait:'敏捷温和',prob:8},
+  {id:'panda',emoji:'🐼',name:'熊猫',rarity:'common',rarityName:'普通',trait:'憨厚可爱',prob:8},
+  {id:'koala',emoji:'🐨',name:'考拉',rarity:'common',rarityName:'普通',trait:'佛系随和',prob:8},
+  {id:'fox',emoji:'🦊',name:'狐狸',rarity:'common',rarityName:'普通',trait:'聪明灵活',prob:8}
+];
+
+// ── 本地存储 ──
+var LS_KEY = 'animal_daily';
+function getDailyData() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}'); } catch(e) { return {}; }
+}
+function saveDailyData(d) { localStorage.setItem(LS_KEY, JSON.stringify(d)); }
+
+// ── 今日日期 ──
+function todayStr() { return new Date().toISOString().slice(0,10); }
+
+// ── 是否有剩余抽卡次数 ──
+function canDraw() {
+  var d = getDailyData();
+  var last = d.lastDraw || '';
+  if (last !== todayStr()) return true;
+  return (d.extraDraws || 0) > 0;
+}
+
+// ── 执行抽卡 ──
+function doDraw() {
+  if (!canDraw()) {
+    alert('今日抽卡次数已用完！\n\n分享到群聊可获得额外抽卡机会～');
+    return;
+  }
+  var result = drawRandom();
+  var d = getDailyData();
+  var isNew = !(d.owned || []).includes(result.id);
+  if (!d.owned) d.owned = [];
+  if (isNew) d.owned.push(result.id);
+  if (d.lastDraw !== todayStr()) { d.lastDraw = todayStr(); d.todayCount = 0; }
+  d.todayCount = (d.todayCount || 0) + 1;
+  saveDailyData(d);
+  showResult(result, isNew);
+  updateUI();
+}
+
+// ── 随机抽取 ──
+function drawRandom() {
+  var total = 0;
+  allAnimals.forEach(function(a){ total += a.prob; });
+  var r = Math.random() * total;
+  var cum = 0;
+  for (var i = 0; i < allAnimals.length; i++) {
+    cum += allAnimals[i].prob;
+    if (r < cum) return allAnimals[i];
+  }
+  return allAnimals[allAnimals.length-1];
+}
+
+// ── 显示结果 ──
+function showResult(animal, isNew) {
+  var card = document.getElementById('drawCard');
+  card.className = 'draw-card ' + animal.rarity;
+  document.getElementById('drawEmoji').textContent = animal.emoji;
+  document.getElementById('drawName').textContent = animal.name;
+  document.getElementById('drawRarity').textContent = animal.rarityName;
+  document.getElementById('drawRarity').className = 'draw-rarity ' + animal.rarity;
+  document.getElementById('drawTrait').textContent = '关键词：' + animal.trait;
+  document.getElementById('drawNewTag').style.display = isNew ? 'inline-block' : 'none';
+  document.getElementById('drawOverlay').classList.add('show');
+}
+
+// ── 关闭 ──
+function closeDraw() {
+  document.getElementById('drawOverlay').classList.remove('show');
+}
+
+// ── 分享 ──
+function shareDraw() {
+  var d = getDailyData();
+  d.extraDraws = (d.extraDraws || 0) + 1;
+  saveDailyData(d);
+  updateUI();
+  alert('🎉 分享成功！获得1次额外抽卡机会！');
+  closeDraw();
+}
+
+// ── 更新UI ──
+function updateUI() {
+  var d = getDailyData();
+  var owned = d.owned || [];
+  var today = d.lastDraw === todayStr() ? (d.todayCount || 0) : 0;
+  var extra = d.extraDraws || 0;
+  var hasDraw = d.lastDraw !== todayStr() || extra > 0;
+
+  // 抽卡按钮
+  var btn = document.getElementById('drawBtn');
+  btn.disabled = false;
+
+  // 统计
+  document.getElementById('statOwned').textContent = owned.length;
+  document.getElementById('statToday').textContent = today;
+  var rareCount = owned.filter(function(id){ var a = allAnimals.filter(function(x){return x.id===id;})[0]; return a && a.rarity !== 'common'; }).length;
+  document.getElementById('statRare').textContent = rareCount;
+  document.getElementById('colCount').textContent = owned.length + '/17';
+
+  // 图鉴
+  var grid = document.getElementById('collectionGrid');
+  grid.innerHTML = '';
+  allAnimals.forEach(function(a) {
+    var isOwned = owned.includes(a.id);
+    var div = document.createElement('div');
+    var cls = 'col-animal';
+    if (isOwned) { cls += ' owned ' + a.rarity + '-owned'; }
+    else { cls += ' locked'; }
+    div.className = cls;
+    div.innerHTML = '<div class="c-emoji">' + a.emoji + '</div><div class="c-name">' + a.name + '</div>';
+    if (isOwned) {
+      var badge = document.createElement('span');
+      badge.className = 'c-rarity';
+      badge.textContent = a.rarityName;
+      div.appendChild(badge);
+    }
+    grid.appendChild(div);
+  });
+
+  // 倒计时
+  updateCountdown();
+}
+
+// ── 倒计时 ──
+function updateCountdown() {
+  var box = document.getElementById('countdownBox');
+  var now = new Date();
+  var tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(0,0,0,0);
+  var diff = tomorrow - now;
+  var h = Math.floor(diff/3600000);
+  var m = Math.floor((diff%3600000)/60000);
+  var s = Math.floor((diff%60000)/1000);
+  document.getElementById('cdH').textContent = String(h).padStart(2,'0');
+  document.getElementById('cdM').textContent = String(m).padStart(2,'0');
+  document.getElementById('cdS').textContent = String(s).padStart(2,'0');
+}
+
+setInterval(updateCountdown, 1000);
+
+// ── 启动 ──
+updateUI();
+</script>
+</body>
+</html>

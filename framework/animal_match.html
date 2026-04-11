@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>动物配对 · 关系分析</title>
+<style>
+:root{--bg:#0a0f1a;--panel:#0d1525;--card:#111d32;--border:#1e3050;--text:#e8edf5;--muted:#5a7a9a;--dim:#8ba5c0;--primary:#f59e0b;--accent:#3b82f6;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;outline:none}
+body{font-family:Segoe UI,PingFang SC,Microsoft YaHei,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.back-btn{position:fixed;top:1rem;left:1rem;background:var(--card);border:1px solid var(--border);color:var(--muted);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;cursor:pointer;z-index:100;text-decoration:none}
+.main{padding:5rem 1.5rem 2rem;max-width:600px;margin:0 auto}
+.title{font-size:1.5rem;font-weight:900;text-align:center;margin-bottom:0.3rem}
+.subtitle{text-align:center;color:var(--muted);font-size:0.85rem;margin-bottom:2rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1rem}
+.card-title{font-size:0.78rem;font-weight:700;color:var(--primary);margin-bottom:1rem;letter-spacing:0.05em}
+.animal-select{display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem}
+.animal-btn{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:0.6rem 0.3rem;display:flex;flex-direction:column;align-items:center;gap:0.2rem;cursor:pointer;font-size:0.7rem;color:var(--dim);transition:all 0.15s}
+.animal-btn .emoji{font-size:1.6rem}
+.animal-btn:hover,.animal-btn.selected{border-color:var(--primary);background:rgba(245,158,11,0.1);color:var(--primary)}
+.animal-btn input{display:none}
+.mode-btns{display:flex;gap:0.5rem;margin-bottom:1.5rem}
+.mode-btn{flex:1;background:var(--panel);border:1px solid var(--border);color:var(--muted);border-radius:10px;padding:0.7rem;font-size:0.82rem;cursor:pointer;text-align:center;transition:all 0.15s}
+.mode-btn.active{border-color:var(--primary);background:rgba(245,158,11,0.1);color:var(--primary);font-weight:700}
+.submit-btn{width:100%;background:linear-gradient(135deg,#f59e0b,#f97316);border:none;border-radius:14px;padding:1rem;font-size:1rem;font-weight:800;color:#fff;cursor:pointer;margin-top:0.5rem;transition:opacity 0.2s}
+.submit-btn:disabled{opacity:0.4;cursor:not-allowed}
+.price-tag{text-align:center;font-size:0.78rem;color:var(--muted);margin-top:0.8rem}
+.price-tag span{color:var(--primary);font-weight:700;font-size:1rem}
+.result-card{background:linear-gradient(135deg,#0d1525,#111d32);border:1px solid var(--border);border-radius:20px;padding:2rem;text-align:center;display:none}
+.result-card.show{display:block}
+.match-score{font-size:3.5rem;font-weight:900;color:var(--primary);margin:0.5rem 0}
+.match-label{font-size:0.85rem;color:var(--muted)}
+.match-emoji{font-size:3rem;margin:1rem 0}
+.relation-title{font-size:1.2rem;font-weight:800;margin:0.5rem 0}
+.relation-desc{color:var(--dim);font-size:0.85rem;line-height:1.8;margin-top:1rem;text-align:left}
+.advantage{margin-top:1.5rem;background:var(--panel);border-radius:12px;padding:1rem;text-align:left}
+.advantage h4{font-size:0.8rem;color:var(--primary);margin-bottom:0.5rem}
+.advantage p{font-size:0.82rem;color:var(--dim);line-height:1.7}
+.royalty-notice{background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:1rem;margin-top:1rem;font-size:0.78rem;color:var(--muted);display:none}
+.royalty-notice.show{display:block}
+@media(min-width:600px){.animal-select{grid-template-columns:repeat(5,1fr)}}
+</style>
+</head>
+<body>
+
+<a href="animal_result.html" class="back-btn">←</a>
+
+<div class="main">
+  <div class="title">🐾 动物配对分析</div>
+  <div class="subtitle">测测你们的关系契合度</div>
+
+  <!-- 关系模式 -->
+  <div class="card">
+    <div class="card-title">选择关系模式</div>
+    <div class="mode-btns">
+      <div class="mode-btn active" onclick="setMode('couple',this)">💑 情侣</div>
+      <div class="mode-btn" onclick="setMode('friend',this)">👫 好友</div>
+      <div class="mode-btn" onclick="setMode('colleague',this)">💼 同事</div>
+    </div>
+  </div>
+
+  <!-- 你的动物 -->
+  <div class="card">
+    <div class="card-title">你的动物人格</div>
+    <div class="animal-select" id="myAnimal">
+      <label class="animal-btn" onclick="selectAnimal('my', 'dragon')"><span class="emoji">🐲</span>龙</label>
+      <label class="animal-btn" onclick="selectAnimal('my', 'phoenix')"><span class="emoji">🔥</span>凤凰</label>
+      <label class="animal-btn" onclick="selectAnimal('my', 'tiger')"><span class="emoji">🐯</span>白虎</label>
+      <label class="animal-btn" onclick="selectAnimal('my', 'unicorn')"><span class="emoji">🦄</span>独角兽</label>
+      <label class="animal-btn" onclick="selectAnimal('my', 'wolf')"><span class="emoji">🐺</span>狼</label>
+      <label class="animal-btn" onclick="selectAnimal('my', 'eagle')"><span class="emoji">🦅</span>鹰</label>
+      <label class="animal-btn" onclick="selectAnimal('my', 'leopard')"><span class="emoji">🐆</span>豹</label>
+      <label class="animal-btn" onclick="selectAnimal('my', 'whale')"><span class="emoji">🐋</span>鲸鱼</label>
+      <label class="animal-btn" onclick="selectAnimal('my', 'dolphin')"><span class="emoji">🐬</span>海豚</label>
+      <label class="animal-btn" onclick="selectAnimal('my', 'owl')"><span class="emoji">🦉</span>猫头鹰</label>
+      <label class="animal-btn" onclick="selectAnimal('my', 'cat')"><span class="emoji">🐱</span>猫</label>
+      <label class="animal-btn" onclick="selectAnimal('my', 'dog')"><span class="emoji">🐶</span>狗</label>
+      <label class="animal-btn" onclick="selectAnimal('my', 'rabbit')"><span class="emoji">🐰</span>兔子</label>
+      <label class="animal-btn" onclick="selectAnimal('my', 'panda')"><span class="emoji">🐼</span>熊猫</label>
+      <label class="animal-btn" onclick="selectAnimal('my', 'koala')"><span class="emoji">🐨</span>考拉</label>
+      <label class="animal-btn" onclick="selectAnimal('my', 'fox')"><span class="emoji">🦊</span>狐狸</label>
+      <label class="animal-btn" onclick="selectAnimal('my', 'giraffe')"><span class="emoji">🦒</span>长颈鹿</label>
+    </div>
+  </div>
+
+  <!-- 对方的动物 -->
+  <div class="card">
+    <div class="card-title">对方的动物人格</div>
+    <div class="animal-select" id="partnerAnimal">
+      <label class="animal-btn" onclick="selectAnimal('partner', 'dragon')"><span class="emoji">🐲</span>龙</label>
+      <label class="animal-btn" onclick="selectAnimal('partner', 'phoenix')"><span class="emoji">🔥</span>凤凰</label>
+      <label class="animal-btn" onclick="selectAnimal('partner', 'tiger')"><span class="emoji">🐯</span>白虎</label>
+      <label class="animal-btn" onclick="selectAnimal('partner', 'unicorn')"><span class="emoji">🦄</span>独角兽</label>
+      <label class="animal-btn" onclick="selectAnimal('partner', 'wolf')"><span class="emoji">🐺</span>狼</label>
+      <label class="animal-btn" onclick="selectAnimal('partner', 'eagle')"><span class="emoji">🦅</span>鹰</label>
+      <label class="animal-btn" onclick="selectAnimal('partner', 'leopard')"><span class="emoji">🐆</span>豹</label>
+      <label class="animal-btn" onclick="selectAnimal('partner', 'whale')"><span class="emoji">🐋</span>鲸鱼</label>
+      <label class="animal-btn" onclick="selectAnimal('partner', 'dolphin')"><span class="emoji">🐬</span>海豚</label>
+      <label class="animal-btn" onclick="selectAnimal('partner', 'owl')"><span class="emoji">🦉</span>猫头鹰</label>
+      <label class="animal-btn" onclick="selectAnimal('partner', 'cat')"><span class="emoji">🐱</span>猫</label>
+      <label class="animal-btn" onclick="selectAnimal('partner', 'dog')"><span class="emoji">🐶</span>狗</label>
+      <label class="animal-btn" onclick="selectAnimal('partner', 'rabbit')"><span class="emoji">🐰</span>兔子</label>
+      <label class="animal-btn" onclick="selectAnimal('partner', 'panda')"><span class="emoji">🐼</span>熊猫</label>
+      <label class="animal-btn" onclick="selectAnimal('partner', 'koala')"><span class="emoji">🐨</span>考拉</label>
+      <label class="animal-btn" onclick="selectAnimal('partner', 'fox')"><span class="emoji">🦊</span>狐狸</label>
+      <label class="animal-btn" onclick="selectAnimal('partner', 'giraffe')"><span class="emoji">🦒</span>长颈鹿</label>
+    </div>
+  </div>
+
+  <button class="submit-btn" id="analyzeBtn" disabled onclick="analyze()">开始分析</button>
+  <div class="price-tag">完全免费 · 基于 MBTI+BigFive 双维度</div>
+
+  <!-- 结果 -->
+  <div class="result-card" id="resultCard">
+    <div class="match-emoji" id="resultEmoji">🐲🦄</div>
+    <div class="match-score" id="matchScore">87%</div>
+    <div class="match-label" id="matchLabel">灵魂伴侣级契合</div>
+    <div class="relation-title" id="relationTitle">龙与独角兽的完美组合</div>
+    <div class="relation-desc" id="relationDesc"></div>
+    <div class="advantage" id="advantageBox">
+      <h4>💡 相处优势</h4>
+      <p id="advantageText"></p>
+    </div>
+    <div class="royalty-notice" id="royaltyNotice">
+      🔥 你们是「天生一对」！这份组合的稀有度高达 <span id="rarityRate">2%</span>，快分享给朋友炫耀一下！
+    </div>
+  </div>
+</div>
+
+<script src="animal_config.js"></script>
+<script>
+var myAnimal = null;
+var partnerAnimal = null;
+var relationMode = 'couple';
+
+var allAnimals = [
+  {id:'dragon',emoji:'🐲',name:'龙'},
+  {id:'phoenix',emoji:'🔥',name:'凤凰'},
+  {id:'tiger',emoji:'🐯',name:'白虎'},
+  {id:'unicorn',emoji:'🦄',name:'独角兽'},
+  {id:'wolf',emoji:'🐺',name:'狼'},
+  {id:'eagle',emoji:'🦅',name:'鹰'},
+  {id:'leopard',emoji:'🐆',name:'豹'},
+  {id:'whale',emoji:'🐋',name:'鲸鱼'},
+  {id:'dolphin',emoji:'🐬',name:'海豚'},
+  {id:'owl',emoji:'🦉',name:'猫头鹰'},
+  {id:'cat',emoji:'🐱',name:'猫'},
+  {id:'dog',emoji:'🐶',name:'狗'},
+  {id:'rabbit',emoji:'🐰',name:'兔子'},
+  {id:'panda',emoji:'🐼',name:'熊猫'},
+  {id:'koala',emoji:'🐨',name:'考拉'},
+  {id:'fox',emoji:'🦊',name:'狐狸'},
+  {id:'giraffe',emoji:'🦒',name:'长颈鹿'}
+];
+
+// 配对关系矩阵
+var relations = {
+  couple: {
+    'dragon-phoenix':{score:98,label:'灵魂伴侣级契合',title:'龙与凤凰的传奇组合',desc:'你们是天生的一对！龙的力量与凤凰的重生之力完美互补。在感情中，你们既能并肩作战也能彼此疗愈，是他人眼中羡慕的神仙眷侣。',advantage:'你们对彼此有天然的欣赏和崇拜，这股能量会让关系持续升温。',rarity:'legendary'},
+    'dragon-unicorn':{score:95,label:'神仙眷侣级契合',title:'龙与独角兽的梦幻组合',desc:'龙与独角兽都是神圣的存在，你们在一起简直是命运的安排。你们对世界有相同的理想追求，能够一起创造不凡的人生。',advantage:'共同的价值观和人生愿景让你们的关系既浪漫又踏实。',rarity:'legendary'},
+    'dragon-tiger':{score:92,label:'王者级契合',title:'龙与白虎的最强组合',desc:'龙与白虎都是力量型选手，你们在一起简直是双倍霸气。你们适合一起闯荡事业，在外人看来你们是最强组合。',advantage:'事业上互为左膀右臂，共同目标感极强。',rarity:'epic'},
+    'wolf-dolphin':{score:90,label:'活力伴侣级契合',title:'狼与海豚的活力组合',desc:'狼的专注与海豚的活泼完美平衡。你们在一起时，既有深度也有欢乐，是朋友圈里最受欢迎的一对。',advantage:'相处永远不会无聊，总有新鲜话题和活动。',rarity:'epic'},
+    'cat-dog':{score:88,label:'甜蜜互补级契合',title:'猫与狗的经典组合',desc:'经典的猫狗组合！你需要安静时我陪伴，你想闹时我奉陪。这种互补性让你们的关系既温馨又有弹性。',advantage:'一个眼神就能懂对方的需求和情绪。',rarity:'rare'},
+    'panda-koala':{score:85,label:'治愈系契合',title:'熊猫与考拉的佛系组合',desc:'两个最佛系的动物在一起，追求的是简单快乐的生活。你们不太会争吵，更愿意花时间一起静静享受当下。',advantage:'极低的冲突率，关系稳定而持久。',rarity:'rare'},
+    'fox-owl':{score:82,label:'智趣相投级契合',title:'狐狸与猫头鹰的智慧组合',desc:'两个都是高智商代表，你们的对话永远充满深度和趣味。你们喜欢探讨人生意义和宇宙真相，思维碰撞出无限火花。',advantage:'精神层面的高度契合让感情更有厚度。',rarity:'rare'},
+    'eagle-wolf':{score:80,label:'自由灵魂级契合',title:'鹰与狼的野性组合',desc:'两个都有强烈独立性格的人，在一起却能相互成就。你们不喜欢被束缚，追求的是各自的诗和远方。',advantage:'既独立又亲密，给彼此足够的成长空间。',rarity:'common'},
+    'default':{score:75,label:'缘分级契合',title:'奇妙的动物组合',desc:'不同动物人格的你们相遇，本身就是一种缘分。差异带来新鲜感，沟通带来成长。',advantage:'多元视角让你们的世界更加丰富。',rarity:'common'}
+  },
+  friend: {
+    'dragon-phoenix':{score:97,label:'生死之交级契合',title:'龙与凤凰的挚友',desc:'你们是彼此最坚实的后盾。无论遇到什么困难，只要对方在就没有过不去的坎。你们的友谊可以经受任何考验。',advantage:'关键时刻的互相支撑能力极强。',rarity:'legendary'},
+    'wolf-dolphin':{score:93,label:'欢乐至死级契合',title:'狼与海豚的铁哥们',desc:'你们是朋友圈的灵魂人物，走到哪都是焦点。狼的义气加上海豚的幽默，你是人人羡慕的好朋友。',advantage:'社交场合的无敌组合。',rarity:'epic'},
+    'cat-rabbit':{score:88,label:'治愈系闺蜜级契合',title:'猫与兔子的温暖组合',desc:'你们是彼此的充电站。累了倦了，只要一起喝个茶聊聊天，满血复活。你们懂得对方的边界，也愿意随时陪伴。',advantage:'高质量的情感陪伴，无条件接纳。',rarity:'rare'},
+    'default':{score:72,label:'有趣的朋友',title:'奇妙的动物组合',desc:'性格各异的你们成为朋友本身就是惊喜。你们的差异让友谊更有张力。',advantage:'互补的性格让友谊更有深度。',rarity:'common'}
+  },
+  colleague: {
+    'dragon-tiger':{score:94,label:'梦幻搭档级契合',title:'龙与白虎的职场组合',desc:'你们是公司里的传奇搭档。一个有战略眼光，一个有执行力，配合起来简直是效率机器。老板最爱的就是你们这种组合。',advantage:'1+1远大于2的协作效应。',rarity:'epic'},
+    'owl-fox':{score:90,label:'智慧搭档级契合',title:'猫头鹰与狐狸的智囊团',desc:'你们是公司里的智慧担当。任何复杂问题交给你们都能迎刃而解。你俩配合起来，简直是全员膜拜。',advantage:'解决复杂问题的能力公司第一。',rarity:'rare'},
+    'cat-dog':{score:78,label:'互补同事级契合',title:'猫与狗的职场组合',desc:'你们在工作中互为补充。狗的勤奋弥补猫的随性，猫的灵活弥补狗的死板。这种组合反而能长期稳定合作。',advantage:'刚柔并济的协作风格。',rarity:'common'},
+    'default':{score:68,label:'普通同事级契合',title:'普通同事组合',desc:'你们在工作中各有所长，合作需要多沟通。保持开放心态，差异也能成为优势。',advantage:'多元背景带来不同视角。',rarity:'common'}
+  }
+};
+
+function setMode(mode, el) {
+  relationMode = mode;
+  document.querySelectorAll('.mode-btn').forEach(function(b){ b.classList.remove('active'); });
+  el.classList.add('active');
+}
+
+function selectAnimal(who, id) {
+  if (who === 'my') {
+    myAnimal = id;
+    document.querySelectorAll('#myAnimal .animal-btn').forEach(function(b){ b.classList.remove('selected'); });
+    event.currentTarget.classList.add('selected');
+  } else {
+    partnerAnimal = id;
+    document.querySelectorAll('#partnerAnimal .animal-btn').forEach(function(b){ b.classList.remove('selected'); });
+    event.currentTarget.classList.add('selected');
+  }
+  checkReady();
+}
+
+function checkReady() {
+  document.getElementById('analyzeBtn').disabled = !(myAnimal && partnerAnimal);
+}
+
+function getAnimalEmoji(id) {
+  var found = allAnimals.filter(function(a){ return a.id === id; });
+  return found.length ? found[0].emoji : '🐾';
+}
+
+function analyze() {
+  if (!myAnimal || !partnerAnimal) return;
+
+  // 保证顺序一致
+  var key = [myAnimal, partnerAnimal].sort().join('-');
+  var data = relations[relationMode] || relations.couple;
+  var result = data[key] || data['default'];
+
+  var myEmoji = getAnimalEmoji(myAnimal);
+  var partnerEmoji = getAnimalEmoji(partnerAnimal);
+
+  document.getElementById('resultEmoji').textContent = myEmoji + ' ' + partnerEmoji;
+  document.getElementById('matchScore').textContent = result.score + '%';
+  document.getElementById('matchLabel').textContent = result.label;
+  document.getElementById('relationTitle').textContent = result.title;
+  document.getElementById('relationDesc').textContent = result.desc;
+  document.getElementById('advantageText').textContent = result.advantage;
+
+  // 显示稀有度提示
+  if (result.rarity === 'legendary') {
+    document.getElementById('rarityRate').textContent = '2%';
+    document.getElementById('royaltyNotice').classList.add('show');
+  } else if (result.rarity === 'epic') {
+    document.getElementById('rarityRate').textContent = '5%';
+    document.getElementById('royaltyNotice').classList.add('show');
+  } else {
+    document.getElementById('royaltyNotice').classList.remove('show');
+  }
+
+  document.getElementById('resultCard').classList.add('show');
+  document.getElementById('resultCard').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>

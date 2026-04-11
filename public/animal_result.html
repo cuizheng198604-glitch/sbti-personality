@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>动物性格测试 - 结果</title>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<style>
+:root{--bg:#0a0f1a;--panel:#0d1525;--card:#111d32;--border:#1e3050;--text:#e8edf5;--muted:#5a7a9a;--dim:#8ba5c0;--primary:#f59e0b;--accent:#3b82f6;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Segoe UI,PingFang SC,Microsoft YaHei,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+.result-screen{max-width:700px;margin:0 auto;padding:1.5rem}
+
+/* ── 主卡片 ── */
+.result-hero{background:var(--panel);border:1px solid var(--border);border-radius:22px;padding:2rem;text-align:center;margin-bottom:1.5rem;position:relative;overflow:hidden;animation:fadeUp 0.6s ease-out}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.result-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(245,158,11,0.12),transparent 70%);pointer-events:none}
+.hero-badge{display:inline-block;padding:0.3rem 1rem;border-radius:20px;font-size:0.7rem;font-weight:700;margin-bottom:1.2rem;letter-spacing:0.05em}
+.hero-animal{font-size:5rem;margin-bottom:0.5rem;animation:bounceIn 0.8s ease-out}
+@keyframes bounceIn{0%{transform:scale(0.3);opacity:0}60%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+.hero-name{font-size:2.5rem;font-weight:900;background:linear-gradient(90deg,#f59e0b,#fbbf24,#fcd34d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:0.3rem}
+.hero-rarity{margin-bottom:1rem}
+.hero-rarity .stars{font-size:1.1rem;letter-spacing:2px}
+.hero-match{font-size:0.85rem;color:var(--muted);margin-bottom:1.2rem}
+.hero-traits{display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.2rem}
+.trait-tag{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:0.25rem 0.7rem;font-size:0.72rem;color:var(--dim)}
+.hero-desc{font-size:0.88rem;color:var(--dim);line-height:1.9;max-width:480px;margin:0 auto;text-align:left}
+
+/* ── 详细解读 ── */
+.detail-section{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1.2rem}
+.section-title{font-size:0.72rem;font-weight:700;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border)}
+.detail-row{display:flex;gap:0.8rem;margin-bottom:0.8rem;align-items:flex-start}
+.detail-row:last-child{margin-bottom:0}
+.detail-icon{font-size:1.2rem;flex-shrink:0;margin-top:0.1rem}
+.detail-content{flex:1}
+.detail-label{font-size:0.72rem;color:var(--muted);margin-bottom:0.2rem}
+.detail-text{font-size:0.88rem;color:var(--dim);line-height:1.7}
+
+/* ── 匹配推荐 ── */
+.match-section{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1.2rem}
+.match-grid{display:flex;gap:0.8rem;flex-wrap:wrap;margin-top:1rem}
+.match-item{flex:1;min-width:100px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:0.8rem;text-align:center}
+.match-emoji{font-size:1.8rem;margin-bottom:0.3rem}
+.match-label{font-size:0.68rem;color:var(--muted)}
+.match-name{font-size:0.82rem;font-weight:700;color:var(--text);margin-top:0.2rem}
+
+/* ── 分享卡片 ── */
+.share-section{padding:1.5rem 0}
+.share-card-wrap{text-align:center;padding:1rem 0}
+.share-card{border-radius:18px;overflow:hidden;max-width:360px;margin:0 auto 1rem;box-shadow:0 8px 40px rgba(0,0,0,0.5);cursor:pointer;transition:transform 0.2s}
+.share-card:hover{transform:scale(1.02)}
+.sc-bg{min-height:500px;padding:1.5rem;display:flex;flex-direction:column;justify-content:space-between}
+.sc-overlay{min-height:500px;display:flex;flex-direction:column;justify-content:space-between}
+.sc-top{display:flex;justify-content:space-between;align-items:flex-start}
+.sc-badge{display:inline-block;padding:0.25rem 0.6rem;border-radius:12px;font-size:0.65rem;font-weight:700}
+.sc-animal{font-size:3.5rem;text-align:center;padding:1rem 0}
+.sc-name{font-size:1.8rem;font-weight:900;text-align:center;margin-bottom:0.3rem}
+.sc-rarity{text-align:center;margin-bottom:1rem}
+.sc-stars{letter-spacing:3px;font-size:0.9rem}
+.sc-match{font-size:0.8rem;text-align:center;margin-bottom:1rem}
+.sc-traits{display:flex;gap:0.4rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.2rem}
+.sc-trait{background:rgba(255,255,255,0.08);border-radius:12px;padding:0.2rem 0.5rem;font-size:0.65rem;color:rgba(255,255,255,0.7)}
+.sc-desc{font-size:0.75rem;color:rgba(255,255,255,0.6);line-height:1.7;text-align:left;flex:1;padding:0 0.3rem}
+.sc-footer{text-align:center;font-size:0.65rem;color:rgba(255,255,255,0.35);padding-top:0.8rem}
+.share-actions{display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap;margin-top:0.8rem}
+.share-btn{padding:0.6rem 1.4rem;border-radius:10px;border:none;font-size:0.85rem;cursor:pointer;font-weight:600;transition:opacity 0.2s}
+.share-btn:hover{opacity:0.85}
+.share-btn.save{background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#0a0f1a}
+.share-btn.wechat{background:#07c160;color:#fff}
+.share-btn.qr{background:var(--card);border:1px solid var(--border);color:var(--dim)}
+.share-qr-modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:1000;flex-direction:column;gap:1rem}
+.share-qr-modal.show{display:flex}
+.qr-box{background:var(--panel);border-radius:16px;padding:2rem;text-align:center;border:1px solid var(--border)}
+.qr-box p{margin:1rem 0 0;color:var(--muted);font-size:0.82rem}
+.qr-box button{margin-top:1rem;padding:0.5rem 1.5rem;background:#f59e0b;border:none;border-radius:8px;color:#0a0f1a;font-weight:700;cursor:pointer}
+
+/* ── 私域引流 ── */
+.traffic-section{background:linear-gradient(135deg,#0d1525,#111d32);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin:1.5rem auto;max-width:500px;text-align:center}
+.traffic-header{display:flex;align-items:center;justify-content:center;gap:0.5rem;margin-bottom:1rem}
+.traffic-icon{font-size:1.4rem}
+.traffic-title{font-size:1rem;font-weight:800;color:var(--text)}
+.traffic-entries{display:flex;flex-direction:column;gap:0.8rem;margin-bottom:1rem}
+.traffic-entry{display:flex;align-items:center;gap:0.8rem;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:0.8rem;text-align:left}
+.entry-icon{font-size:1.8rem;flex-shrink:0}
+.entry-info{flex:1}
+.entry-title{font-size:0.88rem;font-weight:700;color:var(--text);margin-bottom:0.15rem}
+.entry-desc{font-size:0.72rem;color:var(--muted)}
+.entry-qr img{width:56px;height:56px;border-radius:6px}
+.traffic-benefit{border-top:1px solid var(--border);padding-top:1rem}
+.benefit-item{font-size:0.78rem;color:var(--muted);margin-bottom:0.3rem;text-align:left}
+
+/* ── 其他动物 ── */
+.others-section{margin:1.5rem 0}
+.others-title{font-size:0.72rem;font-weight:700;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1rem;text-align:center}
+.others-grid{display:flex;gap:0.8rem;justify-content:center;flex-wrap:wrap}
+.other-card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:1rem;text-align:center;min-width:120px;flex:1;max-width:160px}
+.other-emoji{font-size:2rem;margin-bottom:0.3rem}
+.other-name{font-size:0.88rem;font-weight:700;color:var(--text)}
+.other-rarity{font-size:0.65rem;color:var(--muted)}
+
+/* ── BigFive雷达 ── */
+.bf-section{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1.2rem}
+.bf-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem}
+.bf-item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.8rem}
+.bf-label{font-size:0.7rem;color:var(--muted);margin-bottom:0.3rem;display:flex;justify-content:space-between}
+.bf-value{font-size:0.9rem;font-weight:700;color:var(--primary)}
+.bf-bar{height:4px;background:var(--border);border-radius:2px;margin-top:0.4rem;overflow:hidden}
+.bf-fill{height:100%;background:linear-gradient(90deg,#f59e0b,#fbbf24);border-radius:2px;transition:width 1s}
+.bf-names{display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:center;margin-bottom:1rem}
+.bf-mbti-badge{display:inline-block;background:linear-gradient(135deg,#3b82f6,#6366f1);padding:0.3rem 0.8rem;border-radius:8px;font-size:0.78rem;font-weight:700;color:#fff;letter-spacing:0.1em}
+
+/* ── 通用 ── */
+.disclaimer{font-size:0.72rem;color:var(--muted);text-align:center;line-height:1.8;padding:1rem 0;max-width:480px;margin:0 auto}
+.ad-container{margin:1.5rem auto;max-width:700px;text-align:center}
+</style>
+</head>
+<body>
+
+<div class="result-screen" id="resultScreen"></div>
+
+<div class="share-qr-modal" id="shareQRModal">
+  <div class="qr-box">
+    <canvas id="qrCanvas"></canvas>
+    <p>截图保存，发给朋友测试</p>
+    <button onclick="hideQR()">关闭</button>
+  </div>
+</div>
+
+<script src="animal_config.js"></script>
+
+<script>
+// ── 解析URL结果 ──
+function getResultFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  const encoded = params.get('r');
+  if (encoded) {
+    try {
+      return JSON.parse(atob(encoded));
+    } catch(e) {}
+  }
+  // 兜底：默认结果（演示用）
+  return getDefaultResult();
+}
+
+function getDefaultResult() {
+  const animal = cfg.animals[0];
+  return {
+    animalId: animal.id,
+    animal,
+    mbti: 'INTJ',
+    matchPercent: 87,
+    rarity: cfg.rarities[animal.rarity],
+    bfScores: { Openness: 75, Conscientiousness: 80, Extraversion: 40, Agreeableness: 60, Neuroticism: 25 },
+    secondAnimal: cfg.animals[1],
+    thirdAnimal: cfg.animals[2]
+  };
+}
+
+const cfg = window.ANIMAL_CONFIG;
+
+// ── 渲染结果 ──
+function renderResult(result) {
+  const { animal, matchPercent, rarity, secondAnimal, thirdAnimal, mbti, bfScores } = result;
+  const screen = document.getElementById('resultScreen');
+
+  const stars = '★'.repeat(rarity.stars) + '☆'.repeat(5 - rarity.stars);
+
+  // BigFive维度中文名
+  const BF_LABELS = {
+    Openness:'开放性', Conscientiousness:'尽责性',
+    Extraversion:'外向性', Agreeableness:'宜人性', Neuroticism:'神经质'
+  };
+
+  const bfBars = Object.entries(bfScores || {}).map(([dim, val]) => `
+    <div class="bf-item">
+      <div class="bf-label"><span>${BF_LABELS[dim] || dim}</span><span class="bf-value">${val}%</span></div>
+      <div class="bf-bar"><div class="bf-fill" style="width:${val}%"></div></div>
+    </div>
+  `).join('');
+
+  screen.innerHTML = `
+    <!-- 主卡片 -->
+    <div class="result-hero">
+      <span class="hero-badge" style="background:${rarity.gradient};color:#0a0f1a">${rarity.emoji} ${rarity.name}</span>
+      <div class="hero-animal">${animal.emoji}</div>
+      <div class="hero-name">${animal.name}</div>
+      <div class="hero-rarity">
+        <div class="stars" style="color:${rarity.color}">${stars}</div>
+      </div>
+      ${mbti ? `<div class="bf-names"><span class="bf-mbti-badge">${mbti}</span></div>` : ''}
+      <div class="hero-match">与该动物匹配度 ${matchPercent}%</div>
+      <div class="hero-traits">
+        ${animal.traits.map(t => `<span class="trait-tag">${t}</span>`).join('')}
+      </div>
+      <div class="hero-desc">${animal.description}</div>
+    </div>
+
+    <!-- BigFive五维 -->
+    <div class="bf-section">
+      <div class="section-title">Big Five 人格维度</div>
+      <div class="bf-grid">${bfBars}</div>
+    </div>
+
+    <!-- 详细解读 -->
+    <div class="detail-section">
+      <div class="section-title">性格解析</div>
+      <div class="detail-row">
+        <div class="detail-icon">💪</div>
+        <div class="detail-content">
+          <div class="detail-label">核心优势</div>
+          <div class="detail-text">${animal.strength}</div>
+        </div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-icon">⚡</div>
+        <div class="detail-content">
+          <div class="detail-label">潜在短板</div>
+          <div class="detail-text">${animal.weakness}</div>
+        </div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-icon">🔮</div>
+        <div class="detail-content">
+          <div class="detail-label">人生关键词</div>
+          <div class="detail-text">${animal.keyword}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 匹配推荐 -->
+    <div class="match-section">
+      <div class="section-title">动物匹配度</div>
+      <div class="match-grid">
+        ${secondAnimal ? `<div class="match-item"><div class="match-emoji">${secondAnimal.emoji}</div><div class="match-label">最佳搭档</div><div class="match-name">${secondAnimal.name}</div></div>` : ''}
+        ${thirdAnimal ? `<div class="match-item"><div class="match-emoji">${thirdAnimal.emoji}</div><div class="match-label">性格相近</div><div class="match-name">${thirdAnimal.name}</div></div>` : ''}
+      </div>
+    </div>
+
+    <!-- 广告位 -->
+    <div class="ad-container" id="adResultTop"></div>
+
+    <!-- 分享卡片 -->
+    <div class="share-section">
+      <div class="section-title" style="text-align:center;border-bottom:none;padding-bottom:0">🌟 分享你的动物人格</div>
+      <div class="share-card-wrap">
+        <div class="share-card" id="shareCard" onclick="downloadCard()">
+          <div class="sc-bg" style="background:${rarity.gradient}">
+            <div class="sc-overlay">
+              <div class="sc-top">
+                <span class="sc-badge" style="background:rgba(0,0,0,0.3);color:#fff">🐾 动物性格测试</span>
+                <span class="sc-badge" style="background:rgba(0,0,0,0.3);color:#fff">${rarity.emoji} ${rarity.name}</span>
+              </div>
+              <div class="sc-animal">${animal.emoji}</div>
+              <div class="sc-name" style="color:#fff">${animal.name}</div>
+              ${mbti ? `<div style="text-align:center;margin-bottom:0.5rem"><span style="background:rgba(255,255,255,0.2);padding:0.2rem 0.6rem;border-radius:6px;font-size:0.75rem;color:#fff;font-weight:700;letter-spacing:0.1em">${mbti}</span></div>` : ''}
+              <div class="sc-rarity"><div class="sc-stars" style="color:rgba(255,255,255,0.9)">${stars}</div></div>
+              <div class="sc-match" style="color:rgba(255,255,255,0.7)">匹配度 ${matchPercent}%</div>
+              <div class="sc-traits">${animal.traits.map(t => `<span class="sc-trait">${t}</span>`).join('')}</div>
+              <div class="sc-desc">${animal.description.substring(0, 80)}...</div>
+              <div class="sc-footer">长按识别二维码 → 测测你的动物人格</div>
+            </div>
+          </div>
+        </div>
+        <div class="share-actions">
+          <button class="share-btn save" onclick="event.stopPropagation();downloadCard()">📥 保存图片</button>
+          <button class="share-btn wechat" onclick="event.stopPropagation();showQR()">💬 分享微信</button>
+          <button class="share-btn qr" onclick="event.stopPropagation();showQR()">📱 二维码</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 私域引流 -->
+    <div class="traffic-section" id="trafficSection">
+      <div class="traffic-header">
+        <span class="traffic-icon">🔑</span>
+        <div class="traffic-title">解锁完整版动物分析</div>
+      </div>
+      <div class="traffic-entries">
+        <div class="traffic-entry">
+          <div class="entry-icon">📮</div>
+          <div class="entry-info">
+            <div class="entry-title">关注公众号</div>
+            <div class="entry-desc">回复【动物】获取完整性格报告</div>
+          </div>
+        </div>
+      </div>
+      <div class="traffic-benefit">
+        <div class="benefit-item">✓ 完整版动物人格分析</div>
+        <div class="benefit-item">✓ MBTI + BigFive 详细报告</div>
+        <div class="benefit-item">✓ 17种动物性格详解</div>
+        <div class="benefit-item">✓ 动物配对指数查询</div>
+      </div>
+    </div>
+
+    <!-- 广告位：底部 -->
+    <div class="ad-container" id="adResultBottom"></div>
+
+    <div class="disclaimer">
+      本测试仅供娱乐，请勿当真。<br>
+      © 动物性格测试 · MBTI × BigFive × 动物人格
+    </div>
+  `;
+
+  if (cfg.ads.enabled) {
+    const at = document.getElementById('adResultTop');
+    const ab = document.getElementById('adResultBottom');
+    const adHTML = '<div style="background:var(--card);border:1px dashed var(--border);border-radius:12px;padding:1rem;text-align:center;color:var(--muted);font-size:0.8rem;">广告位（配置 AdSense ID 启用）</div>';
+    if (at) at.innerHTML = adHTML;
+    if (ab) ab.innerHTML = adHTML;
+  }
+}
+
+function downloadCard() {
+  const card = document.getElementById('shareCard');
+  if (!card) return;
+  if (typeof html2canvas !== 'undefined') {
+    html2canvas(card, { scale: 2, backgroundColor: null }).then(canvas => {
+      const link = document.createElement('a');
+      link.download = `动物人格_${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+  } else {
+    alert('截图功能已就绪，长按卡片可直接保存');
+  }
+}
+
+function showQR() {
+  const modal = document.getElementById('shareQRModal');
+  if (!modal) return;
+  modal.classList.add('show');
+  const canvas = document.getElementById('qrCanvas');
+  if (canvas && typeof QRCode !== 'undefined') {
+    canvas.innerHTML = '';
+    new QRCode(canvas, {
+      text: window.location.href,
+      width: 180,
+      height: 180,
+      colorDark: "#ffffff",
+      colorLight: "#0d1525"
+    });
+  }
+}
+
+function hideQR() {
+  document.getElementById('shareQRModal').classList.remove('show');
+}
+
+// ── 启动 ──
+document.addEventListener('DOMContentLoaded', () => {
+  const result = getResultFromURL();
+  renderResult(result);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>动物性格测试</title>
+<style>
+:root{--bg:#0a0f1a;--panel:#0d1525;--card:#111d32;--border:#1e3050;--text:#e8edf5;--muted:#5a7a9a;--dim:#8ba5c0;--primary:#f59e0b;--accent:#3b82f6;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Segoe UI,PingFang SC,Microsoft YaHei,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* ── 封面 ── */
+#startScreen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem}
+.start-card{background:var(--panel);border:1px solid var(--border);border-radius:22px;padding:2.5rem 2rem;max-width:520px;width:100%;text-align:center;animation:fadeUp 0.6s ease-out}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.start-emoji{font-size:4rem;margin-bottom:1rem}
+.start-title{font-size:1.9rem;font-weight:900;background:linear-gradient(90deg,#f59e0b,#fbbf24,#fcd34d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:0.4rem}
+.start-subtitle{color:var(--muted);font-size:0.9rem;margin-bottom:1.5rem}
+.start-desc{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:left;color:var(--dim);font-size:0.82rem;line-height:1.9;margin-bottom:1.5rem}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin-bottom:1.5rem;text-align:left}
+.info-item{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:0.6rem 0.8rem}
+.info-n{font-size:0.68rem;color:var(--muted);margin-bottom:0.15rem}
+.info-v{font-size:0.88rem;font-weight:700;color:var(--primary)}
+.btn-group{display:flex;flex-direction:column;gap:0.6rem}
+.btn-start{background:linear-gradient(135deg,#f59e0b,#fbbf24);border:none;border-radius:12px;color:#0a0f1a;font-size:1rem;font-weight:800;cursor:pointer;padding:0.85rem 2rem;letter-spacing:0.03em;transition:opacity 0.2s,transform 0.1s;box-shadow:0 4px 20px rgba(245,158,11,0.3)}
+.btn-start:hover{opacity:0.9}
+.btn-start:active{transform:scale(0.97)}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:10px;padding:0.6rem 2rem;font-size:0.85rem;cursor:pointer;transition:all 0.15s}
+.btn-ghost:hover{background:var(--card);color:var(--text)}
+
+/* ── 答题页 ── */
+#quizScreen{display:none;min-height:100vh}
+.quiz-header{background:linear-gradient(135deg,#0d1525,#111d32);border-bottom:1px solid var(--border);padding:0.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;position:sticky;top:0;z-index:10}
+.qh-left{display:flex;align-items:center;gap:0.8rem}
+.qh-badge{background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:var(--primary);padding:0.2rem 0.6rem;border-radius:6px;font-size:0.68rem;font-weight:700}
+.qh-title{font-size:0.82rem;font-weight:700;color:var(--muted)}
+.progress-wrap{flex:1;max-width:400px}
+.pg-bar{height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.pg-fill{height:100%;background:linear-gradient(90deg,#f59e0b,#fbbf24);border-radius:3px;transition:width 0.4s}
+.pg-text{font-size:0.68rem;color:var(--muted);text-align:right;margin-top:0.18rem}
+.quiz-body{padding:1.8rem 1.5rem;max-width:700px;margin:0 auto}
+.q-block{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1rem;animation:fadeIn 0.3s ease-out}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.q-meta{font-size:0.68rem;color:var(--muted);margin-bottom:0.6rem;letter-spacing:0.05em}
+.q-text{font-size:0.98rem;color:var(--text);line-height:1.75;margin-bottom:1.1rem;font-weight:600}
+.q-opts{display:flex;flex-direction:column;gap:0.5rem}
+.q-opt{display:flex;align-items:center;gap:0.8rem;padding:0.7rem 1rem;border:1px solid var(--border);background:var(--card);border-radius:10px;color:var(--dim);font-size:0.88rem;cursor:pointer;transition:all 0.15s;user-select:none}
+.q-opt:hover{border-color:var(--primary);color:var(--text);background:rgba(245,158,11,0.05)}
+.q-opt.selected{border-color:var(--primary);background:rgba(245,158,11,0.12);color:var(--primary);font-weight:600}
+.q-opt .ol{font-size:1.1rem;font-weight:800;flex-shrink:0;width:28px;text-align:center;opacity:0.6}
+.q-opt.selected .ol{opacity:1}
+.nav-row{display:flex;gap:0.5rem;justify-content:flex-end;margin-top:1.2rem;padding-top:1rem;border-top:1px solid var(--border)}
+.btn-next{padding:0.65rem 2.2rem;background:linear-gradient(135deg,#f59e0b,#fbbf24);border:none;border-radius:10px;color:#0a0f1a;font-size:0.9rem;font-weight:800;cursor:pointer;transition:opacity 0.2s;box-shadow:0 2px 12px rgba(245,158,11,0.2)}
+.btn-next:hover{opacity:0.88}
+.btn-next:disabled{opacity:0.35;cursor:not-allowed}
+.btn-back{padding:0.65rem 1.2rem;background:#111d32;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:0.9rem;cursor:pointer;transition:all 0.15s}
+.btn-back:hover{background:#1e3050;color:var(--text)}
+
+/* ── 加载页 ── */
+#loadingScreen{display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;padding:2rem}
+.loading-emoji{font-size:3rem;animation:bounce 1s infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.loading-text{color:var(--muted);font-size:0.9rem;margin-top:1rem;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+</style>
+</head>
+<body>
+
+<!-- 封面 -->
+<div id="startScreen">
+  <div class="start-card">
+    <div class="start-emoji">🐾</div>
+    <h1 class="start-title">动物性格测试</h1>
+    <p class="start-subtitle">MBTI已过时，动物人格才是新潮流</p>
+    <div class="start-desc">
+      基于 <strong>MBTI</strong> + <strong>Big Five</strong> 双维度人格理论，结合东方动物哲学全新设计。<br><br>
+      不同动物有不同性格——<strong>龙的威严、狐狸的机智、考拉的淡定</strong>。<br>
+      38道题，揭开你内心最真实的动物面孔。
+    </div>
+    <div class="info-grid">
+      <div class="info-item"><div class="info-n">题目数</div><div class="info-v">38题</div></div>
+      <div class="info-item"><div class="info-n">预计用时</div><div class="info-v">5-8分钟</div></div>
+      <div class="info-item"><div class="info-n">结果类型</div><div class="info-v">17种动物</div></div>
+      <div class="info-item"><div class="info-n">稀有度</div><div class="info-v">4级掉落</div></div>
+    </div>
+    <div class="btn-group">
+      <button class="btn-start" onclick="startQuiz()">🐾 开始测试</button>
+      <button class="btn-ghost" onclick="startQuiz()">好奇试试</button>
+    </div>
+  </div>
+</div>
+
+<!-- 答题页 -->
+<div id="quizScreen">
+  <div class="quiz-header">
+    <div class="qh-left">
+      <span class="qh-badge">MBTI × Big5</span>
+      <span class="qh-title">🐾 动物性格测试</span>
+    </div>
+    <div class="progress-wrap">
+      <div class="pg-bar"><div class="pg-fill" id="pgFill" style="width:0%"></div></div>
+      <div class="pg-text" id="pgText">0 / 38</div>
+    </div>
+    <button class="btn-back" onclick="confirmExit()">退出</button>
+  </div>
+  <div class="quiz-body" id="quizBody"></div>
+</div>
+
+<!-- 加载页 -->
+<div id="loadingScreen">
+  <div class="loading-emoji">🐾</div>
+  <div class="loading-text">正在分析你的动物人格...</div>
+</div>
+
+<script src="animal_config.js"></script>
+<script>
+const cfg = ANIMAL_CONFIG;
+const QUESTIONS = cfg.questions;
+
+let currentQ = 0;
+let answers = {};
+const total = QUESTIONS.length;
+
+// MBTI字母计分
+// dim E/I, N/S, F/T, J/P: 高分→第一字母，低分→第二字母
+// BigFive五维: 算百分比
+const mbti_dims = ['E','N','F','J']; // 阳性维度(高分显示第一字母)
+const bf_dims = ['Openness','Conscientiousness','Extraversion','Agreeableness','Neuroticism'];
+
+function startQuiz() {
+  document.getElementById('startScreen').style.display = 'none';
+  document.getElementById('quizScreen').style.display = 'block';
+  showQuestion(0);
+}
+
+function showQuestion(index) {
+  currentQ = index;
+  const q = QUESTIONS[index];
+  const body = document.getElementById('quizBody');
+
+  document.getElementById('pgFill').style.width = ((index + 1) / total * 100) + '%';
+  document.getElementById('pgText').textContent = `${index + 1} / ${total}`;
+
+  body.innerHTML = `
+    <div class="q-block">
+      <div class="q-meta">${q.section} · 第${index + 1}题</div>
+      <div class="q-text">${q.text}</div>
+      <div class="q-opts">
+        ${q.opts.map((o, i) => `
+          <div class="q-opt" onclick="selectOpt(${i}, ${o.s})">
+            <span class="ol">${o.l}</span>
+            <span>${o.t}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    <div class="nav-row">
+      ${index > 0 ? '<button class="btn-back" onclick="prevQ()">上一题</button>' : ''}
+      <button class="btn-next" id="nextBtn" onclick="nextQ()" disabled>${index === total - 1 ? '🔮 查看结果' : '下一题 →'}</button>
+    </div>
+  `;
+
+  // 恢复已选
+  if (answers[index] !== undefined) {
+    const saved = answers[index].score;
+    const opts = document.querySelectorAll('.q-opt');
+    opts.forEach((opt, i) => {
+      if (q.opts[i].s === saved) opt.classList.add('selected');
+    });
+    document.getElementById('nextBtn').disabled = false;
+  }
+}
+
+function selectOpt(index, score) {
+  answers[currentQ] = { score, index };
+  const opts = document.querySelectorAll('.q-opt');
+  opts.forEach((o, i) => o.classList.toggle('selected', i === index));
+  document.getElementById('nextBtn').disabled = false;
+}
+
+function nextQ() {
+  if (currentQ < total - 1) showQuestion(currentQ + 1);
+  else showResult();
+}
+
+function prevQ() {
+  if (currentQ > 0) showQuestion(currentQ - 1);
+}
+
+function confirmExit() {
+  if (confirm('确定退出吗？进度将不会保存。')) {
+    document.getElementById('quizScreen').style.display = 'none';
+    document.getElementById('startScreen').style.display = 'flex';
+  }
+}
+
+// ══════════════════════════════════════
+//  计分引擎：MBTI + BigFive → 动物
+// ══════════════════════════════════════
+function calcResult() {
+  // 1. 分别累计各维度总分和题数
+  const mbti_scores = { E:0, I:0, N:0, S:0, F:0, T:0, J:0, P:0 };
+  const mbti_counts = { E:0, I:0, N:0, S:0, F:0, T:0, J:0, P:0 };
+  const bf_scores  = { Openness:0, Conscientiousness:0, Extraversion:0, Agreeableness:0, Neuroticism:0 };
+  const bf_counts  = { Openness:0, Conscientiousness:0, Extraversion:0, Agreeableness:0, Neuroticism:0 };
+
+  QUESTIONS.forEach((q, qi) => {
+    const ans = answers[qi];
+    if (!ans) return;
+    const s = ans.score;
+
+    if (q.type === 'mbti') {
+      // E/I维度：E=高分(4,5), I=低分(1,2)
+      // N/S维度：N=高分(4,5), S=低分(1,2)
+      // F/T维度：F=高分(4,5), T=低分(1,2)
+      // J/P维度：J=高分(4,5), P=低分(1,2)
+      const dim = q.dim; // 'E','N','F','J'
+      if (s >= 4) { mbti_scores[dim] += s; mbti_counts[dim]++; }
+      else if (s <= 2) {
+        const opposite = {E:'I',N:'S',F:'T',J:'P'}[dim];
+        mbti_scores[opposite] += (6 - s); mbti_counts[opposite]++;
+      } else { mbti_scores[dim] += s; mbti_counts[dim]++; }
+    } else if (q.type === 'bf') {
+      bf_scores[q.dim] += s; bf_counts[q.dim]++;
+    }
+  });
+
+  // 2. 算百分比
+  const bf_pct = {};
+  bf_dims.forEach(d => {
+    bf_pct[d] = bf_counts[d] > 0 ? Math.round((bf_scores[d] / (bf_counts[d] * 5)) * 100) : 50;
+  });
+
+  // MBTI字母
+  const mbti = ['E','N','F','J'].map(d => {
+    const pos = mbti_scores[d];
+    const neg = {E:'I',N:'S',F:'T',J:'P'}[d];
+    const neg_score = mbti_scores[neg];
+    return pos >= neg_score ? d : {E:'I',N:'S',F:'T',J:'P'}[d];
+  }).join('');
+
+  // 3. 用BigFive五维找最匹配的动物
+  let bestAnimal = null;
+  let bestSimilarity = -1;
+
+  cfg.animals.forEach(animal => {
+    const p = animal.profile;
+    let sim = 0;
+    bf_dims.forEach(d => {
+      const diff = Math.abs(bf_pct[d] - (p[d] || 50));
+      sim += (100 - diff);
+    });
+    sim = sim / bf_dims.length; // 0-100
+    if (sim > bestSimilarity) {
+      bestSimilarity = sim;
+      bestAnimal = animal;
+    }
+  });
+
+  // 4. 稀有度：根据匹配度 + 动物本身稀有度综合决定
+  const matchPercent = Math.round(bestSimilarity);
+  const rarity = bestAnimal.rarity;
+
+  // 5. 找次要动物
+  const sorted = cfg.animals.map(a => {
+    const p = a.profile;
+    let sim = 0;
+    bf_dims.forEach(d => { sim += (100 - Math.abs(bf_pct[d] - (p[d]||50))); });
+    return { animal: a, sim: sim / bf_dims.length };
+  }).sort((a,b) => b.sim - a.sim);
+
+  return {
+    animalId: bestAnimal.id,
+    animal: bestAnimal,
+    mbti,
+    matchPercent,
+    rarity: cfg.rarities[rarity],
+    bfScores: bf_pct,
+    secondAnimal: sorted[1] ? sorted[1].animal : null,
+    thirdAnimal: sorted[2] ? sorted[2].animal : null,
+    allDimensions: bf_pct
+  };
+}
+
+function showResult() {
+  document.getElementById('quizScreen').style.display = 'none';
+  document.getElementById('loadingScreen').style.display = 'flex';
+
+  setTimeout(() => {
+    const result = calcResult();
+    const encoded = btoa(JSON.stringify(result));
+    window.location.href = `animal_result.html?r=${encoded}`;
+  }, 1800);
+}
+</script>
+</body>
+</html>

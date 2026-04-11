@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SBTI人格测试 - 结果</title>
+<!-- 第三方库：二维码 + 截图 -->
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<style>
+:root{--bg:#0f0f1a;--panel:#13132a;--card:#1a1a2e;--border:#2d2d4a;--text:#e2e8f0;--muted:#64748b;--dim:#94a3b8;--primary:#3b82f6;--accent:#9333ea;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Segoe UI,PingFang SC,Microsoft YaHei,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.result-screen{max-width:700px;margin:0 auto;padding:1.5rem}
+
+/* ========== 主类型卡片 ========== */
+.result-hero{background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid var(--border);border-radius:20px;padding:2rem;text-align:center;margin-bottom:1.5rem;position:relative;overflow:hidden}
+.result-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(59,130,246,0.15),transparent 70%);pointer-events:none}
+.hero-badge{display:inline-block;background:linear-gradient(135deg,#3b82f6,#9333ea);padding:0.3rem 1rem;border-radius:20px;font-size:0.7rem;font-weight:700;margin-bottom:1rem;letter-spacing:0.05em}
+.hero-type{font-size:3.5rem;font-weight:900;background:linear-gradient(90deg,#60a5fa,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.1;margin-bottom:0.3rem}
+.hero-name{font-size:1.2rem;font-weight:700;color:var(--text);margin-bottom:0.3rem}
+.hero-match{font-size:0.85rem;color:var(--muted);margin-bottom:1.5rem}
+.hero-desc{font-size:0.88rem;color:var(--dim);line-height:1.8;max-width:480px;margin:0 auto}
+
+/* ========== 十五维度评分 ========== */
+.dimensions-section{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem}
+.section-title{font-size:0.75rem;font-weight:700;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border)}
+.dim-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem}
+.dim-item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:0.8rem}
+.dim-label{font-size:0.7rem;color:var(--muted);margin-bottom:0.3rem}
+.dim-value{font-size:1.2rem;font-weight:800;color:var(--primary)}
+.dim-bar{height:4px;background:var(--border);border-radius:2px;margin-top:0.4rem;overflow:hidden}
+.dim-fill{height:100%;background:linear-gradient(90deg,#3b82f6,#9333ea);border-radius:2px;transition:width 1s}
+
+/* ========== 结果解读 ========== */
+.interpretation{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem}
+.interpretation p{font-size:0.88rem;color:var(--dim);line-height:1.9;margin-bottom:0.8rem}
+.interpretation p:last-child{margin-bottom:0}
+
+/* ========== 裂变分享 ========== */
+.share-section{padding:1.5rem 0}
+
+/* ========== 私域引流 ========== */
+.traffic-section{background:linear-gradient(135deg,#1a1a2e,#13132a);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin:1.5rem auto;max-width:500px;text-align:center}
+.traffic-header{display:flex;align-items:center;justify-content:center;gap:0.5rem;margin-bottom:1.2rem}
+.traffic-icon{font-size:1.4rem}
+.traffic-title{font-size:1rem;font-weight:800;color:#e2e8f0}
+.traffic-entries{display:flex;flex-direction:column;gap:0.8rem;margin-bottom:1.2rem}
+.traffic-entry{display:flex;align-items:center;gap:0.8rem;background:#0f0f1a;border:1px solid #2d2d4a;border-radius:12px;padding:0.8rem;text-align:left}
+.entry-icon{font-size:1.8rem;flex-shrink:0}
+.entry-info{flex:1}
+.entry-title{font-size:0.88rem;font-weight:700;color:#e2e8f0;margin-bottom:0.15rem}
+.entry-desc{font-size:0.72rem;color:#64748b}
+.entry-qr img{width:56px;height:56px;border-radius:6px}
+.traffic-benefit{border-top:1px solid #2d2d4a;padding-top:1rem}
+.benefit-item{font-size:0.78rem;color:#94a3b8;margin-bottom:0.3rem;text-align:left}
+
+/* ========== 分享卡片 ========== */
+.share-card-wrap{text-align:center;padding:1rem 0}
+.share-card{border-radius:16px;overflow:hidden;max-width:360px;margin:0 auto 1rem;box-shadow:0 8px 32px rgba(0,0,0,0.4)}
+.sc-bg{min-height:480px;background:linear-gradient(135deg,#1a1a2e,#0f0f1a);padding:1.5rem;display:flex;flex-direction:column;justify-content:space-between}
+.sc-overlay{min-height:480px;display:flex;flex-direction:column;justify-content:space-between}
+.sc-badge{display:inline-block;background:linear-gradient(135deg,#3b82f6,#9333ea);padding:0.3rem 0.8rem;border-radius:20px;font-size:0.7rem;font-weight:700;width:fit-content}
+.sc-result{text-align:center;padding:2rem 0}
+.sc-type{font-size:2.5rem;font-weight:900;background:linear-gradient(90deg,#60a5fa,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:0.5rem}
+.sc-match{font-size:0.9rem;color:#94a3b8}
+.sc-dimensions{padding:0.5rem 0}
+.sc-dim-row{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem}
+.sc-dim-name{font-size:0.7rem;color:#94a3b8;width:60px;text-align:left}
+.sc-dim-bar{flex:1;height:4px;background:rgba(255,255,255,0.1);border-radius:2px}
+.sc-dim-fill{height:100%;background:linear-gradient(90deg,#3b82f6,#9333ea);border-radius:2px}
+.sc-footer{text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.5)}
+.share-actions{display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap}
+.share-btn{padding:0.6rem 1.2rem;border-radius:10px;border:none;font-size:0.85rem;cursor:pointer;font-weight:600;transition:opacity 0.2s}
+.share-btn:hover{opacity:0.85}
+.share-btn.save{background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff}
+.share-btn.wechat{background:#07c160;color:#fff}
+.share-btn.qr{background:#1a1a2e;border:1px solid #2d2d4a;color:#94a3b8}
+.share-qr-modal{position:fixed;inset:0;background:rgba(0,0,0,0.8);display:none;align-items:center;justify-content:center;z-index:1000}
+.share-qr-modal.show{display:flex}
+.qr-box{background:#13132a;border-radius:16px;padding:2rem;text-align:center}
+.qr-box canvas{border-radius:8px}
+.qr-box p{margin:1rem 0;color:#94a3b8;font-size:0.85rem}
+.qr-box button{padding:0.5rem 1.5rem;background:#3b82f6;border:none;border-radius:8px;color:#fff;cursor:pointer}
+
+/* ========== 广告 ========== */
+.ad-container{margin:1.5rem auto;max-width:700px;text-align:center}
+
+/* ========== 通用 ========== */
+.disclaimer{font-size:0.72rem;color:var(--muted);text-align:center;line-height:1.8;padding:1rem 0;max-width:480px;margin:0 auto}
+</style>
+</head>
+<body>
+
+<div class="result-screen" id="resultScreen">
+  <!-- 由JS动态填充 -->
+</div>
+
+<!-- 分享模态框 -->
+<div class="share-qr-modal" id="shareQRModal">
+  <div class="qr-box">
+    <div id="qrContainer"></div>
+    <p>截图保存，发给朋友</p>
+    <button onclick="hideQRModal()">关闭</button>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="engine.js"></script>
+<script src="share.js"></script>
+<script src="traffic.js"></script>
+<script src="ads.js"></script>
+<script>
+/**
+ * 从URL参数获取结果数据
+ * ?type=INTJ&match=92&scores=...
+ */
+function getResultFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  const type = params.get('type') || 'CTRL';
+  const match = parseInt(params.get('match') || '80');
+  const scores = params.get('scores');
+
+  let allDimensions = { Energy: 0, Awareness: 0, Decision: 0, Execution: 0, Openness: 0, Conscientiousness: 0, Extraversion: 0, Agreeableness: 0, Neuroticism: 0 };
+  if (scores) {
+    try {
+      allDimensions = JSON.parse(atob(scores));
+    } catch(e) {}
+  }
+
+  return { type, matchPercent: match, allDimensions };
+}
+
+function renderResult(result) {
+  const screen = document.getElementById('resultScreen');
+  const { type, matchPercent, allDimensions } = result;
+
+  // 主类型卡片
+  const mainDims = ['Energy','Awareness','Decision','Execution'].map(d => ({
+    name: d,
+    value: allDimensions[d] || 0
+  }));
+  const bfDims = ['Openness','Conscientiousness','Extraversion','Agreeableness','Neuroticism'].map(d => ({
+    name: d,
+    value: allDimensions[d] || 0
+  }));
+
+  screen.innerHTML = `
+    <div class="result-hero">
+      <span class="hero-badge">SBTI 人格类型</span>
+      <div class="hero-type">${type}</div>
+      <div class="hero-match">与该类型匹配度 ${matchPercent}%</div>
+      <div class="hero-desc" id="resultDesc">正在加载人格解读...</div>
+    </div>
+
+    <!-- SBTI四维度 -->
+    <div class="dimensions-section">
+      <div class="section-title">SBTI 四维度</div>
+      <div class="dim-grid">
+        ${mainDims.map(d => `
+          <div class="dim-item">
+            <div class="dim-label">${d.name}</div>
+            <div class="dim-value">${d.value}%</div>
+            <div class="dim-bar"><div class="dim-fill" style="width:${d.value}%"></div></div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- BigFive五维度 -->
+    <div class="dimensions-section">
+      <div class="section-title">Big Five 人格维度</div>
+      <div class="dim-grid">
+        ${bfDims.map(d => `
+          <div class="dim-item">
+            <div class="dim-label">${d.name}</div>
+            <div class="dim-value">${d.value}%</div>
+            <div class="dim-bar"><div class="dim-fill" style="width:${d.value}%"></div></div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- 结果解读 -->
+    <div class="interpretation">
+      <div class="section-title">人格解读</div>
+      <p id="interpText">你是典型的${type}类型——富有洞察力、追求完美、又带着一点控制欲。世界已经够乱了，起码把日子过好。</p>
+    </div>
+
+    <!-- 广告位：结果页顶部 -->
+    <div class="ad-container" id="adResultTop"></div>
+
+    <!-- 裂变分享 -->
+    <div class="share-section">
+      <div class="section-title" style="text-align:center;padding-bottom:0.5rem;border-bottom:none">🌟 分享你的结果</div>
+      <div id="shareContainer"></div>
+    </div>
+
+    <!-- 私域引流 -->
+    <div id="trafficContainer"></div>
+
+    <!-- 广告位：结果页底部 -->
+    <div class="ad-container" id="adResultBottom"></div>
+
+    <div class="disclaimer">
+      本测试仅供娱乐，别拿它当诊断、面试、相亲、分手、招魂、算命或人生判决书。<br>
+      © SBTI Framework - 换题库5分钟上线
+    </div>
+  `;
+
+  // 渲染分享卡片
+  const shareContainer = document.getElementById('shareContainer');
+  shareManager.renderShareCard(result, shareContainer);
+
+  // 渲染私域引流
+  const trafficContainer = document.getElementById('trafficContainer');
+  trafficManager.render(trafficContainer, result);
+
+  // 插入广告
+  adManager.init();
+  adManager.showAd(document.querySelector('#adResultTop'), 'resultTop');
+  adManager.showAd(document.querySelector('#adResultBottom'), 'resultBottom');
+}
+
+// 全局实例
+const shareManager = new ShareManager(CONFIG);
+const trafficManager = new TrafficManager(CONFIG);
+const adManager = new AdManager(CONFIG);
+
+function hideQRModal() {
+  document.getElementById('shareQRModal').classList.remove('show');
+}
+
+// 启动
+document.addEventListener('DOMContentLoaded', () => {
+  const result = getResultFromURL();
+  renderResult(result);
+});
+</script>
+
+<!-- 
+  使用说明：
+  1. 把 config.js 放到同目录，配置题库/广告/引流
+  2. 用法1（独立页面）：result.html?type=INTJ&match=92&scores=BASE64(JSON)
+  3. 用法2（嵌入）：result.html#result（由父页面控制渲染）
+  4. 部署：直接扔到 Vercel / 任意静态托管
+-->
+</body>
+</html>

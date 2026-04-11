@@ -289,8 +289,11 @@ function showResult() {
 
   setTimeout(() => {
     const result = calcResult();
-    const encoded = btoa(JSON.stringify(result));
-    window.location.href = `animal_result.html?r=${encoded}`;
+    // 用 sessionStorage 传递，不走 URL
+    try {
+      sessionStorage.setItem('animal_result', JSON.stringify(result));
+    } catch(e) {}
+    window.location.href = 'animal_result.html';
   }, 1800);
 }
 </script>

@@ -131,8 +131,18 @@ body{font-family:Segoe UI,PingFang SC,Microsoft YaHei,sans-serif;background:var(
 <script src="animal_config.js"></script>
 
 <script>
-// ── 解析URL结果 ──
+// ── 解析结果（优先 sessionStorage，兜底 URL）──
 function getResultFromURL() {
+  // 优先从 sessionStorage 读取
+  try {
+    const stored = sessionStorage.getItem('animal_result');
+    if (stored) {
+      sessionStorage.removeItem('animal_result');
+      return JSON.parse(stored);
+    }
+  } catch(e) {}
+
+  // 兜底：从 URL 参数读取
   const params = new URLSearchParams(window.location.search);
   const encoded = params.get('r');
   if (encoded) {
@@ -140,7 +150,6 @@ function getResultFromURL() {
       return JSON.parse(atob(encoded));
     } catch(e) {}
   }
-  // 兜底：默认结果（演示用）
   return getDefaultResult();
 }
 

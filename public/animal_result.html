@@ -196,7 +196,7 @@ function getDefaultResult() {
   };
 }
 
-const cfg = window.ANIMAL_CONFIG || { animals: [{id:'fox',name:'狐狸',emoji:'🦊',rarity:'common',traits:['聪明','灵活'],description:'狐狸',strength:'聪明',weakness:'有时狡猾',bestMatch:[],worstMatch:[],profile:{Openness:70,Conscientiousness:60,Extraversion:65,Agreeableness:55,Neuroticism:45}}], rarities: { common:{name:'普通',stars:1,color:'#888'}, rare:{name:'稀有',stars:3,color:'#4ade80'}, epic:{name:'史诗',stars:4,color:'#a78bfa'}, legendary:{name:'传说',stars:5,color:'#fbbf24'} } };
+var cfg = window.ANIMAL_CONFIG || { animals: [{id:'fox',name:'狐狸',emoji:'🦊',rarity:'common',traits:['聪明','灵活'],description:'狐狸',strength:'聪明',weakness:'有时狡猾',bestMatch:[],worstMatch:[],profile:{Openness:70,Conscientiousness:60,Extraversion:65,Agreeableness:55,Neuroticism:45}, share:{quizUrl:'https://www.fbti.net'}}], rarities: { common:{name:'普通',stars:1,color:'#888'}, rare:{name:'稀有',stars:3,color:'#4ade80'}, epic:{name:'史诗',stars:4,color:'#a78bfa'}, legendary:{name:'传说',stars:5,color:'#fbbf24'} }, share:{quizUrl:'https://www.fbti.net'}, ads:{enabled:false} };
 
 // ── 渲染结果 ──
 function renderResult(result) {
@@ -305,7 +305,7 @@ function renderResult(result) {
               <div class="sc-match" style="color:rgba(255,255,255,0.7)">匹配度 ${matchPercent}%</div>
               <div class="sc-traits">${animal.traits.map(t => `<span class="sc-trait">${t}</span>`).join('')}</div>
               <div class="sc-desc">${(animal.description||'').substring(0, 80)}...</div>
-              <div class="sc-url">🔗 <span id="scQuizUrl">${cfg.share.quizUrl}</span></div>
+              <div class="sc-url">🔗 <span id="scQuizUrl">${(cfg && cfg.share && cfg.share.quizUrl) || 'https://www.fbti.net'}</span></div>
               <div class="sc-footer">长按识别二维码 → 测测你的动物人格</div>
             </div>
           </div>

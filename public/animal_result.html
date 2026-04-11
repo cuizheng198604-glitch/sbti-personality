@@ -64,7 +64,8 @@ body{font-family:Segoe UI,PingFang SC,Microsoft YaHei,sans-serif;background:var(
 .sc-traits{display:flex;gap:0.4rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.2rem}
 .sc-trait{background:rgba(255,255,255,0.08);border-radius:12px;padding:0.2rem 0.5rem;font-size:0.65rem;color:rgba(255,255,255,0.7)}
 .sc-desc{font-size:0.75rem;color:rgba(255,255,255,0.6);line-height:1.7;text-align:left;flex:1;padding:0 0.3rem}
-.sc-footer{text-align:center;font-size:0.65rem;color:rgba(255,255,255,0.35);padding-top:0.8rem}
+.sc-url{text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.7);padding:0.5rem 0.3rem;background:rgba(0,0,0,0.2);border-radius:8px;margin:0.5rem 0.3rem;letter-spacing:0.02em;word-break:break-all}
+.sc-footer{text-align:center;font-size:0.65rem;color:rgba(255,255,255,0.35);padding-top:0.4rem}
 .share-actions{display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap;margin-top:0.8rem}
 .share-btn{padding:0.6rem 1.4rem;border-radius:10px;border:none;font-size:0.85rem;cursor:pointer;font-weight:600;transition:opacity 0.2s}
 .share-btn:hover{opacity:0.85}
@@ -88,6 +89,7 @@ body{font-family:Segoe UI,PingFang SC,Microsoft YaHei,sans-serif;background:var(
 .ad-overlay-qr{background:#fff;border-radius:8px;padding:0.8rem;display:inline-block}
 .ad-overlay-btn{display:block;width:100%;padding:0.7rem;background:linear-gradient(135deg,#f59e0b,#fbbf24);border:none;border-radius:10px;color:#0a0f1a;font-size:0.9rem;font-weight:700;cursor:pointer;margin-top:1rem}
 .ad-overlay-note{font-size:0.7rem;color:#5a7a9a;margin-top:0.8rem}
+.ad-overlay-url{background:#1a1a2e;border:1px solid #3b82f6;border-radius:8px;padding:0.6rem 0.8rem;font-size:0.78rem;color:#60a5fa;word-break:break-all;cursor:pointer;text-align:center;margin:0.5rem 0}
 
 /* ── 结果页广告 ── */
 .result-ad{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;display:flex;align-items:center;gap:0.8rem}
@@ -296,6 +298,7 @@ function renderResult(result) {
               <div class="sc-match" style="color:rgba(255,255,255,0.7)">匹配度 ${matchPercent}%</div>
               <div class="sc-traits">${animal.traits.map(t => `<span class="sc-trait">${t}</span>`).join('')}</div>
               <div class="sc-desc">${(animal.description||'').substring(0, 80)}...</div>
+              <div class="sc-url">🔗 <span id="scQuizUrl">${cfg.share.quizUrl}</span></div>
               <div class="sc-footer">长按识别二维码 → 测测你的动物人格</div>
             </div>
           </div>
@@ -400,9 +403,10 @@ function showAdOverlay(type) {
     `;
     overlay.classList.add('show');
     // 生成二维码
-    setTimeout(() => {
-      const target = document.getElementById('qrTarget');
-      if (target) { target.innerHTML = ''; new QRCode(target, { text: window.location.href, width: 160, height: 160, colorDark: "#000000", colorLight: "#ffffff" }); }
+    setTimeout(function() {
+      var target = document.getElementById('qrTarget');
+      var quizUrl = cfg.share.quizUrl;
+      if (target && typeof QRCode !== 'undefined') { target.innerHTML = ''; new QRCode(target, { text: quizUrl, width: 160, height: 160, colorDark: "#000000", colorLight: "#ffffff" }); }
     }, 50);
   } else if (type === 'save') {
     content.innerHTML = `
@@ -414,22 +418,39 @@ function showAdOverlay(type) {
     overlay.classList.add('show');
   } else if (type === 'wechat') {
     content.innerHTML = `
-      <div class="ad-overlay-title">💬 分享到微信</div>
-      <div class="ad-overlay-desc">关注公众号，回复【动物】获取完整报告</div>
-      <div class="ad-overlay-qr" id="qrTarget2"></div>
-      <button class="ad-overlay-btn" onclick="closeAdOverlay()">我知道了</button>
-      <div class="ad-overlay-note">截图保存图片，发给好友或发朋友圈</div>
+      <div class="ad-overlay-title">💬 分享给好友</div>
+      <div class="ad-overlay-desc">复制链接发给好友</div>
+      <div class="ad-overlay-url" id="shareUrlText">${cfg.share.quizUrl}</div>
+      <button class="ad-overlay-btn" onclick="copyShareUrl()">📋 复制链接</button>
+      <div style="margin-top:0.8rem">
+        <div class="ad-overlay-qr" id="qrTarget2"></div>
+      </div>
+      <div class="ad-overlay-note">长按二维码保存图片发朋友圈</div>
     `;
     overlay.classList.add('show');
-    setTimeout(() => {
-      const target = document.getElementById('qrTarget2');
-      if (target) { target.innerHTML = ''; new QRCode(target, { text: window.location.href, width: 160, height: 160, colorDark: "#000000", colorLight: "#ffffff" }); }
+    setTimeout(function() {
+      var target = document.getElementById('qrTarget2');
+      var quizUrl = cfg.share.quizUrl;
+      if (target && typeof QRCode !== 'undefined') { target.innerHTML = ''; new QRCode(target, { text: quizUrl, width: 140, height: 140, colorDark: "#000000", colorLight: "#ffffff" }); }
     }, 50);
   }
 }
 
 function closeAdOverlay() {
   document.getElementById('adOverlay').classList.remove('show');
+}
+
+function copyShareUrl() {
+  var url = cfg.share.quizUrl || document.getElementById('shareUrlText').textContent;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(function() {
+      alert('链接已复制！粘贴发送给好友');
+    }).catch(function() {
+      prompt('链接：', url);
+    });
+  } else {
+    prompt('链接（Ctrl+C复制）：', url);
+  }
 }
 
 function downloadCard() {

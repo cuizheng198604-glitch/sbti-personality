@@ -226,6 +226,8 @@ const ANIMAL_CONFIG = {
   // ==================== 分享配置 ====================
   share: {
     enabled: true,
+    // 答题链接（显示在分享卡片上，用户可复制）
+    quizUrl: "https://fbti-new.onrender.com/animal_quiz.html",
     card: {
       background:"", fallbackGradient:"linear-gradient(135deg, #0d1525 0%, #0a0f1a 100%)",
       title:"我的动物人格是【{name}】{emoji}，你也来测！",

@@ -6,8 +6,6 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'sbti-admin-2026';
-
-// 静态文件目录（优先环境变量，fallback到项目根目录）
 const STATIC_DIR = process.env.STATIC_DIR || path.join(process.cwd(), 'public');
 const DATA_DIR = process.env.RENDER_DISK_PATH || '/tmp';
 const DATA_FILE = path.join(DATA_DIR, 'animal_results.json');
@@ -15,7 +13,7 @@ const DATA_FILE = path.join(DATA_DIR, 'animal_results.json');
 console.log('STATIC_DIR:', STATIC_DIR);
 console.log('DATA_FILE:', DATA_FILE);
 
-let results = [];
+var results = [];
 
 function loadResults() {
   try {
@@ -25,6 +23,7 @@ function loadResults() {
     }
   } catch (e) {
     console.log('Load error: ' + e.message);
+    results = [];
   }
 }
 
@@ -40,21 +39,26 @@ loadResults();
 
 app.use(cors({ origin: '*', methods: ['GET', 'POST', 'DELETE', 'OPTIONS'], allowedHeaders: ['Content-Type', 'X-Admin-Password'] }));
 app.use(express.json({ limit: '5mb' }));
-
-// 静态文件
 app.use(express.static(STATIC_DIR));
 
-// API
+// 提取rarity字符串
+function getRarityKey(r) {
+  var rar = r.rarity;
+  if (typeof rar === 'string') return rar.toLowerCase();
+  if (typeof rar === 'object' && rar !== null) return (rar.name || 'common').toLowerCase();
+  return 'common';
+}
+
 app.post('/api/results', function(req, res) {
   var data = req.body || {};
   if (!data.animalId) return res.status(400).json({ error: 'Missing animalId' });
   var result = {
     id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-    animalId: data.animalId,
+    animalId: String(data.animalId),
     animal: data.animal || {},
-    rarity: data.rarity || 'common',
+    rarity: typeof data.rarity === 'string' ? data.rarity : 'common',
     rarityName: data.rarityName || '',
-    matchPercent: data.matchPercent || 0,
+    matchPercent: Number(data.matchPercent) || 0,
     mbti: data.mbti || '',
     bfScores: data.bfScores || {},
     secondAnimal: data.secondAnimal || null,
@@ -70,45 +74,60 @@ app.post('/api/results', function(req, res) {
 });
 
 app.get('/api/stats', function(req, res) {
-  var byRarity = { legendary: 0, epic: 0, rare: 0, common: 0 };
-  var byAnimal = {};
-  for (var i = 0; i < results.length; i++) {
-    var r = results[i];
-    var k = (r.rarity || 'common').toLowerCase();
-    if (k === 'legendary') byRarity.legendary++;
-    else if (k === 'epic') byRarity.epic++;
-    else if (k === 'rare') byRarity.rare++;
-    else byRarity.common++;
-    var id = r.animalId || 'unknown';
-    byAnimal[id] = (byAnimal[id] || 0) + 1;
+  try {
+    var byRarity = { legendary: 0, epic: 0, rare: 0, common: 0 };
+    var byAnimal = {};
+    for (var i = 0; i < results.length; i++) {
+      var r = results[i];
+      var k = getRarityKey(r);
+      if (k === 'legendary') byRarity.legendary++;
+      else if (k === 'epic') byRarity.epic++;
+      else if (k === 'rare') byRarity.rare++;
+      else byRarity.common++;
+      var id = String(r.animalId || 'unknown');
+      byAnimal[id] = (byAnimal[id] || 0) + 1;
+    }
+    var entries = Object.keys(byAnimal).map(function(k) { return [k, byAnimal[k]]; });
+    entries.sort(function(a, b) { return b[1] - a[1]; });
+    var top = entries.slice(0, 20).map(function(e) { return { type: e[0], count: e[1] }; });
+    res.json({ total: results.length, by_rarity: byRarity, top_types: top });
+  } catch (e) {
+    console.log('Stats error: ' + e.message);
+    res.status(500).json({ error: e.message });
   }
-  var top = Object.entries(byAnimal).sort(function(a, b) { return b[1] - a[1]; }).slice(0, 20);
-  res.json({ total: results.length, by_rarity: byRarity, top_types: top.map(function(e) { return { type: e[0], count: e[1] }; }) });
 });
 
 app.get('/api/admin/results', function(req, res) {
-  var password = req.headers['x-admin-password'];
-  if (password !== ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
-  var byRarity = { legendary: 0, epic: 0, rare: 0, common: 0 };
-  for (var i = 0; i < results.length; i++) {
-    var k = (results[i].rarity || 'common').toLowerCase();
-    if (k === 'legendary') byRarity.legendary++;
-    else if (k === 'epic') byRarity.epic++;
-    else if (k === 'rare') byRarity.rare++;
-    else byRarity.common++;
-  }
-  res.json({
-    results: results.slice(0, 2000),
-    stats: {
-      total: results.length,
-      by_rarity: byRarity,
-      top_types: Object.entries(results.reduce(function(acc, r) {
-        var id = r.animalId || 'unknown';
-        acc[id] = (acc[id] || 0) + 1;
-        return acc;
-      }, {})).sort(function(a, b) { return b[1] - a[1]; }).slice(0, 20).map(function(e) { return { type: e[0], count: e[1] }; })
+  try {
+    var password = req.headers['x-admin-password'];
+    if (password !== ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
+    var byRarity = { legendary: 0, epic: 0, rare: 0, common: 0 };
+    for (var i = 0; i < results.length; i++) {
+      var k = getRarityKey(results[i]);
+      if (k === 'legendary') byRarity.legendary++;
+      else if (k === 'epic') byRarity.epic++;
+      else if (k === 'rare') byRarity.rare++;
+      else byRarity.common++;
     }
-  });
+    var byAnimalMap = {};
+    for (var j = 0; j < results.length; j++) {
+      var id = String(results[j].animalId || 'unknown');
+      byAnimalMap[id] = (byAnimalMap[id] || 0) + 1;
+    }
+    var entries2 = Object.keys(byAnimalMap).map(function(k) { return [k, byAnimalMap[k]]; });
+    entries2.sort(function(a, b) { return b[1] - a[1]; });
+    res.json({
+      results: results.slice(0, 2000),
+      stats: {
+        total: results.length,
+        by_rarity: byRarity,
+        top_types: entries2.slice(0, 20).map(function(e) { return { type: e[0], count: e[1] }; })
+      }
+    });
+  } catch (e) {
+    console.log('Admin error: ' + e.message);
+    res.status(500).json({ error: e.message });
+  }
 });
 
 app.delete('/api/admin/results/:id', function(req, res) {
@@ -128,7 +147,7 @@ app.delete('/api/admin/results', function(req, res) {
 });
 
 app.get('/health', function(req, res) {
-  res.json({ status: 'ok', total: results.length, uptime: Math.floor(process.uptime()), static_dir: STATIC_DIR });
+  res.json({ status: 'ok', total: results.length, uptime: Math.floor(process.uptime()) });
 });
 
 app.get('/', function(req, res) {
@@ -138,4 +157,5 @@ app.get('/', function(req, res) {
 app.listen(PORT, '0.0.0.0', function() {
   console.log('Server running on port: ' + PORT);
   console.log('Admin password: ' + ADMIN_PASSWORD);
+  console.log('Data file: ' + DATA_FILE);
 });

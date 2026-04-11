@@ -52,11 +52,14 @@ function getRarityKey(r) {
 app.post('/api/results', function(req, res) {
   var data = req.body || {};
   if (!data.animalId) return res.status(400).json({ error: 'Missing animalId' });
+  var rarity = data.rarity;
+  if (typeof rarity === 'object' && rarity !== null) rarity = rarity.name || 'common';
+  if (typeof rarity !== 'string') rarity = 'common';
   var result = {
     id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
     animalId: String(data.animalId),
     animal: data.animal || {},
-    rarity: typeof data.rarity === 'string' ? data.rarity : 'common',
+    rarity: rarity,
     rarityName: data.rarityName || '',
     matchPercent: Number(data.matchPercent) || 0,
     mbti: data.mbti || '',
@@ -78,22 +81,25 @@ app.get('/api/stats', function(req, res) {
     var byRarity = { legendary: 0, epic: 0, rare: 0, common: 0 };
     var byAnimal = {};
     for (var i = 0; i < results.length; i++) {
-      var r = results[i];
-      var k = getRarityKey(r);
-      if (k === 'legendary') byRarity.legendary++;
-      else if (k === 'epic') byRarity.epic++;
-      else if (k === 'rare') byRarity.rare++;
-      else byRarity.common++;
-      var id = String(r.animalId || 'unknown');
-      byAnimal[id] = (byAnimal[id] || 0) + 1;
+      try {
+        var r = results[i];
+        var k = 'common';
+        try { k = getRarityKey(r); } catch(e2) {}
+        if (k === 'legendary') byRarity.legendary++;
+        else if (k === 'epic') byRarity.epic++;
+        else if (k === 'rare') byRarity.rare++;
+        else byRarity.common++;
+        var id = r.animalId ? String(r.animalId) : 'unknown';
+        byAnimal[id] = (byAnimal[id] || 0) + 1;
+      } catch(e1) { console.log('Record error: ' + e1.message); }
     }
-    var entries = Object.keys(byAnimal).map(function(k) { return [k, byAnimal[k]]; });
-    entries.sort(function(a, b) { return b[1] - a[1]; });
-    var top = entries.slice(0, 20).map(function(e) { return { type: e[0], count: e[1] }; });
+    var entries = Object.keys(byAnimal).map(function(key) { return { type: key, count: byAnimal[key] }; });
+    entries.sort(function(a, b) { return b.count - a.count; });
+    var top = entries.slice(0, 20);
     res.json({ total: results.length, by_rarity: byRarity, top_types: top });
   } catch (e) {
-    console.log('Stats error: ' + e.message);
-    res.status(500).json({ error: e.message });
+    console.log('Stats error: ' + e.message + ' | ' + (e.stack || '').split('\n')[1]);
+    res.json({ total: results.length, by_rarity: { legendary: 0, epic: 0, rare: 0, common: 0 }, top_types: [], error: e.message });
   }
 });
 

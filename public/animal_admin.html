@@ -17,7 +17,6 @@ h1{font-size:1.1rem;font-weight:700}
 .login-wrap input:focus{border-color:var(--primary)}
 .login-btn{width:100%;padding:0.7rem;background:linear-gradient(135deg,#f59e0b,#fbbf24);border:none;border-radius:8px;color:#0a0f1a;font-size:0.9rem;font-weight:700;cursor:pointer}
 .login-err{color:#f87171;font-size:0.8rem;margin-top:0.5rem}
-.login-hint{margin-top:1.5rem;font-size:0.72rem;color:#334155;line-height:1.8;text-align:center}
 .admin-wrap{display:none;padding:1.5rem;max-width:1200px;margin:0 auto}
 .tab-nav{display:flex;gap:0.4rem;margin-bottom:1.5rem;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:0.8rem}
 .tab-btn{padding:0.5rem 1.2rem;background:transparent;border:1px solid transparent;border-radius:8px;color:var(--muted);font-size:0.82rem;cursor:pointer;transition:all 0.15s}
@@ -72,10 +71,6 @@ h1{font-size:1.1rem;font-weight:700}
 .export-row{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem}
 .export-btn{padding:0.5rem 1.2rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--dim);font-size:0.82rem;cursor:pointer}
 .export-btn:hover{background:#1e3050;color:var(--text)}
-.config-editor{padding:1rem;background:var(--panel);border:1px solid var(--border);border-radius:12px;margin-bottom:1rem}
-.config-editor textarea{width:100%;min-height:200px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.78rem;padding:0.8rem;font-family:Consolas,monospace;resize:vertical;outline:none}
-.config-editor textarea:focus{border-color:var(--primary)}
-.config-actions{display:flex;gap:0.5rem;margin-top:0.5rem}
 .alert-bar{padding:0.8rem 1rem;border-radius:8px;font-size:0.82rem;margin-bottom:1rem;display:none}
 .alert-bar.success{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:#22c55e}
 .alert-bar.error{background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3);color:#f87171}
@@ -97,7 +92,7 @@ h1{font-size:1.1rem;font-weight:700}
   <input type="password" id="passwordInput" placeholder="请输入管理密码" onkeydown="if(event.key==='Enter')doLogin()">
   <button class="login-btn" onclick="doLogin()">登录</button>
   <div class="login-err" id="loginErr"></div>
-  <div class="login-hint">默认密码: sbti-admin-2026<br>（环境变量 ADMIN_PASSWORD 可修改）</div>
+  <div class="login-hint">密码: <strong>2026</strong><br>（纯本地存储，数据保存在浏览器）</div>
 </div>
 
 <div id="adminPage" class="admin-wrap">
@@ -106,7 +101,6 @@ h1{font-size:1.1rem;font-weight:700}
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('overview')">📊 数据概览</button>
     <button class="tab-btn" onclick="switchTab('results')">📋 提交记录</button>
-    <button class="tab-btn" onclick="switchTab('config')">⚙️ 配置管理</button>
     <button class="tab-btn" onclick="switchTab('export')">📤 导出数据</button>
   </div>
 
@@ -147,22 +141,6 @@ h1{font-size:1.1rem;font-weight:700}
     <div class="pagination" id="pagination"></div>
   </div>
 
-  <div class="tab-panel" id="tab-config">
-    <div class="filter-row">
-      <button class="filter-btn" onclick="loadConfig('animals')">🐾 动物配置</button>
-      <button class="filter-btn" onclick="loadConfig('questions')">📝 题目配置</button>
-      <button class="filter-btn" onclick="loadConfig('rarities')">⭐ 稀有度配置</button>
-    </div>
-    <div class="config-editor">
-      <div class="section-title" id="configTitle">配置内容</div>
-      <textarea id="configTextarea"></textarea>
-      <div class="config-actions">
-        <button class="filter-btn success-btn" onclick="saveConfig()">💾 保存配置</button>
-        <button class="filter-btn" onclick="resetConfig()">↩️ 重置</button>
-      </div>
-    </div>
-  </div>
-
   <div class="tab-panel" id="tab-export">
     <div class="export-row">
       <button class="export-btn" onclick="exportJSON()">📄 导出 JSON</button>
@@ -176,8 +154,6 @@ h1{font-size:1.1rem;font-weight:700}
 </div>
 
 <script>
-const API = window.location.origin;
-let password = '';
 let allResults = [];
 let currentPage = 1;
 const PAGE_SIZE = 20;
@@ -209,27 +185,31 @@ const ALL_ANIMALS = [
   {id:'fox',name:'狐狸',emoji:'🦊',rarity:'common'},
 ];
 
+function saveToStorage() {
+  try { localStorage.setItem('animal_results', JSON.stringify(allResults)); } catch(e) {}
+}
+function loadFromStorage() {
+  try { return JSON.parse(localStorage.getItem('animal_results') || '[]'); } catch(e) { return []; }
+}
+
 function doLogin() {
-  password = document.getElementById('passwordInput').value;
-  if (!password) { document.getElementById('loginErr').textContent = '请输入密码'; return; }
-  document.getElementById('loginErr').textContent = '';
-  fetch(API + '/api/admin/results', { headers:{ 'X-Admin-Password': password } })
-    .then(r => { if (!r.ok) throw new Error('密码错误'); return r.json(); })
-    .then(data => {
-      allResults = data.results;
-      document.getElementById('loginPage').style.display = 'none';
-      document.getElementById('adminPage').style.display = 'block';
-      document.getElementById('totalCount').textContent = '共 ' + allResults.length + ' 条';
-      populateAnimalFilter();
-      renderStats(data.stats);
-      renderAnimalDist(data.results);
-      loadResults(1);
-      renderExportStats();
-    }).catch(() => { document.getElementById('loginErr').textContent = '密码错误，请重试'; });
+  const pw = document.getElementById('passwordInput').value;
+  if (pw !== '2026') {
+    document.getElementById('loginErr').textContent = '密码错误';
+    return;
+  }
+  allResults = loadFromStorage();
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('adminPage').style.display = 'block';
+  document.getElementById('totalCount').textContent = '共 ' + allResults.length + ' 条';
+  populateAnimalFilter();
+  renderStats({ total: allResults.length, by_rarity: calcRarityCounts() });
+  renderAnimalDist(allResults);
+  loadResults(1);
+  renderExportStats();
 }
 
 function logout() {
-  if (!confirm('确定退出登录？')) return;
   document.getElementById('loginPage').style.display = 'block';
   document.getElementById('adminPage').style.display = 'none';
   document.getElementById('passwordInput').value = '';
@@ -247,10 +227,10 @@ function renderStats(stats) {
   const byR = stats.by_rarity || calcRarityCounts();
   const total = stats.total || allResults.length || 1;
   document.getElementById('statTotal').textContent = stats.total || allResults.length;
-  document.getElementById('statLegendary').textContent = byR.legendary || byR.Legendary || 0;
-  document.getElementById('statEpic').textContent = byR.epic || byR.Epic || 0;
-  document.getElementById('statRare').textContent = byR.rare || byR.Rare || 0;
-  document.getElementById('statCommon').textContent = byR.common || byR.Common || 0;
+  document.getElementById('statLegendary').textContent = byR.legendary || 0;
+  document.getElementById('statEpic').textContent = byR.epic || 0;
+  document.getElementById('statRare').textContent = byR.rare || 0;
+  document.getElementById('statCommon').textContent = byR.common || 0;
   const rarities = [
     {key:'legendary',label:'🌟 传说',color:'#f59e0b'},
     {key:'epic',label:'💜 史诗',color:'#8b5cf6'},
@@ -278,7 +258,7 @@ function renderStats(stats) {
 
 function renderAnimalDist(results) {
   const counts = {};
-  results.forEach(r => { const id = r.animal_id || r.sbti_type || ''; counts[id] = (counts[id]||0)+1; });
+  results.forEach(r => { const id = r.animalId || ''; counts[id] = (counts[id]||0)+1; });
   const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
   const total = results.length || 1;
   const max = sorted[0] ? sorted[0][1] : 1;
@@ -299,13 +279,16 @@ function renderAnimalDist(results) {
 
 function calcRarityCounts() {
   const counts = {};
-  allResults.forEach(r => { const rarity = (r.rarity||'common').toLowerCase(); counts[rarity] = (counts[rarity]||0)+1; });
+  allResults.forEach(r => {
+    const rarity = (r.rarity && r.rarity.name) ? r.rarity.name.toLowerCase() : 'common';
+    counts[rarity] = (counts[rarity]||0)+1;
+  });
   return counts;
 }
 
 function populateAnimalFilter() {
   const map = {};
-  allResults.forEach(r => { const id = r.animal_id||r.sbti_type||''; map[id] = (map[id]||0)+1; });
+  allResults.forEach(r => { const id = r.animalId || ''; map[id] = (map[id]||0)+1; });
   const sel = document.getElementById('filterAnimal');
   sel.innerHTML = '<option value="">全部动物</option>';
   Object.keys(map).sort().forEach(id => {
@@ -320,8 +303,11 @@ function getFiltered() {
   const animal = document.getElementById('filterAnimal').value;
   const kw = document.getElementById('filterKeyword').value.trim().toLowerCase();
   return allResults.filter(r => {
-    if (rarity) { const rr = (r.rarity||'').toLowerCase(); if (rr !== rarity && rr !== rarity.charAt(0).toUpperCase()+rarity.slice(1)) return false; }
-    if (animal && (r.animal_id||r.sbti_type||'') !== animal) return false;
+    if (rarity) {
+      const rr = r.rarity && r.rarity.name ? r.rarity.name.toLowerCase() : 'common';
+      if (rr !== rarity) return false;
+    }
+    if (animal && (r.animalId||'') !== animal) return false;
     if (kw && !JSON.stringify(r).toLowerCase().includes(kw)) return false;
     return true;
   });
@@ -338,12 +324,14 @@ function loadResults(page) {
   tbody.innerHTML = pageData.map(r => {
     const dt = new Date(r.submitted_at);
     const ts = dt.getFullYear()+'-'+pad(dt.getMonth()+1)+'-'+pad(dt.getDate())+' '+pad(dt.getHours())+':'+pad(dt.getMinutes());
-    const animalId = r.animal_id || r.sbti_type || '';
+    const animalId = r.animalId || '';
     const animal = ALL_ANIMALS.find(a=>a.id===animalId) || {name:animalId,emoji:'🐾',rarity:'common'};
-    const rarity = (r.rarity || animal.rarity || 'common').toLowerCase();
-    const traits = (r.traits||r.keywords||[]).join(' / ') || '-';
-    const match = r.match_percent || r.matchPercent || r.bigfive_total || '-';
-    return '<tr><td class="emoji-cell">'+animal.emoji+'</td><td><span class="rarity-tag rt-'+rarity+'">'+ANIMAL_META[rarity].label+'</span></td><td class="type-cell">'+animal.name+'</td><td style="color:var(--primary)">'+match+(typeof match==='number'?'%':'')+'</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+traits+'</td><td class="time-cell">'+ts+'</td><td><button class="del-btn" onclick="deleteResult(\''+r.id+'\')">删除</button></td></tr>';
+    const rarityKey = r.rarity && r.rarity.name ? r.rarity.name.toLowerCase() : 'common';
+    const rClass = 'rt-' + rarityKey;
+    const rLabel = ANIMAL_META[rarityKey] ? ANIMAL_META[rarityKey].label : rarityKey;
+    const traits = (r.animal && r.animal.traits) ? r.animal.traits.join(' / ') : '-';
+    const match = r.matchPercent || '-';
+    return '<tr><td class="emoji-cell">'+animal.emoji+'</td><td><span class="rarity-tag '+rClass+'">'+rLabel+'</span></td><td class="type-cell">'+animal.name+'</td><td style="color:var(--primary)">'+match+(typeof match==='number'?'%':'')+'</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+traits+'</td><td class="time-cell">'+ts+'</td><td><button class="del-btn" onclick="deleteResult(\''+r.id+'\')">删除</button></td></tr>';
   }).join('');
   const pDiv = document.getElementById('pagination');
   pDiv.innerHTML = '';
@@ -359,49 +347,32 @@ function resetFilters() { document.getElementById('filterRarity').value=''; docu
 
 function deleteResult(id) {
   if (!confirm('确定删除这条记录？')) return;
-  fetch(API+'/api/admin/results/'+id, {method:'DELETE',headers:{'X-Admin-Password':password}})
-    .then(r=>r.json()).then(()=>{
-      allResults = allResults.filter(r=>r.id!==id);
-      document.getElementById('totalCount').textContent = '共 '+allResults.length+' 条';
-      renderStats({total:allResults.length,by_rarity:calcRarityCounts()});
-      renderAnimalDist(allResults);
-      loadResults(currentPage);
-      showAlert('删除成功','success');
-    }).catch(()=>showAlert('删除失败','error'));
+  allResults = allResults.filter(r => r.id !== id);
+  saveToStorage();
+  document.getElementById('totalCount').textContent = '共 ' + allResults.length + ' 条';
+  renderStats({total:allResults.length, by_rarity:calcRarityCounts()});
+  renderAnimalDist(allResults);
+  loadResults(currentPage);
+  showAlert('删除成功', 'success');
 }
 
 function clearAll() {
   if (!confirm('⚠️ 确定要清空全部 '+allResults.length+' 条数据？此操作不可恢复！')) return;
   if (!confirm('再次确认：清空后数据无法恢复，确定继续？')) return;
-  fetch(API+'/api/admin/results',{method:'DELETE',headers:{'X-Admin-Password':password}})
-    .then(r=>r.json()).then(()=>{
-      allResults = [];
-      document.getElementById('totalCount').textContent = '共 0 条';
-      renderStats({total:0,by_rarity:{}});
-      document.getElementById('animalDist').innerHTML = '<div class="empty-state">暂无数据</div>';
-      loadResults(1);
-      showAlert('已清空全部数据','success');
-    }).catch(()=>showAlert('清空失败','error'));
+  allResults = [];
+  saveToStorage();
+  document.getElementById('totalCount').textContent = '共 0 条';
+  renderStats({total:0, by_rarity:{}});
+  document.getElementById('animalDist').innerHTML = '<div class="empty-state">暂无数据</div>';
+  loadResults(1);
+  showAlert('已清空全部数据', 'success');
 }
-
-let currentConfigType = '';
-function loadConfig(type) {
-  currentConfigType = type;
-  let title='', content='';
-  if (type==='animals') { title='🐾 动物配置（17种动物）'; content=JSON.stringify(ALL_ANIMALS,null,2); }
-  else if (type==='rarities') { title='⭐ 稀有度配置'; content=JSON.stringify(ANIMAL_META,null,2); }
-  else { title='📝 题目配置'; content='// 参考: framework/animal_config.js\n// ANIMAL_CONFIG.questions'; }
-  document.getElementById('configTitle').textContent = title;
-  document.getElementById('configTextarea').value = content;
-}
-function saveConfig() { showAlert('💾 配置已保存（前端演示模式，实际请编辑 animal_config.js）','success'); }
-function resetConfig() { if (currentConfigType) loadConfig(currentConfigType); }
 
 function renderExportStats() {
   const el = document.getElementById('exportStats');
   const rCounts = calcRarityCounts();
   const aCounts = {};
-  allResults.forEach(r=>{ const id=r.animal_id||r.sbti_type||'unknown'; aCounts[id]=(aCounts[id]||0)+1; });
+  allResults.forEach(r=>{ const id=r.animalId||'unknown'; aCounts[id]=(aCounts[id]||0)+1; });
   let html = '<strong>总提交：</strong>'+allResults.length+' 条<br><br><strong>稀有度分布</strong><br>';
   Object.entries(ANIMAL_META).forEach(([k,m])=>{ html+='<span style="color:'+m.color+'">● '+m.label+'</span>：'+(rCounts[k]||0)+'人 · '+(allResults.length?Math.round((rCounts[k]||0)/allResults.length*100):0)+'%<br>'; });
   html += '<br><strong>动物类型分布</strong><br>';
@@ -412,20 +383,20 @@ function renderExportStats() {
 function exportJSON() {
   const blob = new Blob([JSON.stringify(allResults,null,2)],{type:'application/json'});
   const link = document.createElement('a'); link.download='animal_results_'+Date.now()+'.json'; link.href=URL.createObjectURL(blob); link.click();
-  showAlert('JSON 导出成功','success');
+  showAlert('JSON 导出成功', 'success');
 }
 
 function exportCSV() {
   const header = 'ID,动物,稀有度,匹配度,特质,时间\n';
   const rows = allResults.map(r=>{
-    const animal = ALL_ANIMALS.find(a=>a.id===r.animal_id)||ALL_ANIMALS.find(a=>a.id===r.sbti_type)||{};
+    const animal = ALL_ANIMALS.find(a=>a.id===r.animalId)||{};
     const ts = new Date(r.submitted_at).toISOString();
-    const traits = (r.traits||r.keywords||[]).join('|');
-    return r.id+','+(animal.name||r.animal_id||r.sbti_type||'')+','+(r.rarity||'')+','+(r.match_percent||r.matchPercent||'')+','+traits+','+ts;
+    const traits = (r.animal&&r.animal.traits) ? r.animal.traits.join('|') : '';
+    return (r.id||'')+','+(animal.name||r.animalId||'')+','+(r.rarity&&r.rarity.name||'')+','+(r.matchPercent||'')+','+traits+','+ts;
   });
   const blob = new Blob([header+rows.join('\n')],{type:'text/csv;charset=utf-8'});
   const link = document.createElement('a'); link.download='animal_results_'+Date.now()+'.csv'; link.href=URL.createObjectURL(blob); link.click();
-  showAlert('CSV 导出成功','success');
+  showAlert('CSV 导出成功', 'success');
 }
 
 function showAlert(msg, type) {

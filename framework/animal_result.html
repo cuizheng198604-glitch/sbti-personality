@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>动物性格测试 - 结果</title>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <style>
 :root{--bg:#0a0f1a;--panel:#0d1525;--card:#111d32;--border:#1e3050;--text:#e8edf5;--muted:#5a7a9a;--dim:#8ba5c0;--primary:#f59e0b;--accent:#3b82f6;}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -76,6 +77,25 @@ body{font-family:Segoe UI,PingFang SC,Microsoft YaHei,sans-serif;background:var(
 .qr-box p{margin:1rem 0 0;color:var(--muted);font-size:0.82rem}
 .qr-box button{margin-top:1rem;padding:0.5rem 1.5rem;background:#f59e0b;border:none;border-radius:8px;color:#0a0f1a;font-weight:700;cursor:pointer}
 
+/* ── 广告弹出层 ── */
+.ad-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:1rem}
+.ad-overlay.show{display:flex}
+.ad-overlay-box{background:#13132a;border:1px solid #2d2d4a;border-radius:16px;padding:2rem;text-align:center;position:relative;max-width:360px;width:90%}
+.ad-overlay-close{position:absolute;top:0.8rem;right:0.8rem;background:none;border:none;color:#64748b;font-size:1rem;cursor:pointer;padding:0.2rem 0.5rem}
+.ad-overlay-close:hover{color:#fff}
+.ad-overlay-title{font-size:0.9rem;font-weight:700;color:#e8edf5;margin-bottom:0.5rem}
+.ad-overlay-desc{font-size:0.78rem;color:#5a7a9a;margin-bottom:1rem}
+.ad-overlay-qr{background:#fff;border-radius:8px;padding:0.8rem;display:inline-block}
+.ad-overlay-btn{display:block;width:100%;padding:0.7rem;background:linear-gradient(135deg,#f59e0b,#fbbf24);border:none;border-radius:10px;color:#0a0f1a;font-size:0.9rem;font-weight:700;cursor:pointer;margin-top:1rem}
+.ad-overlay-note{font-size:0.7rem;color:#5a7a9a;margin-top:0.8rem}
+
+/* ── 结果页广告 ── */
+.result-ad{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;display:flex;align-items:center;gap:0.8rem}
+.result-ad-label{background:rgba(245,158,11,0.1);color:var(--primary);padding:0.2rem 0.5rem;border-radius:6px;font-size:0.65rem;font-weight:700;flex-shrink:0}
+.result-ad-inner{flex:1;display:flex;align-items:center;gap:0.8rem}
+.result-ad-text{font-size:0.82rem;color:var(--dim);flex:1}
+.result-ad-btn{background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#0a0f1a;padding:0.4rem 1rem;border-radius:8px;font-size:0.8rem;font-weight:700;cursor:pointer;flex-shrink:0}
+
 /* ── 私域引流 ── */
 .traffic-section{background:linear-gradient(135deg,#0d1525,#111d32);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin:1.5rem auto;max-width:500px;text-align:center}
 .traffic-header{display:flex;align-items:center;justify-content:center;gap:0.5rem;margin-bottom:1rem}
@@ -131,8 +151,18 @@ body{font-family:Segoe UI,PingFang SC,Microsoft YaHei,sans-serif;background:var(
 <script src="animal_config.js"></script>
 
 <script>
-// ── 解析URL结果 ──
+// ── 解析结果（优先 sessionStorage，兜底 URL）──
 function getResultFromURL() {
+  // 优先从 sessionStorage 读取
+  try {
+    const stored = sessionStorage.getItem('animal_result');
+    if (stored) {
+      sessionStorage.removeItem('animal_result');
+      return JSON.parse(stored);
+    }
+  } catch(e) {}
+
+  // 兜底：从 URL 参数读取
   const params = new URLSearchParams(window.location.search);
   const encoded = params.get('r');
   if (encoded) {
@@ -140,7 +170,6 @@ function getResultFromURL() {
       return JSON.parse(atob(encoded));
     } catch(e) {}
   }
-  // 兜底：默认结果（演示用）
   return getDefaultResult();
 }
 
@@ -238,14 +267,22 @@ function renderResult(result) {
       </div>
     </div>
 
-    <!-- 广告位 -->
-    <div class="ad-container" id="adResultTop"></div>
+    <!-- 广告位：顶部 -->
+    <div class="ad-container" id="adResultTop">
+      <div class="result-ad">
+        <div class="result-ad-label">广告</div>
+        <div class="result-ad-inner">
+          <div class="result-ad-text">10道题测出你的动物人格，朋友都在玩</div>
+          <div class="result-ad-btn" onclick="location.href='animal_quiz.html'">开始测试</div>
+        </div>
+      </div>
+    </div>
 
     <!-- 分享卡片 -->
     <div class="share-section">
       <div class="section-title" style="text-align:center;border-bottom:none;padding-bottom:0">🌟 分享你的动物人格</div>
       <div class="share-card-wrap">
-        <div class="share-card" id="shareCard" onclick="downloadCard()">
+        <div class="share-card" id="shareCard">
           <div class="sc-bg" style="background:${rarity.gradient}">
             <div class="sc-overlay">
               <div class="sc-top">
@@ -258,16 +295,24 @@ function renderResult(result) {
               <div class="sc-rarity"><div class="sc-stars" style="color:rgba(255,255,255,0.9)">${stars}</div></div>
               <div class="sc-match" style="color:rgba(255,255,255,0.7)">匹配度 ${matchPercent}%</div>
               <div class="sc-traits">${animal.traits.map(t => `<span class="sc-trait">${t}</span>`).join('')}</div>
-              <div class="sc-desc">${animal.description.substring(0, 80)}...</div>
+              <div class="sc-desc">${(animal.description||'').substring(0, 80)}...</div>
               <div class="sc-footer">长按识别二维码 → 测测你的动物人格</div>
             </div>
           </div>
         </div>
         <div class="share-actions">
-          <button class="share-btn save" onclick="event.stopPropagation();downloadCard()">📥 保存图片</button>
-          <button class="share-btn wechat" onclick="event.stopPropagation();showQR()">💬 分享微信</button>
-          <button class="share-btn qr" onclick="event.stopPropagation();showQR()">📱 二维码</button>
+          <button class="share-btn save" onclick="showAdOverlay('save')">📥 保存图片</button>
+          <button class="share-btn wechat" onclick="showAdOverlay('wechat')">💬 分享微信</button>
+          <button class="share-btn qr" onclick="showAdOverlay('qr')">📱 二维码</button>
         </div>
+      </div>
+    </div>
+
+    <!-- 分享广告弹出层 -->
+    <div id="adOverlay" class="ad-overlay">
+      <div class="ad-overlay-box">
+        <div class="ad-overlay-close" onclick="closeAdOverlay()">✕</div>
+        <div id="adOverlayContent"></div>
       </div>
     </div>
 
@@ -294,8 +339,38 @@ function renderResult(result) {
       </div>
     </div>
 
+    <!-- 私域引流 + 广告 -->
+    <div class="traffic-section" id="trafficSection">
+      <div class="traffic-header">
+        <span class="traffic-icon">🔑</span>
+        <div class="traffic-title">解锁完整版动物分析</div>
+      </div>
+      <div class="traffic-entries">
+        <div class="traffic-entry">
+          <div class="entry-icon">📮</div>
+          <div class="entry-info">
+            <div class="entry-title">关注公众号</div>
+            <div class="entry-desc">回复【动物】获取完整分析报告</div>
+          </div>
+        </div>
+      </div>
+      <div class="traffic-benefit">
+        <div class="benefit-item">✓ 完整版动物人格分析</div>
+        <div class="benefit-item">✓ MBTI + BigFive 详细报告</div>
+        <div class="benefit-item">✓ 17种动物性格详解</div>
+      </div>
+    </div>
+
     <!-- 广告位：底部 -->
-    <div class="ad-container" id="adResultBottom"></div>
+    <div class="ad-container" id="adResultBottom">
+      <div class="result-ad">
+        <div class="result-ad-label">广告</div>
+        <div class="result-ad-inner">
+          <div class="result-ad-text">测测你更像哪种动物？10道题揭秘真实性格</div>
+          <div class="result-ad-btn" onclick="location.href='animal_quiz.html'">重新测试</div>
+        </div>
+      </div>
+    </div>
 
     <div class="disclaimer">
       本测试仅供娱乐，请勿当真。<br>
@@ -312,13 +387,58 @@ function renderResult(result) {
   }
 }
 
+function showAdOverlay(type) {
+  const overlay = document.getElementById('adOverlay');
+  const content = document.getElementById('adOverlayContent');
+
+  if (type === 'qr') {
+    content.innerHTML = `
+      <div class="ad-overlay-title">📱 分享到朋友圈</div>
+      <div class="ad-overlay-desc">长按识别二维码保存到相册</div>
+      <div class="ad-overlay-qr" id="qrTarget"></div>
+      <div class="ad-overlay-note">截图保存，发给朋友测试效果更好</div>
+    `;
+    overlay.classList.add('show');
+    // 生成二维码
+    setTimeout(() => {
+      const target = document.getElementById('qrTarget');
+      if (target) { target.innerHTML = ''; new QRCode(target, { text: window.location.href, width: 160, height: 160, colorDark: "#000000", colorLight: "#ffffff" }); }
+    }, 50);
+  } else if (type === 'save') {
+    content.innerHTML = `
+      <div class="ad-overlay-title">📥 保存图片</div>
+      <div class="ad-overlay-desc">生成你的专属分享图</div>
+      <button class="ad-overlay-btn" onclick="closeAdOverlay();downloadCard()">立即生成并保存</button>
+      <div class="ad-overlay-note">图片包含你的动物类型，可直接发朋友圈</div>
+    `;
+    overlay.classList.add('show');
+  } else if (type === 'wechat') {
+    content.innerHTML = `
+      <div class="ad-overlay-title">💬 分享到微信</div>
+      <div class="ad-overlay-desc">关注公众号，回复【动物】获取完整报告</div>
+      <div class="ad-overlay-qr" id="qrTarget2"></div>
+      <button class="ad-overlay-btn" onclick="closeAdOverlay()">我知道了</button>
+      <div class="ad-overlay-note">截图保存图片，发给好友或发朋友圈</div>
+    `;
+    overlay.classList.add('show');
+    setTimeout(() => {
+      const target = document.getElementById('qrTarget2');
+      if (target) { target.innerHTML = ''; new QRCode(target, { text: window.location.href, width: 160, height: 160, colorDark: "#000000", colorLight: "#ffffff" }); }
+    }, 50);
+  }
+}
+
+function closeAdOverlay() {
+  document.getElementById('adOverlay').classList.remove('show');
+}
+
 function downloadCard() {
   const card = document.getElementById('shareCard');
   if (!card) return;
   if (typeof html2canvas !== 'undefined') {
     html2canvas(card, { scale: 2, backgroundColor: null }).then(canvas => {
       const link = document.createElement('a');
-      link.download = `动物人格_${Date.now()}.png`;
+      link.download = '我的动物人格_' + (window._animalResult && window._animalResult.animal ? window._animalResult.animal.name : '测试') + '.png';
       link.href = canvas.toDataURL('image/png');
       link.click();
     });
@@ -327,30 +447,17 @@ function downloadCard() {
   }
 }
 
-function showQR() {
-  const modal = document.getElementById('shareQRModal');
-  if (!modal) return;
-  modal.classList.add('show');
-  const canvas = document.getElementById('qrCanvas');
-  if (canvas && typeof QRCode !== 'undefined') {
-    canvas.innerHTML = '';
-    new QRCode(canvas, {
-      text: window.location.href,
-      width: 180,
-      height: 180,
-      colorDark: "#ffffff",
-      colorLight: "#0d1525"
-    });
-  }
-}
-
-function hideQR() {
-  document.getElementById('shareQRModal').classList.remove('show');
+function showAlert(msg, type) {
+  const el = document.getElementById('alertBar');
+  el.textContent = msg;
+  el.className = 'alert-bar show ' + type;
+  setTimeout(()=>{ el.className = 'alert-bar'; }, 3000);
 }
 
 // ── 启动 ──
 document.addEventListener('DOMContentLoaded', () => {
   const result = getResultFromURL();
+  window._animalResult = result;
   renderResult(result);
 });
 </script>

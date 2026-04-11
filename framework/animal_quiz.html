@@ -63,6 +63,14 @@ body{font-family:Segoe UI,PingFang SC,Microsoft YaHei,sans-serif;background:var(
 @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 .loading-text{color:var(--muted);font-size:0.9rem;margin-top:1rem;animation:pulse 1.5s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+/* ── 答题页广告 ── */
+.ad-container{margin:0.5rem auto;max-width:700px}
+.quiz-ad{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:0.8rem;display:flex;align-items:center;gap:0.8rem;margin:0.5rem 0}
+.quiz-ad-label{background:rgba(245,158,11,0.1);color:var(--primary);padding:0.15rem 0.5rem;border-radius:4px;font-size:0.65rem;font-weight:700;flex-shrink:0}
+.quiz-ad-content{display:flex;align-items:center;gap:0.8rem;flex:1}
+.quiz-ad-text{font-size:0.78rem;color:var(--dim);flex:1;text-align:left}
+.quiz-ad-qr{background:#fff;border-radius:6px;padding:4px;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -114,6 +122,7 @@ body{font-family:Segoe UI,PingFang SC,Microsoft YaHei,sans-serif;background:var(
 </div>
 
 <script src="animal_config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script>
 const cfg = ANIMAL_CONFIG;
 const QUESTIONS = cfg.questions;
@@ -155,6 +164,7 @@ function showQuestion(index) {
         `).join('')}
       </div>
     </div>
+    <div class="ad-container" id="qAdContainer"></div>
     <div class="nav-row">
       ${index > 0 ? '<button class="btn-back" onclick="prevQ()">上一题</button>' : ''}
       <button class="btn-next" id="nextBtn" onclick="nextQ()" disabled>${index === total - 1 ? '🔮 查看结果' : '下一题 →'}</button>
@@ -169,6 +179,28 @@ function showQuestion(index) {
       if (q.opts[i].s === saved) opt.classList.add('selected');
     });
     document.getElementById('nextBtn').disabled = false;
+  }
+  // 每5题显示广告
+  const adContainer = document.getElementById('qAdContainer');
+  if (adContainer) {
+    if ((index + 1) % 5 === 0 && index < total - 1) {
+      adContainer.innerHTML = `<div class="quiz-ad">
+        <div class="quiz-ad-label">广告</div>
+        <div class="quiz-ad-content">
+          <div class="quiz-ad-text">扫码领取独家性格分析资料</div>
+          <div class="quiz-ad-qr" id="quizAdQR"></div>
+        </div>
+      </div>`;
+      setTimeout(() => {
+        const qrTarget = document.getElementById('quizAdQR');
+        if (qrTarget && typeof QRCode !== 'undefined') {
+          qrTarget.innerHTML = '';
+          new QRCode(qrTarget, { text: window.location.href.split('?')[0] || 'quiz', width: 80, height: 80, colorDark: "#ffffff", colorLight: "#0d1525" });
+        }
+      }, 100);
+    } else {
+      adContainer.innerHTML = '';
+    }
   }
 }
 
@@ -289,8 +321,24 @@ function showResult() {
 
   setTimeout(() => {
     const result = calcResult();
-    const encoded = btoa(JSON.stringify(result));
-    window.location.href = `animal_result.html?r=${encoded}`;
+
+    // 提交到后端API
+    fetch('https://sbtinew.onrender.com/api/results', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(result)
+    }).catch(() => {});
+
+    // 同时保存本地（备份）
+    try {
+      const history = JSON.parse(localStorage.getItem('animal_results') || '[]');
+      history.unshift({ ...result, submitted_at: new Date().toISOString(), id: Date.now().toString(36) });
+      if (history.length > 500) history.length = 500;
+      localStorage.setItem('animal_results', JSON.stringify(history));
+    } catch(e) {}
+
+    try { sessionStorage.setItem('animal_result', JSON.stringify(result)); } catch(e) {}
+    window.location.href = 'animal_result.html';
   }, 1800);
 }
 </script>

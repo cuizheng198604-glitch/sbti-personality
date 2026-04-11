@@ -321,21 +321,23 @@ function showResult() {
 
   setTimeout(() => {
     const result = calcResult();
-    // 保存到 localStorage（纯前端存储）
+
+    // 提交到后端API
+    fetch('https://sbtinew.onrender.com/api/results', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(result)
+    }).catch(() => {});
+
+    // 同时保存本地（备份）
     try {
       const history = JSON.parse(localStorage.getItem('animal_results') || '[]');
-      history.unshift({
-        ...result,
-        submitted_at: new Date().toISOString(),
-        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6)
-      });
-      // 最多保留500条
+      history.unshift({ ...result, submitted_at: new Date().toISOString(), id: Date.now().toString(36) });
       if (history.length > 500) history.length = 500;
       localStorage.setItem('animal_results', JSON.stringify(history));
     } catch(e) {}
-    try {
-      sessionStorage.setItem('animal_result', JSON.stringify(result));
-    } catch(e) {}
+
+    try { sessionStorage.setItem('animal_result', JSON.stringify(result)); } catch(e) {}
     window.location.href = 'animal_result.html';
   }, 1800);
 }

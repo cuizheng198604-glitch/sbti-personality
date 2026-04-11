@@ -153,25 +153,32 @@ body{font-family:Segoe UI,PingFang SC,Microsoft YaHei,sans-serif;background:var(
 <script src="animal_config.js"></script>
 
 <script>
-// ── 解析结果（优先 sessionStorage，兜底 URL）──
+// ── 解析结果（优先 sessionStorage → localStorage → URL）──
 function getResultFromURL() {
-  // 优先从 sessionStorage 读取
+  // 优先从 sessionStorage 读取（答题流程传入）
   try {
-    const stored = sessionStorage.getItem('animal_result');
+    var stored = sessionStorage.getItem('animal_result');
     if (stored) {
       sessionStorage.removeItem('animal_result');
       return JSON.parse(stored);
     }
   } catch(e) {}
 
-  // 兜底：从 URL 参数读取
-  const params = new URLSearchParams(window.location.search);
-  const encoded = params.get('r');
+  // 从 URL 参数读取（如分享链接）
+  var params = new URLSearchParams(window.location.search);
+  var encoded = params.get('r');
   if (encoded) {
     try {
       return JSON.parse(atob(encoded));
     } catch(e) {}
   }
+
+  // 最后的兜底：从 localStorage 读取最近一次结果
+  try {
+    var allResults = JSON.parse(localStorage.getItem('animal_results') || '[]');
+    if (allResults.length > 0) return allResults[0];
+  } catch(e) {}
+
   return getDefaultResult();
 }
 

@@ -334,10 +334,13 @@ function showResult() {
       const history = JSON.parse(localStorage.getItem('animal_results') || '[]');
       history.unshift({ ...result, submitted_at: new Date().toISOString(), id: Date.now().toString(36) });
       if (history.length > 500) history.length = 500;
+      history.unshift(result);
+      if (history.length > 100) history = history.slice(0, 100);
       localStorage.setItem('animal_results', JSON.stringify(history));
     } catch(e) {}
 
     try { sessionStorage.setItem('animal_result', JSON.stringify(result)); } catch(e) {}
+    try { localStorage.setItem('animal_last_result', JSON.stringify(result)); } catch(e) {}
     window.location.href = 'animal_result.html';
   }, 1800);
 }

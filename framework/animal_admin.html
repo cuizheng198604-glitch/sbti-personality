@@ -193,12 +193,14 @@ function loadFromStorage() {
 }
 
 function doLogin() {
-  const pw = document.getElementById('passwordInput').value;
+  var pw = document.getElementById('passwordInput').value;
   if (!pw) { document.getElementById('loginErr').textContent = '请输入密码'; return; }
-  document.getElementById('loginErr').textContent = '';
-  fetch('https://fbti-new.onrender.com/api/admin/results', { headers: { 'X-Admin-Password': pw } })
-    .then(r => { if (!r.ok) throw new Error('密码错误'); return r.json(); })
-    .then(data => {
+  document.getElementById('loginErr').textContent = '连接中...';
+  var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  var timeout = setTimeout(function() { if (controller) controller.abort(); }, 15000);
+  fetch('https://fbti-new.onrender.com/api/admin/results', { headers: { 'X-Admin-Password': pw }, signal: controller ? controller.signal : null })
+    .then(function(r) { clearTimeout(timeout); if (!r.ok) throw new Error('密码错误 (' + r.status + ')'); return r.json(); })
+    .then(function(data) {
       allResults = data.results || [];
       document.getElementById('loginPage').style.display = 'none';
       document.getElementById('adminPage').style.display = 'block';
@@ -208,7 +210,7 @@ function doLogin() {
       renderAnimalDist(allResults);
       loadResults(1);
       renderExportStats();
-    }).catch(() => { document.getElementById('loginErr').textContent = '密码错误，请重试'; });
+    }).catch(function(e) { clearTimeout(timeout); document.getElementById('loginErr').textContent = e.message || '连接失败，请重试'; });
 }
 
 function logout() {

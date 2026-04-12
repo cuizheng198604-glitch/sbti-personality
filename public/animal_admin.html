@@ -134,8 +134,8 @@ h1{font-size:1.1rem;font-weight:700}
     </div>
     <div style="overflow-x:auto">
       <table class="results-table">
-        <thead><tr><th>动物</th><th>稀有度</th><th>匹配度</th><th>性格特质</th><th>提交时间</th><th>操作</th></tr></thead>
-        <tbody id="resultsBody"><tr><td colspan="6" class="empty-state">加载中...</td></tr></tbody>
+        <thead><tr><th>动物</th><th>稀有度</th><th>MBTI</th><th>Big Five 评分</th><th>匹配度</th><th>性格特质</th><th>提交时间</th><th>操作</th></tr></thead>
+        <tbody id="resultsBody"><tr><td colspan="8" class="empty-state">加载中...</td></tr></tbody>
       </table>
     </div>
     <div class="pagination" id="pagination"></div>
@@ -324,7 +324,7 @@ function loadResults(page) {
   const start = (page - 1) * PAGE_SIZE;
   const pageData = filtered.slice(start, start + PAGE_SIZE);
   const tbody = document.getElementById('resultsBody');
-  if (filtered.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="empty-state">暂无数据</td></tr>'; document.getElementById('pagination').innerHTML = ''; return; }
+  if (filtered.length === 0) { tbody.innerHTML = '<tr><td colspan="8" class="empty-state">暂无数据</td></tr>'; document.getElementById('pagination').innerHTML = ''; return; }
   tbody.innerHTML = pageData.map(r => {
     const dt = new Date(r.submitted_at);
     const ts = dt.getFullYear()+'-'+pad(dt.getMonth()+1)+'-'+pad(dt.getDate())+' '+pad(dt.getHours())+':'+pad(dt.getMinutes());
@@ -335,7 +335,12 @@ function loadResults(page) {
     const rLabel = ANIMAL_META[rarityKey] ? ANIMAL_META[rarityKey].label : rarityKey;
     const traits = (r.animal && r.animal.traits) ? r.animal.traits.join(' / ') : '-';
     const match = r.matchPercent || '-';
-    return '<tr><td class="emoji-cell">'+animal.emoji+'</td><td><span class="rarity-tag '+rClass+'">'+rLabel+'</span></td><td class="type-cell">'+animal.name+'</td><td style="color:var(--primary)">'+match+(typeof match==='number'?'%':'')+'</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+traits+'</td><td class="time-cell">'+ts+'</td><td><button class="del-btn" onclick="deleteResult(\''+r.id+'\')">删除</button></td></tr>';
+    const mbti = r.mbti || '-';
+    const bf = r.bfScores || {};
+    const bfText = (bf.Openness !== undefined || bf.Conscientiousness !== undefined || bf.Extraversion !== undefined || bf.Agreeableness !== undefined || bf.Neuroticism !== undefined)
+      ? 'O:'+(bf.Openness||'-')+' C:'+(bf.Conscientiousness||'-')+' E:'+(bf.Extraversion||'-')+' A:'+(bf.Agreeableness||'-')+' N:'+(bf.Neuroticism||'-')
+      : '-';
+    return '<tr><td class="emoji-cell">'+animal.emoji+'</td><td><span class="rarity-tag '+rClass+'">'+rLabel+'</span></td><td class="type-cell">'+mbti+'</td><td style="font-size:0.72rem;color:var(--muted)">'+bfText+'</td><td style="color:var(--primary)">'+match+(typeof match==='number'?'%':'')+'</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+traits+'</td><td class="time-cell">'+ts+'</td><td><button class="del-btn" onclick="deleteResult(\''+r.id+'\')">删除</button></td></tr>';
   }).join('');
   const pDiv = document.getElementById('pagination');
   pDiv.innerHTML = '';
@@ -395,12 +400,16 @@ function exportJSON() {
 }
 
 function exportCSV() {
-  const header = 'ID,动物,稀有度,匹配度,特质,时间\n';
+  const header = 'ID,动物,稀有度,MBTI,BigFive(O/C/E/A/N),匹配度,特质,时间\n';
   const rows = allResults.map(r=>{
     const animal = ALL_ANIMALS.find(a=>a.id===r.animalId)||{};
     const ts = new Date(r.submitted_at).toISOString();
     const traits = (r.animal&&r.animal.traits) ? r.animal.traits.join('|') : '';
-    return (r.id||'')+','+(animal.name||r.animalId||'')+','+(r.rarity&&r.rarity.name||'')+','+(r.matchPercent||'')+','+traits+','+ts;
+    const bf = r.bfScores || {};
+    const bfText = (bf.Openness !== undefined || bf.Conscientiousness !== undefined)
+      ? 'O:'+(bf.Openness||'-')+' C:'+(bf.Conscientiousness||'-')+' E:'+(bf.Extraversion||'-')+' A:'+(bf.Agreeableness||'-')+' N:'+(bf.Neuroticism||'-')
+      : '';
+    return (r.id||'')+','+(animal.name||r.animalId||'')+','+(r.rarity&&r.rarity.name||'')+','+(r.mbti||'')+','+bfText+','+(r.matchPercent||'')+','+traits+','+ts;
   });
   const blob = new Blob([header+rows.join('\n')],{type:'text/csv;charset=utf-8'});
   const link = document.createElement('a'); link.download='animal_results_'+Date.now()+'.csv'; link.href=URL.createObjectURL(blob); link.click();

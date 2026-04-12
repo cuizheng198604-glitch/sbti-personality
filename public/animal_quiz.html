@@ -374,6 +374,15 @@ function showResult() {
     window.location.href = 'animal_result.html';
   }, 1800);
 }
+
+// Expose needed functions globally for onclick handlers
+window.startQuiz = startQuiz;
+window.selectOpt = selectOpt;
+window.prevQ = prevQ;
+window.nextQ = nextQ;
+window.confirmExit = confirmExit;
+window.calcResult = calcResult;
+
 I18N.applyLang();
 })();
 </script>

@@ -51,12 +51,42 @@ function getRarityKey(r) {
 
 app.post('/api/results', function(req, res) {
   var data = req.body || {};
+  var resultType = data.resultType || 'animal';
+
+  if (resultType === 'personality') {
+    // 人格测试结果
+    var sbti_scores = data.sbti_scores || {};
+    var bf_scores = data.bf_scores || {};
+    var result = {
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      resultType: 'personality',
+      sbti_type: data.sbti_type || '',
+      rarity: data.rarity || 'common',
+      role: data.role || '',
+      element: data.element || '',
+      keywords: data.keywords || [],
+      stats: data.stats || {},
+      sbti_scores: sbti_scores,
+      bf_scores: bf_scores,
+      bigfive_total: data.bigfive_total || 0,
+      description: data.description || '',
+      submitted_at: new Date().toISOString()
+    };
+    results.unshift(result);
+    if (results.length > 50000) results = results.slice(0, 50000);
+    saveResults();
+    console.log('New: ' + result.sbti_type + ' | Total: ' + results.length);
+    return res.json({ success: true, id: result.id, total: results.length });
+  }
+
+  // 动物测试结果
   if (!data.animalId) return res.status(400).json({ error: 'Missing animalId' });
   var rarity = data.rarity;
   if (typeof rarity === 'object' && rarity !== null) rarity = rarity.name || 'common';
   if (typeof rarity !== 'string') rarity = 'common';
   var result = {
     id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    resultType: 'animal',
     animalId: String(data.animalId),
     animal: data.animal || {},
     rarity: rarity,

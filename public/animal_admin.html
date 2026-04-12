@@ -132,10 +132,13 @@ h1{font-size:1.1rem;font-weight:700}
       <button class="filter-btn" onclick="resetFilters()">重置</button>
       <button class="filter-btn danger-btn" onclick="clearAll()">🗑 清空全部</button>
     </div>
+    <div class="filter-row" style="margin-bottom:0.5rem">
+      <select id="filterType"><option value="">全部类型</option><option value="animal">🐾 动物测试</option><option value="personality">🎯 人格测试</option></select>
+    </div>
     <div style="overflow-x:auto">
       <table class="results-table">
-        <thead><tr><th>动物</th><th>稀有度</th><th>MBTI</th><th>Big Five 评分</th><th>匹配度</th><th>性格特质</th><th>提交时间</th><th>操作</th></tr></thead>
-        <tbody id="resultsBody"><tr><td colspan="8" class="empty-state">加载中...</td></tr></tbody>
+        <thead><tr><th>类型</th><th>MBTI</th><th>稀有度</th><th>角色/动物</th><th>维度评分</th><th>提交时间</th><th>操作</th></tr></thead>
+        <tbody id="resultsBody"><tr><td colspan="7" class="empty-state">加载中...</td></tr></tbody>
       </table>
     </div>
     <div class="pagination" id="pagination"></div>
@@ -303,12 +306,14 @@ function populateAnimalFilter() {
 }
 
 function getFiltered() {
+  const type = document.getElementById('filterType').value;
   const rarity = document.getElementById('filterRarity').value;
   const animal = document.getElementById('filterAnimal').value;
   const kw = document.getElementById('filterKeyword').value.trim().toLowerCase();
   return allResults.filter(r => {
+    if (type && r.resultType !== type) return false;
     if (rarity) {
-      const rr = r.rarity && r.rarity.name ? r.rarity.name.toLowerCase() : 'common';
+      const rr = r.rarity && r.rarity.name ? r.rarity.name.toLowerCase() : String(r.rarity || 'common').toLowerCase();
       if (rr !== rarity) return false;
     }
     if (animal && (r.animalId||'') !== animal) return false;
@@ -324,23 +329,37 @@ function loadResults(page) {
   const start = (page - 1) * PAGE_SIZE;
   const pageData = filtered.slice(start, start + PAGE_SIZE);
   const tbody = document.getElementById('resultsBody');
-  if (filtered.length === 0) { tbody.innerHTML = '<tr><td colspan="8" class="empty-state">暂无数据</td></tr>'; document.getElementById('pagination').innerHTML = ''; return; }
+  if (filtered.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="empty-state">暂无数据</td></tr>'; document.getElementById('pagination').innerHTML = ''; return; }
   tbody.innerHTML = pageData.map(r => {
     const dt = new Date(r.submitted_at);
     const ts = dt.getFullYear()+'-'+pad(dt.getMonth()+1)+'-'+pad(dt.getDate())+' '+pad(dt.getHours())+':'+pad(dt.getMinutes());
-    const animalId = r.animalId || '';
-    const animal = ALL_ANIMALS.find(a=>a.id===animalId) || {name:animalId,emoji:'🐾',rarity:'common'};
-    const rarityKey = r.rarity && r.rarity.name ? r.rarity.name.toLowerCase() : 'common';
-    const rClass = 'rt-' + rarityKey;
-    const rLabel = ANIMAL_META[rarityKey] ? ANIMAL_META[rarityKey].label : rarityKey;
-    const traits = (r.animal && r.animal.traits) ? r.animal.traits.join(' / ') : '-';
-    const match = r.matchPercent || '-';
-    const mbti = r.mbti || '-';
-    const bf = r.bfScores || {};
-    const bfText = (bf.Openness !== undefined || bf.Conscientiousness !== undefined || bf.Extraversion !== undefined || bf.Agreeableness !== undefined || bf.Neuroticism !== undefined)
-      ? 'O:'+(bf.Openness||'-')+' C:'+(bf.Conscientiousness||'-')+' E:'+(bf.Extraversion||'-')+' A:'+(bf.Agreeableness||'-')+' N:'+(bf.Neuroticism||'-')
-      : '-';
-    return '<tr><td class="emoji-cell">'+animal.emoji+'</td><td><span class="rarity-tag '+rClass+'">'+rLabel+'</span></td><td class="type-cell">'+mbti+'</td><td style="font-size:0.72rem;color:var(--muted)">'+bfText+'</td><td style="color:var(--primary)">'+match+(typeof match==='number'?'%':'')+'</td><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+traits+'</td><td class="time-cell">'+ts+'</td><td><button class="del-btn" onclick="deleteResult(\''+r.id+'\')">删除</button></td></tr>';
+
+    if (r.resultType === 'personality') {
+      // 人格测试结果
+      const rarityKey = String(r.rarity || 'common').toLowerCase();
+      const rClass = 'rt-' + rarityKey;
+      const rLabel = ANIMAL_META[rarityKey] ? ANIMAL_META[rarityKey].label : r.rarity || rarityKey;
+      const role = r.role || '-';
+      const bf = r.bf_scores || {};
+      const sbti = r.sbti_scores || {};
+      const dimsText = (sbti.Energy !== undefined ? 'E:'+sbti.Energy+' N:'+(sbti.Awareness||sbti.Awareness)+' F:'+(sbti.Decision||sbti.Decision)+' P:'+(sbti.Execution||sbti.Execution) : '-') +
+        ' | O:'+(bf.Openness||'-')+' C:'+(bf.Conscientiousness||'-')+' E:'+(bf.Extraversion||'-')+' A:'+(bf.Agreeableness||'-')+' N:'+(bf.Neuroticism||'-');
+      const kw = (r.keywords || []).join(' ');
+      return '<tr><td><span style="font-size:0.7rem;background:rgba(139,92,246,0.15);color:#a78bfa;padding:0.15rem 0.5rem;border-radius:8px">🎯 人格</span></td><td class="type-cell" style="color:var(--primary);font-weight:800">'+r.sbti_type+'</td><td><span class="rarity-tag '+rClass+'">'+rLabel+'</span></td><td style="font-size:0.82rem">'+role+'</td><td style="font-size:0.68rem;color:var(--muted);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+dimsText+'</td><td class="time-cell">'+ts+'</td><td><button class="del-btn" onclick="deleteResult(\''+r.id+'\')">删除</button></td></tr>';
+    } else {
+      // 动物测试结果
+      const animalId = r.animalId || '';
+      const animal = ALL_ANIMALS.find(a=>a.id===animalId) || {name:animalId,emoji:'🐾',rarity:'common'};
+      const rarityKey = r.rarity && r.rarity.name ? r.rarity.name.toLowerCase() : String(r.rarity || 'common').toLowerCase();
+      const rClass = 'rt-' + rarityKey;
+      const rLabel = ANIMAL_META[rarityKey] ? ANIMAL_META[rarityKey].label : rarityKey;
+      const mbti = r.mbti || '-';
+      const bf = r.bfScores || {};
+      const bfText = (bf.Openness !== undefined || bf.Conscientiousness !== undefined) ? 'O:'+(bf.Openness||'-')+' C:'+(bf.Conscientiousness||'-')+' E:'+(bf.Extraversion||'-')+' A:'+(bf.Agreeableness||'-')+' N:'+(bf.Neuroticism||'-') : '-';
+      const match = r.matchPercent || '-';
+      const traits = (r.animal && r.animal.traits) ? r.animal.traits.join(' / ') : '-';
+      return '<tr><td><span style="font-size:0.7rem;background:rgba(245,158,11,0.15);color:#f59e0b;padding:0.15rem 0.5rem;border-radius:8px">🐾 动物</span></td><td class="type-cell" style="font-weight:800">'+mbti+'</td><td><span class="rarity-tag '+rClass+'">'+rLabel+'</span></td><td>'+animal.emoji+' '+animal.name+'</td><td style="font-size:0.68rem;color:var(--muted)">'+bfText+'</td><td class="time-cell">'+ts+'</td><td><button class="del-btn" onclick="deleteResult(\''+r.id+'\')">删除</button></td></tr>';
+    }
   }).join('');
   const pDiv = document.getElementById('pagination');
   pDiv.innerHTML = '';
@@ -352,7 +371,7 @@ function loadResults(page) {
   if (currentPage < totalPages) pDiv.innerHTML += '<button class="page-btn" onclick="loadResults('+(currentPage+1)+')">→</button>';
 }
 
-function resetFilters() { document.getElementById('filterRarity').value=''; document.getElementById('filterAnimal').value=''; document.getElementById('filterKeyword').value=''; loadResults(1); }
+function resetFilters() { document.getElementById('filterType').value=''; document.getElementById('filterRarity').value=''; document.getElementById('filterAnimal').value=''; document.getElementById('filterKeyword').value=''; loadResults(1); }
 
 function deleteResult(id) {
   if (!confirm('确定删除这条记录？')) return;
@@ -400,19 +419,24 @@ function exportJSON() {
 }
 
 function exportCSV() {
-  const header = 'ID,动物,稀有度,MBTI,BigFive(O/C/E/A/N),匹配度,特质,时间\n';
+  const header = 'ID,类型,MBTI,稀有度,角色/动物,SBTI维度,BigFive维度,提交时间\n';
   const rows = allResults.map(r=>{
-    const animal = ALL_ANIMALS.find(a=>a.id===r.animalId)||{};
     const ts = new Date(r.submitted_at).toISOString();
-    const traits = (r.animal&&r.animal.traits) ? r.animal.traits.join('|') : '';
-    const bf = r.bfScores || {};
-    const bfText = (bf.Openness !== undefined || bf.Conscientiousness !== undefined)
-      ? 'O:'+(bf.Openness||'-')+' C:'+(bf.Conscientiousness||'-')+' E:'+(bf.Extraversion||'-')+' A:'+(bf.Agreeableness||'-')+' N:'+(bf.Neuroticism||'-')
-      : '';
-    return (r.id||'')+','+(animal.name||r.animalId||'')+','+(r.rarity&&r.rarity.name||'')+','+(r.mbti||'')+','+bfText+','+(r.matchPercent||'')+','+traits+','+ts;
+    if (r.resultType === 'personality') {
+      const sbti = r.sbti_scores || {};
+      const bf = r.bf_scores || {};
+      const sbtiText = 'E:'+(sbti.Energy||'-')+' N:'+(sbti.Awareness||'-')+' F:'+(sbti.Decision||'-')+' P:'+(sbti.Execution||'-');
+      const bfText = 'O:'+(bf.Openness||'-')+' C:'+(bf.Conscientiousness||'-')+' E:'+(bf.Extraversion||'-')+' A:'+(bf.Agreeableness||'-')+' N:'+(bf.Neuroticism||'-');
+      return (r.id||'')+',人格,'+(r.sbti_type||'')+','+(r.rarity||'')+','+(r.role||'')+','+sbtiText+','+bfText+','+ts;
+    } else {
+      const animal = ALL_ANIMALS.find(a=>a.id===r.animalId)||{};
+      const bf = r.bfScores || {};
+      const bfText = (bf.Openness !== undefined) ? 'O:'+(bf.Openness||'-')+' C:'+(bf.Conscientiousness||'-')+' E:'+(bf.Extraversion||'-')+' A:'+(bf.Agreeableness||'-')+' N:'+(bf.Neuroticism||'-') : '';
+      return (r.id||'')+',动物,'+(r.mbti||'')+','+(r.rarity&&r.rarity.name||r.rarity||'')+','+((animal.name||'')+' '+(r.animalId?'('+r.animalId+')':''))+','+bfText+','+ts;
+    }
   });
   const blob = new Blob([header+rows.join('\n')],{type:'text/csv;charset=utf-8'});
-  const link = document.createElement('a'); link.download='animal_results_'+Date.now()+'.csv'; link.href=URL.createObjectURL(blob); link.click();
+  const link = document.createElement('a'); link.download='all_results_'+Date.now()+'.csv'; link.href=URL.createObjectURL(blob); link.click();
   showAlert('CSV 导出成功', 'success');
 }
 

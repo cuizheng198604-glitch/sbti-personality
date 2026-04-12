@@ -300,4 +300,15 @@ function renderResult(answers) {
   h += '</div>';
 
   document.getElementById('resultContent').innerHTML = h;
+
+  // 提交到后端
+  submitResult({ sbti_type: tp, rarity: rar, role: meta.r, element: meta.e, keywords: meta.kw, stats: stats, sbti_scores: s, bf_scores: s, bigfive_total: s.Openness + s.Conscientiousness + s.Extraversion + s.Agreeableness + s.Neuroticism, description: genDesc(tp, s) });
+}
+
+function submitResult(data) {
+  fetch('https://fbti-new.onrender.com/api/results', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(Object.assign({}, data, { resultType: 'personality' }))
+  }).then(r => r.json()).then(d => console.log('Submitted:', d)).catch(e => console.error('Submit error:', e));
 }

@@ -109,6 +109,28 @@
     'rarity_epic': { zh: '💜 史诗', en: '💜 Epic' },
     'rarity_rare': { zh: '💎 稀有', en: '💎 Rare' },
     'rarity_common': { zh: '✨ 普通', en: '✨ Common' },
+
+    // ── 人格测试结果页 UI ──
+    'pt_result_prob': { zh: '出现概率', en: 'Appearance Rate' },
+    'pt_sbti_dims': { zh: 'SBTI 四维倾向', en: 'SBTI Four Dimensions' },
+    'pt_battle_attrs': { zh: '战斗属性', en: 'Battle Attributes' },
+    'pt_skills': { zh: '天赋技能', en: 'Talent Skills' },
+    'pt_bf_detail': { zh: 'Big Five 人格明细', en: 'Big Five Details' },
+    'pt_rarity_desc': { zh: '稀有度说明', en: 'Rarity Description' },
+    'pt_style_kw': { zh: '立绘风格关键词', en: 'Portrait Style Keywords' },
+    'pt_retest': { zh: '重新测试', en: 'Retake Test' },
+    'pt_core': { zh: '核心优势', en: 'Core Strengths' },
+    'pt_growth_blind': { zh: '成长盲区', en: 'Growth Blindspots' },
+    'pt_attr_atk': { zh: '攻击', en: 'ATK' },
+    'pt_attr_def': { zh: '防御', en: 'DEF' },
+    'pt_attr_hp': { zh: '生命', en: 'HP' },
+    'pt_attr_spd': { zh: '速度', en: 'SPD' },
+    'pt_attr_crit': { zh: '暴击', en: 'Crit' },
+    'pt_attr_dodge': { zh: '闪避', en: 'Dodge' },
+    'pt_energy': { zh: '能量倾向', en: 'Energy' },
+    'pt_awareness': { zh: '信息感知', en: 'Awareness' },
+    'pt_decision': { zh: '决策方式', en: 'Decision' },
+    'pt_execution': { zh: '执行方式', en: 'Execution' },
   };
 
   // ── 英语问卷题目（38题，与 cfg.questions 一一对应）──────────
@@ -239,6 +261,88 @@
     return EN_QUESTIONS;
   }
 
+  // ── 人格测试数据（英语版本）──────────────────────────────
+  function getPersonalityData(lang) {
+    if (lang !== 'en') return null;
+    return {
+      TYPES: {
+        ENTP:{r:'Inventor',   e:'Wind', kw:['Gear','Starry Sky','Floating Elements'],     cl:'#60a5fa'},
+        ENTJ:{r:'Commander',   e:'Fire', kw:['Chess Piece','Sword','Precision Machinery'], cl:'#f97316'},
+        ENFP:{r:'Adventurer',  e:'Light',kw:['Feather','Paintbrush','Rainbow'],           cl:'#f472b6'},
+        ENFJ:{r:'Mentor',      e:'Light',kw:['Halo','Wings','Warm Light'],                 cl:'#fbbf24'},
+        ESFP:{r:'Performer',   e:'Fire', kw:['Spotlight','Dancer','Petals'],              cl:'#fb923c'},
+        ESFJ:{r:'Consul',      e:'Earth',kw:['Badge','Shield','Order Light'],             cl:'#a3a3a3'},
+        ESTP:{r:'Entrepreneur', e:'Fire', kw:['Gold Coin','Map','Stallion'],               cl:'#fbbf24'},
+        ESTJ:{r:'Executive',    e:'Earth',kw:['Scale','Codex','Stone Pillar'],             cl:'#737373'},
+        INTP:{r:'Architect',    e:'Water',kw:['Blueprint','Crystal','Rational Light'],      cl:'#38bdf8'},
+        INTJ:{r:'Strategist',   e:'Water',kw:['Architecture','Moon','Cool Light FX'],       cl:'#818cf8'},
+        INFP:{r:'Mediator',     e:'Wind', kw:['Wings','Light','Dreamy Particles'],        cl:'#c084fc'},
+        INFJ:{r:'Advocate',     e:'Water',kw:['Moon','Tome','Starry Robe'],               cl:'#a78bfa'},
+        ISFP:{r:'Artist',       e:'Wind', kw:['Easel','Journey','Exotic Elements'],        cl:'#f0abfc'},
+        ISFJ:{r:'Defender',     e:'Earth',kw:['Flower Vine','Heart','Gentle Light'],      cl:'#86efac'},
+        ISTP:{r:'Virtuoso',     e:'Fire', kw:['Hammer','Toolbox','Furnace'],              cl:'#f87171'},
+        ISTJ:{r:'Logistician',  e:'Earth',kw:['Scale','Ledger','Sense of Order'],          cl:'#94a3b8'},
+      },
+      RC: {
+        Common:   {cls:'rt-common',   sc:'hs0', st:'★★☆☆☆', prob:'50%', fill:'#8a8a8a',
+          desc:'Your personality combination is quite common in the population, belonging to the largest base type. These people are solid and reliable, the stable force of society.'},
+        Rare:     {cls:'rt-rare',     sc:'hs1', st:'★★★☆☆', prob:'25%', fill:'#3b82f6',
+          desc:'Your personality combination is relatively rare, belonging to the less common types. This trait combination appears in only about a quarter of the population.'},
+        Special:  {cls:'rt-special',  sc:'hs2', st:'★★★★☆', prob:'15%', fill:'#9333ea',
+          desc:'Your personality combination is quite rare, a one-in-a-hundred type. This trait combination is fully expressed in only a small number of people.'},
+        Legendary:{cls:'rt-legendary',sc:'hs3', st:'★★★★★', prob:'10%', fill:'#f59e0b',
+          desc:'Your personality combination is Legendary level! Extremely rare, only one in ten people possesses this rare trait combination.'},
+      },
+      BFN: {Openness:'Openness', Conscientiousness:'Conscientiousness', Extraversion:'Extraversion', Agreeableness:'Agreeableness', Neuroticism:'Neuroticism'},
+      BFT: {
+        Openness:['Highly imaginative','Prefers art & new things','Sensitive to aesthetics'],
+        Conscientiousness:['Highly self-disciplined','Organized','Strong sense of responsibility'],
+        Extraversion:['Socially active','Gains energy from external world','Seeks stimulation'],
+        Agreeableness:['Trusts others','Helpful','Values cooperation'],
+        Neuroticism:['High emotional fluctuation','Sensitive to stress','Prone to anxiety'],
+      },
+      BSK: {
+        Openness:{h:['Infinite Possibility','CRIT DMG +30%, but CRIT Rate -5%'],m:['Inspiration','When speed < enemy, 25% chance to chase']},
+        Conscientiousness:{h:['Precision Strike','CRIT Rate +10%, once per battle'],m:['Steady Progress','CRIT Rate +5%, CRIT DMG -10%']},
+        Extraversion:{h:['Aura Suppression','20% chance to reduce enemy speed by 10%'],m:['Glory Moment','30% chance to boost next attack 50% DMG']},
+        Agreeableness:{h:['Guardian Heart','Absorbs one fatal hit for ally (once per battle)'],m:['Emotional Resonance','Healing +20%, share 5% of ally DMG taken']},
+        Neuroticism:{h:['Emotional Outburst','ATK +40% for 3 turns when HP <30%'],m:['Calm Analysis','15% chance to reduce 30% DMG taken']},
+      },
+      SSK: {
+        E:['Glory Moment','30% chance to boost next attack 50% DMG'],
+        I:['Deep Focus','DEF +5% per 10% HP lost'],
+        S:['Steady Progress','CRIT Rate +5%, CRIT DMG -10%'],
+        N:['Inspiration','When speed < enemy, 25% chance to chase'],
+        T:['Calm Analysis','15% chance to reduce 30% DMG taken'],
+        F:['Emotional Resonance','Healing +20%, share 5% ally DMG'],
+        J:['Plan Execution','ATK +15% at turn start if undamaged this turn'],
+        P:['Adaptive','Dodge Rate +8%, 20% chance to double attack'],
+      },
+      ROLE_DESC: {
+        INTJ:'Like an off-stage architect, constructing precise models of how the world operates — silent yet profound.',
+        INTP:'Like an explorer in a logic maze, chasing the truth of every paradox.',
+        INFJ:'Like a visionary, perceiving the unspoken emotional undercurrents behind words.',
+        INFP:'Like an idealistic bard, with a faint fire burning to change the world.',
+        ISTJ:'Like precisely meshing gears, every tooth fitting perfectly together.',
+        ISFJ:'Like a light left on for lost travelers at night, quiet and steadfast.',
+        ISTP:'Like a lone craftsman in the wilderness, solving any problem with tools.',
+        ISFP:'Like a wandering painter, weaving meaning into existence with color and moments.',
+        ENTJ:'Like a commander in wartime, born to win, deploying resources effortlessly.',
+        ENTP:'Like a mad alchemist, breaking any rule into new possibilities.',
+        ENFJ:'Like a soul mentor on stage, burning to illuminate others\' path.',
+        ENFP:'Like an unending flame, every breath seeking a new passion.',
+        ESTJ:'Like the cornerstone of an orderly society, building a kingdom with iron laws.',
+        ESFJ:'Like a festival organizer, connecting everyone through you.',
+        ESTP:'Like a warrior in the arena, fighting for victory every second.',
+        ESFP:'Like a star center stage, where enjoying the moment IS the meaning of life.',
+      },
+      genDesc_hi: ['Very high openness, unlimited creativity','Superb self-discipline and execution','Outstanding social skills','Strong empathy','Emotionally stable, peaceful mindset'],
+      genDesc_lo: ['Pragmatic and conservative','Casual in action','Draws energy from solitude','Struggles to say no to others','Emotionally sensitive, volatile'],
+      genDesc_str: '\nCore Strengths: ',
+      genDesc_wkl: '\nGrowth Blindspots: ',
+    };
+  }
+
   // ── 导出 ──────────────────────────────────────────────────
   window.I18N = {
     t: t,
@@ -252,6 +356,7 @@
     },
     getEnglishQuestions: getEnglishQuestions,
     detectLang: detectLang,
+    getPersonalityData: getPersonalityData,
   };
 
 })();

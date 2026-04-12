@@ -29,7 +29,7 @@ body{font-family:Segoe UI,PingFang SC,Microsoft YaHei,sans-serif;background:var(
 .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:10px;padding:0.6rem 2rem;font-size:0.85rem;cursor:pointer;transition:all 0.15s}
 .btn-ghost:hover{background:var(--card);color:var(--text)}
 
-/* ── 答题�?── */
+/* ── 答题页 ── */
 #quizScreen{display:none;min-height:100vh}
 .quiz-header{background:linear-gradient(135deg,#0d1525,#111d32);border-bottom:1px solid var(--border);padding:0.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;position:sticky;top:0;z-index:10}
 .qh-left{display:flex;align-items:center;gap:0.8rem}
@@ -57,14 +57,14 @@ body{font-family:Segoe UI,PingFang SC,Microsoft YaHei,sans-serif;background:var(
 .btn-back{padding:0.65rem 1.2rem;background:#111d32;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:0.9rem;cursor:pointer;transition:all 0.15s}
 .btn-back:hover{background:#1e3050;color:var(--text)}
 
-/* ── 加载�?── */
+/* ── 加载页 ── */
 #loadingScreen{display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;padding:2rem}
 .loading-emoji{font-size:3rem;animation:bounce 1s infinite}
 @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 .loading-text{color:var(--muted);font-size:0.9rem;margin-top:1rem;animation:pulse 1.5s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 
-/* ── 答题页广�?── */
+/* ── 答题页广告 ── */
 .ad-container{margin:0.5rem auto;max-width:700px}
 .quiz-ad{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:0.8rem;display:flex;align-items:center;gap:0.8rem;margin:0.5rem 0}
 .quiz-ad-label{background:rgba(245,158,11,0.1);color:var(--primary);padding:0.15rem 0.5rem;border-radius:4px;font-size:0.65rem;font-weight:700;flex-shrink:0}
@@ -80,26 +80,26 @@ body{font-family:Segoe UI,PingFang SC,Microsoft YaHei,sans-serif;background:var(
   <div class="start-card">
     <div class="start-emoji" data-i18n="quiz_emoji">🐾</div>
     <h1 class="start-title" data-i18n="quiz_title">动物性格测试</h1>
-    <p class="start-subtitle" data-i18n="quiz_subtitle">MBTI已过时，动物人格才是新潮�?/p>
+    <p class="start-subtitle" data-i18n="quiz_subtitle">MBTI已过时，动物人格才是新潮流</p>
     <div class="start-desc" data-i18n-html="quiz_desc">
-      基于 <strong>MBTI</strong> + <strong>Big Five</strong> 双维度人格理论，结合东方动物哲学全新设计�?br><br>
-      不同动物有不同性格—�?strong>龙的威严、狐狸的机智、考拉的淡�?/strong>�?br>
-      38道题，揭开你内心最真实的动物面孔�?
+      基于 <strong>MBTI</strong> + <strong>Big Five</strong> 双维度人格理论，结合东方动物哲学全新设计。<br><br>
+      不同动物有不同性格——<strong>龙的威严、狐狸的机智、考拉的淡定</strong>。<br>
+      38道题，揭开你内心最真实的动物面孔。
     </div>
     <div class="info-grid">
-      <div class="info-item"><div class="info-n" data-i18n="quiz_q_count">题目�?/div><div class="info-v">38�?/div></div>
+      <div class="info-item"><div class="info-n" data-i18n="quiz_q_count">题目数</div><div class="info-v">38题</div></div>
       <div class="info-item"><div class="info-n" data-i18n="quiz_duration">预计用时</div><div class="info-v">5-8分钟</div></div>
-      <div class="info-item"><div class="info-n" data-i18n="quiz_result_types">结果类型</div><div class="info-v">17种动�?/div></div>
-      <div class="info-item"><div class="info-n" data-i18n="quiz_rarity">稀有度</div><div class="info-v">4级掉�?/div></div>
+      <div class="info-item"><div class="info-n" data-i18n="quiz_result_types">结果类型</div><div class="info-v">17种动物</div></div>
+      <div class="info-item"><div class="info-n" data-i18n="quiz_rarity">稀有度</div><div class="info-v">4级掉落</div></div>
     </div>
     <div class="btn-group">
-      <button class="btn-start" data-i18n="quiz_start" onclick="startQuiz()">🐾 开始测�?/button>
+      <button class="btn-start" data-i18n="quiz_start" onclick="startQuiz()">🐾 开始测试</button>
       <button class="btn-ghost" data-i18n="quiz_try" onclick="startQuiz()">好奇试试</button>
     </div>
   </div>
 </div>
 
-<!-- 答题�?-->
+<!-- 答题页 -->
 <div id="quizScreen">
   <div class="quiz-header">
     <div class="qh-left">
@@ -110,12 +110,12 @@ body{font-family:Segoe UI,PingFang SC,Microsoft YaHei,sans-serif;background:var(
       <div class="pg-bar"><div class="pg-fill" id="pgFill" style="width:0%"></div></div>
       <div class="pg-text" id="pgText">0 / 38</div>
     </div>
-    <button class="btn-back" onclick="confirmExit()" data-i18n="quiz_exit">退�?/button>
+    <button class="btn-back" onclick="confirmExit()" data-i18n="quiz_exit">退出</button>
   </div>
   <div class="quiz-body" id="quizBody"></div>
 </div>
 
-<!-- 加载�?-->
+<!-- 加载页 -->
 <div id="loadingScreen">
   <div class="loading-emoji">🐾</div>
   <div class="loading-text" data-i18n="quiz_loading">正在分析你的动物人格...</div>
@@ -143,15 +143,15 @@ const SECTION_LABELS = isEnglish
       O:'BigFive · Openness', C:'BigFive · Conscientiousness', E:'BigFive · Extraversion',
       A:'BigFive · Agreeableness', N:'BigFive · Neuroticism' }
   : { EI:'MBTI · 能量倾向', NS:'MBTI · 信息感知', FT:'MBTI · 决策方式', JP:'MBTI · 执行方式',
-      O:'BigFive · 开放�?, C:'BigFive · 尽责�?, E:'BigFive · 外向�?,
-      A:'BigFive · 宜人�?, N:'BigFive · 神经�? };
+      O:'BigFive · 开放性', C:'BigFive · 尽责性', E:'BigFive · 外向性',
+      A:'BigFive · 宜人性', N:'BigFive · 神经质' };
 
-const NEXT_BTN = isEnglish ? 'Next �? : '下一�?�?;
+const NEXT_BTN = isEnglish ? 'Next →' : '下一题 →';
 const SUBMIT_BTN = isEnglish ? '🔮 View Result' : '🔮 查看结果';
-const PREV_BTN = isEnglish ? 'Previous' : '上一�?;
+const PREV_BTN = isEnglish ? 'Previous' : '上一题';
 const EXIT_CONFIRM = isEnglish
   ? 'Are you sure you want to exit? Progress will not be saved.'
-  : '确定退出吗？进度将不会保存�?;
+  : '确定退出吗？进度将不会保存。';
 const LOADING_TEXT = isEnglish ? 'Analyzing your animal personality...' : '正在分析你的动物人格...';
 
 function getSectionLabel(q) {
@@ -185,15 +185,15 @@ function showQuestion(index) {
 
   body.innerHTML = `
     <div class="q-block">
-      <div class="q-meta">\${getSectionLabel(q)} · \${isEnglish ? 'Q' + (index + 1) : '�?+(index+1)+'�?}</div>
+      <div class="q-meta">\${getSectionLabel(q)} · \${isEnglish ? 'Q' + (index + 1) : '第'+(index+1)+'题'}</div>
       <div class="q-text">\${q.text}</div>
       <div class="q-opts">
-        \${q.opts.map((o, i) => `
+        \${q.opts.map((o, i) => \`
           <div class="q-opt" onclick="selectOpt(\${i}, \${o.s})">
             <span class="ol">\${o.l}</span>
             <span>\${o.t}</span>
           </div>
-        `).join('')}
+        \`).join('')}
       </div>
     </div>
     <div class="ad-container" id="qAdContainer"></div>
@@ -211,7 +211,7 @@ function showQuestion(index) {
     });
     document.getElementById('nextBtn').disabled = false;
   }
-  // �?题显示广�?
+  // 每5题显示广告
   const adContainer = document.getElementById('qAdContainer');
   if (adContainer) {
     if ((index + 1) % 5 === 0 && index < total - 1) {
@@ -260,10 +260,10 @@ function confirmExit() {
 }
 
 // ══════════════════════════════════════
-//  计分引擎：MBTI + BigFive �?动物
+//  计分引擎：MBTI + BigFive → 动物
 // ══════════════════════════════════════
 function calcResult() {
-  // 1. 分别累计各维度总分和题�?
+  // 1. 分别累计各维度总分和题数
   const mbti_scores = { E:0, I:0, N:0, S:0, F:0, T:0, J:0, P:0 };
   const mbti_counts = { E:0, I:0, N:0, S:0, F:0, T:0, J:0, P:0 };
   const bf_scores  = { Openness:0, Conscientiousness:0, Extraversion:0, Agreeableness:0, Neuroticism:0 };
@@ -300,7 +300,7 @@ function calcResult() {
     return pos >= neg_score ? d : {E:'I',N:'S',F:'T',J:'P'}[d];
   }).join('');
 
-  // 3. 用BigFive五维找最匹配的动�?
+  // 3. 用BigFive五维找最匹配的动物
   let bestAnimal = null;
   let bestSimilarity = -1;
 
@@ -321,7 +321,7 @@ function calcResult() {
   const matchPercent = Math.round(bestSimilarity);
   const rarity = bestAnimal.rarity;
 
-  // 4. 找次要动�?
+  // 4. 找次要动物
   const sorted = cfg.animals.map(a => {
     const p = a.profile;
     let sim = 0;

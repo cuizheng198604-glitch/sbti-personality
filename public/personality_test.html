@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SBTI x Big Five 人格测试</title>
+<script src="lang.js"></script>
 <style>
 :root{--bg:#0f0f1a;--panel:#13132a;--card:#1a1a2e;--border:#2d2d4a;--text:#e2e8f0;--muted:#64748b;--dim:#94a3b8;--c:#8a8a8a;--r:#3b82f6;--s:#9333ea;--l:#f59e0b;}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -95,21 +96,21 @@ body{font-family:Segoe UI,PingFang SC,Microsoft YaHei,sans-serif;background:var(
 <body>
 <div id="startScreen">
   <div class="start-card">
-    <h1>SBTI x Big Five 人格测试</h1>
-    <p class="subtitle">36道题  测出你的稀有人格</p>
-    <div class="start-desc">
+    <h1 data-i18n="pt_title">SBTI x Big Five 人格测试</h1>
+    <p class="subtitle" data-i18n="pt_subtitle">36道题  测出你的稀有人格</p>
+    <div class="start-desc" data-i18n-html="pt_desc">
       本测试融合 <strong>SBTI 四维</strong>与<strong>Big Five 大五人格</strong>两大体系，<br>
       通过36道情境选择题，评估你在四大核心维度和五大人格特质上的倾向。<br><br>
       测试结束后，将根据你的性格组合计算<strong>稀有度评级</strong>，<br>
       并用<strong>游戏角色风格</strong>为你生成一份完整的人格档案。
     </div>
     <div class="info-grid">
-      <div class="info-item"><div class="info-n">题目数量</div><div class="info-v">36 题</div></div>
-      <div class="info-item"><div class="info-n">测试用时</div><div class="info-v">约 5-8 分钟</div></div>
-      <div class="info-item"><div class="info-n">涵盖维度</div><div class="info-v">SBTI + Big Five</div></div>
-      <div class="info-item"><div class="info-n">输出内容</div><div class="info-v">稀有度 + 角色描述</div></div>
+      <div class="info-item"><div class="info-n" data-i18n="pt_q_count">题目数量</div><div class="info-v">36 题</div></div>
+      <div class="info-item"><div class="info-n" data-i18n="pt_duration">测试用时</div><div class="info-v">约 5-8 分钟</div></div>
+      <div class="info-item"><div class="info-n" data-i18n="pt_dims">涵盖维度</div><div class="info-v">SBTI + Big Five</div></div>
+      <div class="info-item"><div class="info-n" data-i18n="pt_output">输出内容</div><div class="info-v" data-i18n="pt_output_val">稀有度 + 角色描述</div></div>
     </div>
-    <button class="btn-primary" id="btnStart">开始测试</button>
+    <button class="btn-primary" id="btnStart" data-i18n="pt_start">开始测试</button>
   </div>
 </div>
 <div id="testScreen">
@@ -584,6 +585,7 @@ function submitResult() {
     btn.disabled = false;
   });
 }
+if (window.I18N) I18N.applyLang();
 </script>
 </body>
 </html>

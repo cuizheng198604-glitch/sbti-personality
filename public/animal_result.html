@@ -151,6 +151,8 @@ body{font-family:Segoe UI,PingFang SC,Microsoft YaHei,sans-serif;background:var(
 </div>
 
 <script src="animal_config.js"></script>
+<script src="lang.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 
 <script>
 // ── 解析结果（优先 sessionStorage → localStorage → URL）──
@@ -198,17 +200,31 @@ function getDefaultResult() {
 
 var cfg = window.ANIMAL_CONFIG || { animals: [{id:'fox',name:'狐狸',emoji:'🦊',rarity:'common',traits:['聪明','灵活'],description:'狐狸',strength:'聪明',weakness:'有时狡猾',bestMatch:[],worstMatch:[],profile:{Openness:70,Conscientiousness:60,Extraversion:65,Agreeableness:55,Neuroticism:45}, share:{quizUrl:'https://www.fbti.net'}}], rarities: { common:{name:'普通',stars:1,color:'#888'}, rare:{name:'稀有',stars:3,color:'#4ade80'}, epic:{name:'史诗',stars:4,color:'#a78bfa'}, legendary:{name:'传说',stars:5,color:'#fbbf24'} }, share:{quizUrl:'https://www.fbti.net'}, ads:{enabled:false} };
 
+// ── 语言感知的 BF_LABELS ─────────────────────
+function getBFLabels(lang) {
+  if (lang === 'en') {
+    return {
+      Openness: 'Openness', Conscientiousness: 'Conscientiousness',
+      Extraversion: 'Extraversion', Agreeableness: 'Agreeableness', Neuroticism: 'Neuroticism'
+    };
+  }
+  return {
+    Openness: '开放性', Conscientiousness: '尽责性',
+    Extraversion: '外向性', Agreeableness: '宜人性', Neuroticism: '神经质'
+  };
+}
+
 // ── 渲染结果 ──
 function renderResult(result) {
   const { animal, matchPercent, rarity, secondAnimal, thirdAnimal, mbti, bfScores } = result;
   const screen = document.getElementById('resultScreen');
-
+  const lang = I18N ? I18N.getLang() : 'zh';
+  const BF_LABELS = getBFLabels(lang);
   const stars = '★'.repeat(rarity.stars) + '☆'.repeat(5 - rarity.stars);
 
-  // BigFive维度中文名
-  const BF_LABELS = {
-    Openness:'开放性', Conscientiousness:'尽责性',
-    Extraversion:'外向性', Agreeableness:'宜人性', Neuroticism:'神经质'
+  const t = function(k) {
+    if (!I18N) return k;
+    return I18N.t(k);
   };
 
   const bfBars = Object.entries(bfScores || {}).map(([dim, val]) => `
@@ -228,7 +244,7 @@ function renderResult(result) {
         <div class="stars" style="color:${rarity.color}">${stars}</div>
       </div>
       ${mbti ? `<div class="bf-names"><span class="bf-mbti-badge">${mbti}</span></div>` : ''}
-      <div class="hero-match">与该动物匹配度 ${matchPercent}%</div>
+      <div class="hero-match">${t('result_match')} ${matchPercent}%</div>
       <div class="hero-traits">
         ${animal.traits.map(t => `<span class="trait-tag">${t}</span>`).join('')}
       </div>
@@ -237,31 +253,31 @@ function renderResult(result) {
 
     <!-- BigFive五维 -->
     <div class="bf-section">
-      <div class="section-title">Big Five 人格维度</div>
+      <div class="section-title">${t('result_bf')}</div>
       <div class="bf-grid">${bfBars}</div>
     </div>
 
     <!-- 详细解读 -->
     <div class="detail-section">
-      <div class="section-title">性格解析</div>
+      <div class="section-title">${lang === 'en' ? 'Personality Analysis' : '性格解析'}</div>
       <div class="detail-row">
         <div class="detail-icon">💪</div>
         <div class="detail-content">
-          <div class="detail-label">核心优势</div>
+          <div class="detail-label">${t('result_core')}</div>
           <div class="detail-text">${animal.strength}</div>
         </div>
       </div>
       <div class="detail-row">
         <div class="detail-icon">⚡</div>
         <div class="detail-content">
-          <div class="detail-label">潜在短板</div>
+          <div class="detail-label">${t('result_weakness')}</div>
           <div class="detail-text">${animal.weakness}</div>
         </div>
       </div>
       <div class="detail-row">
         <div class="detail-icon">🔮</div>
         <div class="detail-content">
-          <div class="detail-label">人生关键词</div>
+          <div class="detail-label">${t('result_life')}</div>
           <div class="detail-text">${animal.keyword}</div>
         </div>
       </div>
@@ -269,33 +285,33 @@ function renderResult(result) {
 
     <!-- 匹配推荐 -->
     <div class="match-section">
-      <div class="section-title">动物匹配度</div>
+      <div class="section-title">${t('result_relationship')}</div>
       <div class="match-grid">
-        ${secondAnimal ? `<div class="match-item"><div class="match-emoji">${secondAnimal.emoji}</div><div class="match-label">最佳搭档</div><div class="match-name">${secondAnimal.name}</div></div>` : ''}
-        ${thirdAnimal ? `<div class="match-item"><div class="match-emoji">${thirdAnimal.emoji}</div><div class="match-label">性格相近</div><div class="match-name">${thirdAnimal.name}</div></div>` : ''}
+        ${secondAnimal ? `<div class="match-item"><div class="match-emoji">${secondAnimal.emoji}</div><div class="match-label">${lang==='en'?'Best Match':'最佳搭档'}</div><div class="match-name">${secondAnimal.name}</div></div>` : ''}
+        ${thirdAnimal ? `<div class="match-item"><div class="match-emoji">${thirdAnimal.emoji}</div><div class="match-label">${lang==='en'?'Similar':'性格相近'}</div><div class="match-name">${thirdAnimal.name}</div></div>` : ''}
       </div>
     </div>
 
     <!-- 广告位：顶部 -->
     <div class="ad-container" id="adResultTop">
       <div class="result-ad">
-        <div class="result-ad-label">广告</div>
+        <div class="result-ad-label">${lang==='en'?'Ad':'广告'}</div>
         <div class="result-ad-inner">
-          <div class="result-ad-text">10道题测出你的动物人格，朋友都在玩</div>
-          <div class="result-ad-btn" onclick="location.href='animal_quiz.html'">开始测试</div>
+          <div class="result-ad-text">${lang==='en'?'10 questions reveal your animal personality!':'10道题测出你的动物人格，朋友都在玩'}</div>
+          <div class="result-ad-btn" onclick="location.href='animal_quiz.html'">${lang==='en'?'Start Test':'开始测试'}</div>
         </div>
       </div>
     </div>
 
     <!-- 分享卡片 -->
     <div class="share-section">
-      <div class="section-title" style="text-align:center;border-bottom:none;padding-bottom:0">🌟 分享你的动物人格</div>
+      <div class="section-title" style="text-align:center;border-bottom:none;padding-bottom:0">${lang==='en'?'🌟 Share Your Animal Personality':'🌟 分享你的动物人格'}</div>
       <div class="share-card-wrap">
         <div class="share-card" id="shareCard">
           <div class="sc-bg" style="background:${rarity.gradient}">
             <div class="sc-overlay">
               <div class="sc-top">
-                <span class="sc-badge" style="background:rgba(0,0,0,0.3);color:#fff">🐾 动物性格测试</span>
+                <span class="sc-badge" style="background:rgba(0,0,0,0.3);color:#fff">🐾 ${lang==='en'?'Animal Personality Test':'动物性格测试'}</span>
                 <span class="sc-badge" style="background:rgba(0,0,0,0.3);color:#fff">${rarity.emoji} ${rarity.name}</span>
               </div>
               <div class="sc-animal">${animal.emoji}</div>
@@ -306,14 +322,14 @@ function renderResult(result) {
               <div class="sc-traits">${animal.traits.map(t => `<span class="sc-trait">${t}</span>`).join('')}</div>
               <div class="sc-desc">${(animal.description||'').substring(0, 80)}...</div>
               <div class="sc-url">🔗 <span id="scQuizUrl">${(cfg && cfg.share && cfg.share.quizUrl) || 'https://www.fbti.net'}</span></div>
-              <div class="sc-footer">长按识别二维码 → 测测你的动物人格</div>
+              <div class="sc-footer">${lang==='en'?'Scan the QR code → Test your animal personality':'长按识别二维码 → 测测你的动物人格'}</div>
             </div>
           </div>
         </div>
         <div class="share-actions">
-          <button class="share-btn save" onclick="showAdOverlay('save')">📥 保存图片</button>
-          <button class="share-btn wechat" onclick="showAdOverlay('wechat')">💬 分享微信</button>
-          <button class="share-btn qr" onclick="showAdOverlay('qr')">📱 二维码</button>
+          <button class="share-btn save" onclick="showAdOverlay('save')">📥 ${lang==='en'?'Save Image':'保存图片'}</button>
+          <button class="share-btn wechat" onclick="showAdOverlay('wechat')">💬 ${lang==='en'?'Share WeChat':'分享微信'}</button>
+          <button class="share-btn qr" onclick="showAdOverlay('qr')">📱 ${lang==='en'?'QR Code':'二维码'}</button>
         </div>
       </div>
     </div>
@@ -322,15 +338,15 @@ function renderResult(result) {
     <div class="feature-btns" style="display:flex;gap:0.8rem;max-width:500px;margin:1.5rem auto;padding:0 1.5rem">
       <button class="feat-btn" onclick="location.href='animal_match.html'" style="flex:1;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:0.8rem;display:flex;flex-direction:column;align-items:center;gap:0.3rem;cursor:pointer;color:var(--dim);font-size:0.75rem;transition:all 0.15s">
         <span style="font-size:1.5rem">💑</span>
-        <span>关系配对</span>
+        <span>${lang==='en'?'Relationship':'关系配对'}</span>
       </button>
       <button class="feat-btn" onclick="location.href='animal_daily.html'" style="flex:1;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:0.8rem;display:flex;flex-direction:column;align-items:center;gap:0.3rem;cursor:pointer;color:var(--dim);font-size:0.75rem;transition:all 0.15s">
         <span style="font-size:1.5rem">🎰</span>
-        <span>每日抽卡</span>
+        <span>${lang==='en'?'Daily Gacha':'每日抽卡'}</span>
       </button>
       <button class="feat-btn" onclick="location.href='animal_quiz.html'" style="flex:1;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:0.8rem;display:flex;flex-direction:column;align-items:center;gap:0.3rem;cursor:pointer;color:var(--dim);font-size:0.75rem;transition:all 0.15s">
         <span style="font-size:1.5rem">🔄</span>
-        <span>重新测试</span>
+        <span>${lang==='en'?'Retake':'重新测试'}</span>
       </button>
     </div>
 
@@ -343,64 +359,42 @@ function renderResult(result) {
     </div>
 
     <!-- 私域引流 -->
-    <div class="traffic-section" id="trafficSection">
+    <div class="traffic-section" id="trafficSection1">
       <div class="traffic-header">
         <span class="traffic-icon">🔑</span>
-        <div class="traffic-title">解锁完整版动物分析</div>
+        <div class="traffic-title">${lang==='en'?'Unlock Full Animal Analysis':'解锁完整版动物分析'}</div>
       </div>
       <div class="traffic-entries">
         <div class="traffic-entry">
           <div class="entry-icon">📮</div>
           <div class="entry-info">
-            <div class="entry-title">关注公众号</div>
-            <div class="entry-desc">回复【动物】获取完整性格报告</div>
+            <div class="entry-title">${lang==='en'?'Follow Official Account':'关注公众号'}</div>
+            <div class="entry-desc">${lang==='en'?'Reply【Animal】for full report':'回复【动物】获取完整性格报告'}</div>
           </div>
         </div>
       </div>
       <div class="traffic-benefit">
-        <div class="benefit-item">✓ 完整版动物人格分析</div>
-        <div class="benefit-item">✓ MBTI + BigFive 详细报告</div>
-        <div class="benefit-item">✓ 17种动物性格详解</div>
-        <div class="benefit-item">✓ 动物配对指数查询</div>
-      </div>
-    </div>
-
-    <!-- 私域引流 + 广告 -->
-    <div class="traffic-section" id="trafficSection">
-      <div class="traffic-header">
-        <span class="traffic-icon">🔑</span>
-        <div class="traffic-title">解锁完整版动物分析</div>
-      </div>
-      <div class="traffic-entries">
-        <div class="traffic-entry">
-          <div class="entry-icon">📮</div>
-          <div class="entry-info">
-            <div class="entry-title">关注公众号</div>
-            <div class="entry-desc">回复【动物】获取完整分析报告</div>
-          </div>
-        </div>
-      </div>
-      <div class="traffic-benefit">
-        <div class="benefit-item">✓ 完整版动物人格分析</div>
-        <div class="benefit-item">✓ MBTI + BigFive 详细报告</div>
-        <div class="benefit-item">✓ 17种动物性格详解</div>
+        <div class="benefit-item">✓ ${lang==='en'?'Full Animal Personality Analysis':'完整版动物人格分析'}</div>
+        <div class="benefit-item">✓ ${lang==='en'?'MBTI + BigFive Detailed Report':'MBTI + BigFive 详细报告'}</div>
+        <div class="benefit-item">✓ ${lang==='en'?'17 Animal Types Explained':'17种动物性格详解'}</div>
+        <div class="benefit-item">✓ ${lang==='en'?'Animal Match Index Query':'动物配对指数查询'}</div>
       </div>
     </div>
 
     <!-- 广告位：底部 -->
     <div class="ad-container" id="adResultBottom">
       <div class="result-ad">
-        <div class="result-ad-label">广告</div>
+        <div class="result-ad-label">${lang==='en'?'Ad':'广告'}</div>
         <div class="result-ad-inner">
-          <div class="result-ad-text">测测你更像哪种动物？10道题揭秘真实性格</div>
-          <div class="result-ad-btn" onclick="location.href='animal_quiz.html'">重新测试</div>
+          <div class="result-ad-text">${lang==='en'?'Which animal are you most like? 10 questions reveal your true personality!':'测测你更像哪种动物？10道题揭秘真实性格'}</div>
+          <div class="result-ad-btn" onclick="location.href='animal_quiz.html'">${lang==='en'?'Retake Test':'重新测试'}</div>
         </div>
       </div>
     </div>
 
     <div class="disclaimer">
-      本测试仅供娱乐，请勿当真。<br>
-      © 动物性格测试 · MBTI × BigFive × 动物人格
+      ${lang==='en'?'This test is for entertainment only.':'本测试仅供娱乐，请勿当真。'}<br>
+      ${lang==='en'?'© Animal Personality Test · MBTI × BigFive × Animal Personalities':'© 动物性格测试 · MBTI × BigFive × 动物人格'}
     </div>
   `;
 
@@ -416,44 +410,44 @@ function renderResult(result) {
 function showAdOverlay(type) {
   const overlay = document.getElementById('adOverlay');
   const content = document.getElementById('adOverlayContent');
+  const lang = I18N ? I18N.getLang() : 'zh';
 
   if (type === 'qr') {
     content.innerHTML = `
-      <div class="ad-overlay-title">📱 分享到朋友圈</div>
-      <div class="ad-overlay-desc">长按识别二维码保存到相册</div>
+      <div class="ad-overlay-title">📱 ${lang==='en'?'Share to Timeline':'分享到朋友圈'}</div>
+      <div class="ad-overlay-desc">${lang==='en'?'Long press QR code to save to album':'长按识别二维码保存到相册'}</div>
       <div class="ad-overlay-qr" id="qrTarget"></div>
-      <div class="ad-overlay-note">截图保存，发给朋友测试效果更好</div>
+      <div class="ad-overlay-note">${lang==='en'?'Screenshot and share with friends':'截图保存，发给朋友测试效果更好'}</div>
     `;
     overlay.classList.add('show');
-    // 生成二维码
     setTimeout(function() {
       var target = document.getElementById('qrTarget');
-      var quizUrl = cfg.share.quizUrl;
+      var quizUrl = cfg.share ? cfg.share.quizUrl : window.location.href;
       if (target && typeof QRCode !== 'undefined') { target.innerHTML = ''; new QRCode(target, { text: quizUrl, width: 160, height: 160, colorDark: "#000000", colorLight: "#ffffff" }); }
     }, 50);
   } else if (type === 'save') {
     content.innerHTML = `
-      <div class="ad-overlay-title">📥 保存图片</div>
-      <div class="ad-overlay-desc">生成你的专属分享图</div>
-      <button class="ad-overlay-btn" onclick="closeAdOverlay();downloadCard()">立即生成并保存</button>
-      <div class="ad-overlay-note">图片包含你的动物类型，可直接发朋友圈</div>
+      <div class="ad-overlay-title">📥 ${lang==='en'?'Save Image':'保存图片'}</div>
+      <div class="ad-overlay-desc">${lang==='en'?'Generate your exclusive share card':'生成你的专属分享图'}</div>
+      <button class="ad-overlay-btn" onclick="closeAdOverlay();downloadCard()">${lang==='en'?'Generate & Save':'立即生成并保存'}</button>
+      <div class="ad-overlay-note">${lang==='en'?'Image includes your animal type, shareable to Moments':'图片包含你的动物类型，可直接发朋友圈'}</div>
     `;
     overlay.classList.add('show');
   } else if (type === 'wechat') {
     content.innerHTML = `
-      <div class="ad-overlay-title">💬 分享给好友</div>
-      <div class="ad-overlay-desc">复制链接发给好友</div>
-      <div class="ad-overlay-url" id="shareUrlText">${cfg.share.quizUrl}</div>
-      <button class="ad-overlay-btn" onclick="copyShareUrl()">📋 复制链接</button>
+      <div class="ad-overlay-title">💬 ${lang==='en'?'Share with Friends':'分享给好友'}</div>
+      <div class="ad-overlay-desc">${lang==='en'?'Copy link and send to friends':'复制链接发给好友'}</div>
+      <div class="ad-overlay-url" id="shareUrlText">${cfg.share ? cfg.share.quizUrl : window.location.href}</div>
+      <button class="ad-overlay-btn" onclick="copyShareUrl()">📋 ${lang==='en'?'Copy Link':'复制链接'}</button>
       <div style="margin-top:0.8rem">
         <div class="ad-overlay-qr" id="qrTarget2"></div>
       </div>
-      <div class="ad-overlay-note">长按二维码保存图片发朋友圈</div>
+      <div class="ad-overlay-note">${lang==='en'?'Long press QR code to save and share':'长按二维码保存图片发朋友圈'}</div>
     `;
     overlay.classList.add('show');
     setTimeout(function() {
       var target = document.getElementById('qrTarget2');
-      var quizUrl = cfg.share.quizUrl;
+      var quizUrl = cfg.share ? cfg.share.quizUrl : window.location.href;
       if (target && typeof QRCode !== 'undefined') { target.innerHTML = ''; new QRCode(target, { text: quizUrl, width: 140, height: 140, colorDark: "#000000", colorLight: "#ffffff" }); }
     }, 50);
   }
@@ -464,30 +458,32 @@ function closeAdOverlay() {
 }
 
 function copyShareUrl() {
-  var url = cfg.share.quizUrl || document.getElementById('shareUrlText').textContent;
+  var lang = I18N ? I18N.getLang() : 'zh';
+  var url = cfg.share ? cfg.share.quizUrl : document.getElementById('shareUrlText') ? document.getElementById('shareUrlText').textContent : window.location.href;
   if (navigator.clipboard) {
     navigator.clipboard.writeText(url).then(function() {
-      alert('链接已复制！粘贴发送给好友');
+      alert(lang==='en' ? 'Link copied! Paste and send to friends.' : '链接已复制！粘贴发送给好友');
     }).catch(function() {
-      prompt('链接：', url);
+      prompt(lang==='en' ? 'Link (Ctrl+C to copy):' : '链接（Ctrl+C复制）：', url);
     });
   } else {
-    prompt('链接（Ctrl+C复制）：', url);
+    prompt(lang==='en' ? 'Link (Ctrl+C to copy):' : '链接（Ctrl+C复制）：', url);
   }
 }
 
 function downloadCard() {
+  var lang = I18N ? I18N.getLang() : 'zh';
   const card = document.getElementById('shareCard');
   if (!card) return;
   if (typeof html2canvas !== 'undefined') {
     html2canvas(card, { scale: 2, backgroundColor: null }).then(canvas => {
       const link = document.createElement('a');
-      link.download = '我的动物人格_' + (window._animalResult && window._animalResult.animal ? window._animalResult.animal.name : '测试') + '.png';
+      link.download = (lang==='en' ? 'MyAnimalPersonality_' : '我的动物人格_') + (window._animalResult && window._animalResult.animal ? window._animalResult.animal.name : 'Test') + '.png';
       link.href = canvas.toDataURL('image/png');
       link.click();
     });
   } else {
-    alert('截图功能已就绪，长按卡片可直接保存');
+    alert(lang==='en' ? 'Screenshot ready, long press card to save directly' : '截图功能已就绪，长按卡片可直接保存');
   }
 }
 

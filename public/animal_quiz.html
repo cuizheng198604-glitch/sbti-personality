@@ -78,23 +78,23 @@ body{font-family:Segoe UI,PingFang SC,Microsoft YaHei,sans-serif;background:var(
 <!-- 封面 -->
 <div id="startScreen">
   <div class="start-card">
-    <div class="start-emoji">🐾</div>
-    <h1 class="start-title">动物性格测试</h1>
-    <p class="start-subtitle">MBTI已过时，动物人格才是新潮流</p>
-    <div class="start-desc">
+    <div class="start-emoji" data-i18n="quiz_emoji">🐾</div>
+    <h1 class="start-title" data-i18n="quiz_title">动物性格测试</h1>
+    <p class="start-subtitle" data-i18n="quiz_subtitle">MBTI已过时，动物人格才是新潮流</p>
+    <div class="start-desc" data-i18n-html="quiz_desc">
       基于 <strong>MBTI</strong> + <strong>Big Five</strong> 双维度人格理论，结合东方动物哲学全新设计。<br><br>
       不同动物有不同性格——<strong>龙的威严、狐狸的机智、考拉的淡定</strong>。<br>
       38道题，揭开你内心最真实的动物面孔。
     </div>
     <div class="info-grid">
-      <div class="info-item"><div class="info-n">题目数</div><div class="info-v">38题</div></div>
-      <div class="info-item"><div class="info-n">预计用时</div><div class="info-v">5-8分钟</div></div>
-      <div class="info-item"><div class="info-n">结果类型</div><div class="info-v">17种动物</div></div>
-      <div class="info-item"><div class="info-n">稀有度</div><div class="info-v">4级掉落</div></div>
+      <div class="info-item"><div class="info-n" data-i18n="quiz_q_count">题目数</div><div class="info-v">38题</div></div>
+      <div class="info-item"><div class="info-n" data-i18n="quiz_duration">预计用时</div><div class="info-v">5-8分钟</div></div>
+      <div class="info-item"><div class="info-n" data-i18n="quiz_result_types">结果类型</div><div class="info-v">17种动物</div></div>
+      <div class="info-item"><div class="info-n" data-i18n="quiz_rarity">稀有度</div><div class="info-v">4级掉落</div></div>
     </div>
     <div class="btn-group">
-      <button class="btn-start" onclick="startQuiz()">🐾 开始测试</button>
-      <button class="btn-ghost" onclick="startQuiz()">好奇试试</button>
+      <button class="btn-start" data-i18n="quiz_start" onclick="startQuiz()">🐾 开始测试</button>
+      <button class="btn-ghost" data-i18n="quiz_try" onclick="startQuiz()">好奇试试</button>
     </div>
   </div>
 </div>
@@ -110,7 +110,7 @@ body{font-family:Segoe UI,PingFang SC,Microsoft YaHei,sans-serif;background:var(
       <div class="pg-bar"><div class="pg-fill" id="pgFill" style="width:0%"></div></div>
       <div class="pg-text" id="pgText">0 / 38</div>
     </div>
-    <button class="btn-back" onclick="confirmExit()">退出</button>
+    <button class="btn-back" onclick="confirmExit()" data-i18n="quiz_exit">退出</button>
   </div>
   <div class="quiz-body" id="quizBody"></div>
 </div>
@@ -118,24 +118,55 @@ body{font-family:Segoe UI,PingFang SC,Microsoft YaHei,sans-serif;background:var(
 <!-- 加载页 -->
 <div id="loadingScreen">
   <div class="loading-emoji">🐾</div>
-  <div class="loading-text">正在分析你的动物人格...</div>
+  <div class="loading-text" data-i18n="quiz_loading">正在分析你的动物人格...</div>
 </div>
 
 <script src="animal_config.js"></script>
+<script src="lang.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script>
+(function() {
 const cfg = ANIMAL_CONFIG;
-const QUESTIONS = cfg.questions;
+
+// 根据语言决定使用哪套题目
+const rawQuestions = cfg.questions;
+const isEnglish = I18N.getLang() === 'en';
+const QUESTIONS = isEnglish ? I18N.getEnglishQuestions() : rawQuestions;
 
 let currentQ = 0;
 let answers = {};
 const total = QUESTIONS.length;
 
-// MBTI字母计分
-// dim E/I, N/S, F/T, J/P: 高分→第一字母，低分→第二字母
-// BigFive五维: 算百分比
-const mbti_dims = ['E','N','F','J']; // 阳性维度(高分显示第一字母)
-const bf_dims = ['Openness','Conscientiousness','Extraversion','Agreeableness','Neuroticism'];
+const BF_DIMS = ['Openness','Conscientiousness','Extraversion','Agreeableness','Neuroticism'];
+const SECTION_LABELS = isEnglish
+  ? { EI:'MBTI · Energy', NS:'MBTI · Awareness', FT:'MBTI · Decision', JP:'MBTI · Execution',
+      O:'BigFive · Openness', C:'BigFive · Conscientiousness', E:'BigFive · Extraversion',
+      A:'BigFive · Agreeableness', N:'BigFive · Neuroticism' }
+  : { EI:'MBTI · 能量倾向', NS:'MBTI · 信息感知', FT:'MBTI · 决策方式', JP:'MBTI · 执行方式',
+      O:'BigFive · 开放性', C:'BigFive · 尽责性', E:'BigFive · 外向性',
+      A:'BigFive · 宜人性', N:'BigFive · 神经质' };
+
+const NEXT_BTN = isEnglish ? 'Next →' : '下一题 →';
+const SUBMIT_BTN = isEnglish ? '🔮 View Result' : '🔮 查看结果';
+const PREV_BTN = isEnglish ? 'Previous' : '上一题';
+const EXIT_CONFIRM = isEnglish
+  ? 'Are you sure you want to exit? Progress will not be saved.'
+  : '确定退出吗？进度将不会保存。';
+const LOADING_TEXT = isEnglish ? 'Analyzing your animal personality...' : '正在分析你的动物人格...';
+
+function getSectionLabel(q) {
+  if (q.type === 'mbti') {
+    if (q.dim === 'E' || q.dim === 'I') return SECTION_LABELS.EI;
+    if (q.dim === 'N' || q.dim === 'S') return SECTION_LABELS.NS;
+    if (q.dim === 'F' || q.dim === 'T') return SECTION_LABELS.FT;
+    return SECTION_LABELS.JP;
+  }
+  if (q.dim === 'Openness') return SECTION_LABELS.O;
+  if (q.dim === 'Conscientiousness') return SECTION_LABELS.C;
+  if (q.dim === 'Extraversion') return SECTION_LABELS.E;
+  if (q.dim === 'Agreeableness') return SECTION_LABELS.A;
+  return SECTION_LABELS.N;
+}
 
 function startQuiz() {
   document.getElementById('startScreen').style.display = 'none';
@@ -149,29 +180,29 @@ function showQuestion(index) {
   const body = document.getElementById('quizBody');
 
   document.getElementById('pgFill').style.width = ((index + 1) / total * 100) + '%';
-  document.getElementById('pgText').textContent = `${index + 1} / ${total}`;
+  document.getElementById('pgText').textContent = (index + 1) + ' / ' + total;
+  document.querySelector('.qh-title').textContent = isEnglish ? '🐾 Animal Personality Test' : '🐾 动物性格测试';
 
-  body.innerHTML = `
+  body.innerHTML = \`
     <div class="q-block">
-      <div class="q-meta">${q.section} · 第${index + 1}题</div>
-      <div class="q-text">${q.text}</div>
+      <div class="q-meta">\${getSectionLabel(q)} · \${isEnglish ? 'Q' + (index + 1) : '第'+(index+1)+'题'}</div>
+      <div class="q-text">\${q.text}</div>
       <div class="q-opts">
-        ${q.opts.map((o, i) => `
-          <div class="q-opt" onclick="selectOpt(${i}, ${o.s})">
-            <span class="ol">${o.l}</span>
-            <span>${o.t}</span>
+        \${q.opts.map((o, i) => \`
+          <div class="q-opt" onclick="selectOpt(\${i}, \${o.s})">
+            <span class="ol">\${o.l}</span>
+            <span>\${o.t}</span>
           </div>
-        `).join('')}
+        \`).join('')}
       </div>
     </div>
     <div class="ad-container" id="qAdContainer"></div>
     <div class="nav-row">
-      ${index > 0 ? '<button class="btn-back" onclick="prevQ()">上一题</button>' : ''}
-      <button class="btn-next" id="nextBtn" onclick="nextQ()" disabled>${index === total - 1 ? '🔮 查看结果' : '下一题 →'}</button>
+      \${index > 0 ? '<button class="btn-back" onclick="prevQ()">' + PREV_BTN + '</button>' : ''}
+      <button class="btn-next" id="nextBtn" onclick="nextQ()" disabled>\${index === total - 1 ? SUBMIT_BTN : NEXT_BTN}</button>
     </div>
-  `;
+  \`;
 
-  // 恢复已选
   if (answers[index] !== undefined) {
     const saved = answers[index].score;
     const opts = document.querySelectorAll('.q-opt');
@@ -184,13 +215,14 @@ function showQuestion(index) {
   const adContainer = document.getElementById('qAdContainer');
   if (adContainer) {
     if ((index + 1) % 5 === 0 && index < total - 1) {
-      adContainer.innerHTML = `<div class="quiz-ad">
-        <div class="quiz-ad-label">广告</div>
+      const adText = isEnglish ? 'Scan for exclusive personality analysis' : '扫码领取独家性格分析资料';
+      adContainer.innerHTML = \`<div class="quiz-ad">
+        <div class="quiz-ad-label">\${isEnglish ? 'Ad' : '广告'}</div>
         <div class="quiz-ad-content">
-          <div class="quiz-ad-text">扫码领取独家性格分析资料</div>
+          <div class="quiz-ad-text">\${adText}</div>
           <div class="quiz-ad-qr" id="quizAdQR"></div>
         </div>
-      </div>`;
+      </div>\`;
       setTimeout(() => {
         const qrTarget = document.getElementById('quizAdQR');
         if (qrTarget && typeof QRCode !== 'undefined') {
@@ -221,7 +253,7 @@ function prevQ() {
 }
 
 function confirmExit() {
-  if (confirm('确定退出吗？进度将不会保存。')) {
+  if (confirm(EXIT_CONFIRM)) {
     document.getElementById('quizScreen').style.display = 'none';
     document.getElementById('startScreen').style.display = 'flex';
   }
@@ -243,11 +275,7 @@ function calcResult() {
     const s = ans.score;
 
     if (q.type === 'mbti') {
-      // E/I维度：E=高分(4,5), I=低分(1,2)
-      // N/S维度：N=高分(4,5), S=低分(1,2)
-      // F/T维度：F=高分(4,5), T=低分(1,2)
-      // J/P维度：J=高分(4,5), P=低分(1,2)
-      const dim = q.dim; // 'E','N','F','J'
+      const dim = q.dim;
       if (s >= 4) { mbti_scores[dim] += s; mbti_counts[dim]++; }
       else if (s <= 2) {
         const opposite = {E:'I',N:'S',F:'T',J:'P'}[dim];
@@ -260,7 +288,7 @@ function calcResult() {
 
   // 2. 算百分比
   const bf_pct = {};
-  bf_dims.forEach(d => {
+  BF_DIMS.forEach(d => {
     bf_pct[d] = bf_counts[d] > 0 ? Math.round((bf_scores[d] / (bf_counts[d] * 5)) * 100) : 50;
   });
 
@@ -279,27 +307,26 @@ function calcResult() {
   cfg.animals.forEach(animal => {
     const p = animal.profile;
     let sim = 0;
-    bf_dims.forEach(d => {
+    BF_DIMS.forEach(d => {
       const diff = Math.abs(bf_pct[d] - (p[d] || 50));
       sim += (100 - diff);
     });
-    sim = sim / bf_dims.length; // 0-100
+    sim = sim / BF_DIMS.length;
     if (sim > bestSimilarity) {
       bestSimilarity = sim;
       bestAnimal = animal;
     }
   });
 
-  // 4. 稀有度：根据匹配度 + 动物本身稀有度综合决定
   const matchPercent = Math.round(bestSimilarity);
   const rarity = bestAnimal.rarity;
 
-  // 5. 找次要动物
+  // 4. 找次要动物
   const sorted = cfg.animals.map(a => {
     const p = a.profile;
     let sim = 0;
-    bf_dims.forEach(d => { sim += (100 - Math.abs(bf_pct[d] - (p[d]||50))); });
-    return { animal: a, sim: sim / bf_dims.length };
+    BF_DIMS.forEach(d => { sim += (100 - Math.abs(bf_pct[d] - (p[d]||50))); });
+    return { animal: a, sim: sim / BF_DIMS.length };
   }).sort((a,b) => b.sim - a.sim);
 
   return {
@@ -317,7 +344,10 @@ function calcResult() {
 
 function showResult() {
   document.getElementById('quizScreen').style.display = 'none';
-  document.getElementById('loadingScreen').style.display = 'flex';
+  var loadingEl = document.getElementById('loadingScreen');
+  loadingEl.style.display = 'flex';
+  var loadingText = loadingEl.querySelector('.loading-text');
+  if (loadingText) loadingText.textContent = LOADING_TEXT;
 
   setTimeout(() => {
     const result = calcResult();
@@ -344,6 +374,8 @@ function showResult() {
     window.location.href = 'animal_result.html';
   }, 1800);
 }
+I18N.applyLang();
+})();
 </script>
 </body>
 </html>

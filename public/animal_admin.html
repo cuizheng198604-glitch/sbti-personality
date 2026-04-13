@@ -345,7 +345,7 @@ function loadResults(page) {
       const dimsText = (sbti.Energy !== undefined ? 'E:'+sbti.Energy+' N:'+(sbti.Awareness||sbti.Awareness)+' F:'+(sbti.Decision||sbti.Decision)+' P:'+(sbti.Execution||sbti.Execution) : '-') +
         ' | O:'+(bf.Openness||'-')+' C:'+(bf.Conscientiousness||'-')+' E:'+(bf.Extraversion||'-')+' A:'+(bf.Agreeableness||'-')+' N:'+(bf.Neuroticism||'-');
       const kw = (r.keywords || []).join(' ');
-      return '<tr><td><span style="font-size:0.7rem;background:rgba(139,92,246,0.15);color:#a78bfa;padding:0.15rem 0.5rem;border-radius:8px">🎯 人格</span></td><td class="type-cell" style="color:var(--primary);font-weight:800">'+r.sbti_type+'</td><td><span class="rarity-tag '+rClass+'">'+rLabel+'</span></td><td style="font-size:0.82rem">'+role+'</td><td style="font-size:0.68rem;color:var(--muted);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+dimsText+'</td><td class="time-cell">'+ts+'</td><td><button class="del-btn" onclick="deleteResult(\''+r.id+'\')">删除</button></td></tr>';
+      return '<tr><td><span style="font-size:0.7rem;background:rgba(139,92,246,0.15);color:#a78bfa;padding:0.15rem 0.5rem;border-radius:8px">🎯 人格</span></td><td class="type-cell" style="color:var(--primary);font-weight:800">'+r.sbti_type+'</td><td><span class="rarity-tag '+rClass+'">'+rLabel+'</span></td><td style="font-size:0.82rem">'+role+'</td><td style="font-size:0.68rem;color:var(--muted);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+dimsText+'</td><td class="time-cell">'+ts+'</td><td>'+(r.ip||'-')+'</td><td><button class="del-btn" onclick="deleteResult(\''+r.id+'\')">删除</button></td></tr>';
     } else {
       // 动物测试结果
       const animalId = r.animalId || '';

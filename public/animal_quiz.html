@@ -376,14 +376,15 @@ function showResult() {
 }
 
 // Expose needed functions globally for onclick handlers
-window.startQuiz = startQuiz;
-window.selectOpt = selectOpt;
-window.prevQ = prevQ;
-window.nextQ = nextQ;
-window.confirmExit = confirmExit;
-window.calcResult = calcResult;
+// Use try-catch to ensure exposure even if earlier code throws
+try { window.startQuiz = startQuiz; } catch(e) {}
+try { window.selectOpt = selectOpt; } catch(e) {}
+try { window.prevQ = prevQ; } catch(e) {}
+try { window.nextQ = nextQ; } catch(e) {}
+try { window.confirmExit = confirmExit; } catch(e) {}
+try { window.calcResult = calcResult; } catch(e) {}
 
-I18N.applyLang();
+try { I18N.applyLang(); } catch(e) {}
 })();
 </script>
 </body>

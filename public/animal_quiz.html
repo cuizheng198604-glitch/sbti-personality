@@ -188,12 +188,12 @@ function showQuestion(index) {
       <div class="q-meta">${getSectionLabel(q)} · ${isEnglish ? 'Q' + (index + 1) : '第'+(index+1)+'题'}</div>
       <div class="q-text">${q.text}</div>
       <div class="q-opts">
-        ${q.opts.map((o, i) => \`
+        ${q.opts.map((o, i) => `
           <div class="q-opt" onclick="selectOpt(${i}, ${o.s})">
             <span class="ol">${o.l}</span>
             <span>${o.t}</span>
           </div>
-        \`).join('')}
+        `).join('')}
       </div>
     </div>
     <div class="ad-container" id="qAdContainer"></div>

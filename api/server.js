@@ -5,203 +5,234 @@ const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const DATA_FILE = path.join(__dirname, 'results.json');
+const COMMENTS_FILE = path.join(__dirname, 'comments.json');
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'sbti-admin-2026';
-const STATIC_DIR = process.env.STATIC_DIR || path.join(process.cwd(), 'public');
-const DATA_DIR = process.env.RENDER_DISK_PATH || '/tmp';
-const DATA_FILE = path.join(DATA_DIR, 'animal_results.json');
 
-console.log('STATIC_DIR:', STATIC_DIR);
-console.log('DATA_FILE:', DATA_FILE);
+// Middleware
+app.use(cors());
+app.use(express.json({ limit: '1mb' }));
+app.use(express.static(path.join(__dirname, 'public')));
 
-var results = [];
-
+// ─── 结果存储 ───────────────────────────────────────
 function loadResults() {
   try {
     if (fs.existsSync(DATA_FILE)) {
-      results = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
-      console.log('Loaded: ' + results.length + ' records');
+      const raw = fs.readFileSync(DATA_FILE, 'utf-8');
+      return JSON.parse(raw);
     }
-  } catch (e) {
-    console.log('Load error: ' + e.message);
-    results = [];
-  }
+  } catch (e) {}
+  return [];
 }
 
-function saveResults() {
+function saveResults(results) {
+  fs.writeFileSync(DATA_FILE, JSON.stringify(results, null, 2), 'utf-8');
+}
+
+// ─── 留言存储 ───────────────────────────────────────
+function loadComments() {
   try {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(results, null, 2), 'utf8');
-  } catch (e) {
-    console.log('Save error: ' + e.message);
-  }
+    if (fs.existsSync(COMMENTS_FILE)) {
+      return JSON.parse(fs.readFileSync(COMMENTS_FILE, 'utf-8'));
+    }
+  } catch (e) {}
+  return [];
 }
 
-loadResults();
-
-app.use(cors({ origin: '*', methods: ['GET', 'POST', 'DELETE', 'OPTIONS'], allowedHeaders: ['Content-Type', 'X-Admin-Password'] }));
-// Trust proxy for correct IP detection behind Render load balancer
-app.set('trust proxy', 1);
-app.use(express.json({ limit: '5mb' }));
-app.use(express.static(STATIC_DIR));
-
-// 提取rarity字符串
-function getCallerIP(req) {
-  return req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim()
-    : req.headers['x-real-ip'] ? req.headers['x-real-ip']
-    : req.socket ? (req.socket.remoteAddress || '').replace('::ffff:', '')
-    : '';
+function saveComments(comments) {
+  fs.writeFileSync(COMMENTS_FILE, JSON.stringify(comments, null, 2), 'utf-8');
 }
 
-function getRarityKey(r) {
-  var rar = r.rarity;
-  if (typeof rar === 'string') return rar.toLowerCase();
-  if (typeof rar === 'object' && rar !== null) return (rar.name || 'common').toLowerCase();
-  return 'common';
-}
+// ─── 提交结果 ───────────────────────────────────────
+app.post('/api/results', (req, res) => {
+  const { sbti_type, rarity, role, element, keywords, stats, skills, sbti_scores, bf_scores, bigfive_total, description } = req.body;
 
-app.post('/api/results', function(req, res) {
-  var data = req.body || {};
-  var resultType = data.resultType || 'animal';
-
-  if (resultType === 'personality') {
-    // 人格测试结果
-    var sbti_scores = data.sbti_scores || {};
-    var bf_scores = data.bf_scores || {};
-    var result = {
-      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-      resultType: 'personality',
-      sbti_type: data.sbti_type || '',
-      rarity: data.rarity || 'common',
-      role: data.role || '',
-      element: data.element || '',
-      keywords: data.keywords || [],
-      stats: data.stats || {},
-      sbti_scores: sbti_scores,
-      bf_scores: bf_scores,
-      bigfive_total: data.bigfive_total || 0,
-      description: data.description || '',
-      submitted_at: new Date().toISOString()
-    };
-    results.unshift(result);
-    if (results.length > 50000) results = results.slice(0, 50000);
-    saveResults();
-    console.log('New: ' + result.sbti_type + ' | Total: ' + results.length);
-    return res.json({ success: true, id: result.id, total: results.length });
+  if (!sbti_type || !rarity) {
+    return res.status(400).json({ error: '缺少必要字段' });
   }
 
-  // 动物测试结果
-  if (!data.animalId) return res.status(400).json({ error: 'Missing animalId' });
-  var rarity = data.rarity;
-  if (typeof rarity === 'object' && rarity !== null) rarity = rarity.name || 'common';
-  if (typeof rarity !== 'string') rarity = 'common';
-  var result = {
+  const result = {
     id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-    resultType: 'animal',
-    ip: getCallerIP(req),
-    animalId: String(data.animalId),
-    animal: data.animal || {},
-    rarity: rarity,
-    rarityName: data.rarityName || '',
-    matchPercent: Number(data.matchPercent) || 0,
-    mbti: data.mbti || '',
-    bfScores: data.bfScores || {},
-    secondAnimal: data.secondAnimal || null,
-    thirdAnimal: data.thirdAnimal || null,
-    allDimensions: data.allDimensions || {},
-    submitted_at: new Date().toISOString()
+    sbti_type,
+    rarity,
+    role: role || '',
+    element: element || '',
+    keywords: keywords || [],
+    stats: stats || {},
+    skills: skills || [],
+    sbti_scores: sbti_scores || {},
+    bf_scores: bf_scores || {},
+    bigfive_total: bigfive_total || 0,
+    description: description || '',
+    submitted_at: new Date().toISOString(),
+    ip_hash: '', // 不记录完整IP，只留哈希用于统计
   };
-  results.unshift(result);
-  if (results.length > 50000) results = results.slice(0, 50000);
-  saveResults();
-  console.log('New: ' + result.animalId + ' | Total: ' + results.length);
+
+  const results = loadResults();
+  results.unshift(result); // 最新在前
+  saveResults(results);
+
   res.json({ success: true, id: result.id, total: results.length });
 });
 
-app.get('/api/stats', function(req, res) {
-  try {
-    var byRarity = { legendary: 0, epic: 0, rare: 0, common: 0 };
-    var byAnimal = {};
-    for (var i = 0; i < results.length; i++) {
-      try {
-        var r = results[i];
-        var k = 'common';
-        try { k = getRarityKey(r); } catch(e2) {}
-        if (k === 'legendary') byRarity.legendary++;
-        else if (k === 'epic') byRarity.epic++;
-        else if (k === 'rare') byRarity.rare++;
-        else byRarity.common++;
-        var id = r.animalId ? String(r.animalId) : 'unknown';
-        byAnimal[id] = (byAnimal[id] || 0) + 1;
-      } catch(e1) { console.log('Record error: ' + e1.message); }
-    }
-    var entries = Object.keys(byAnimal).map(function(key) { return { type: key, count: byAnimal[key] }; });
-    entries.sort(function(a, b) { return b.count - a.count; });
-    var top = entries.slice(0, 20);
-    res.json({ total: results.length, by_rarity: byRarity, top_types: top });
-  } catch (e) {
-    console.log('Stats error: ' + e.message + ' | ' + (e.stack || '').split('\n')[1]);
-    res.json({ total: results.length, by_rarity: { legendary: 0, epic: 0, rare: 0, common: 0 }, top_types: [], error: e.message });
+// ─── 获取全部结果（需密码）────────────────────────────
+app.get('/api/admin/results', (req, res) => {
+  const password = req.headers['x-admin-password'];
+  if (password !== ADMIN_PASSWORD) {
+    return res.status(401).json({ error: '未授权' });
   }
-});
 
-app.get('/api/admin/results', function(req, res) {
-  try {
-    var password = req.headers['x-admin-password'];
-    if (password !== ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
-    var byRarity = { legendary: 0, epic: 0, rare: 0, common: 0 };
-    for (var i = 0; i < results.length; i++) {
-      var k = getRarityKey(results[i]);
-      if (k === 'legendary') byRarity.legendary++;
-      else if (k === 'epic') byRarity.epic++;
-      else if (k === 'rare') byRarity.rare++;
-      else byRarity.common++;
-    }
-    var byAnimalMap = {};
-    for (var j = 0; j < results.length; j++) {
-      var id = String(results[j].animalId || 'unknown');
-      byAnimalMap[id] = (byAnimalMap[id] || 0) + 1;
-    }
-    var entries2 = Object.keys(byAnimalMap).map(function(k) { return [k, byAnimalMap[k]]; });
-    entries2.sort(function(a, b) { return b[1] - a[1]; });
-    res.json({
-      results: results.slice(0, 2000),
-      stats: {
-        total: results.length,
-        by_rarity: byRarity,
-        top_types: entries2.slice(0, 20).map(function(e) { return { type: e[0], count: e[1] }; })
-      }
-    });
-  } catch (e) {
-    console.log('Admin error: ' + e.message);
-    res.status(500).json({ error: e.message });
+  const results = loadResults();
+  const stats = {
+    total: results.length,
+    by_type: {},
+    by_rarity: { Common: 0, Rare: 0, Special: 0, Legendary: 0 },
+    top_types: [],
+    avg_bf_total: 0,
+  };
+
+  let bf_sum = 0;
+  results.forEach(r => {
+    stats.by_rarity[r.rarity] = (stats.by_rarity[r.rarity] || 0) + 1;
+    stats.by_type[r.sbti_type] = (stats.by_type[r.sbti_type] || 0) + 1;
+    bf_sum += r.bigfive_total || 0;
+  });
+
+  if (results.length > 0) {
+    stats.avg_bf_total = Math.round(bf_sum / results.length);
   }
+
+  // 按次数排序
+  stats.top_types = Object.entries(stats.by_type)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([type, count]) => ({ type, count }));
+
+  res.json({ results, stats });
 });
 
-app.delete('/api/admin/results/:id', function(req, res) {
-  if (req.headers['x-admin-password'] !== ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
-  var before = results.length;
-  results = results.filter(function(r) { return r.id !== req.params.id; });
-  saveResults();
-  res.json({ success: true, deleted: before - results.length, total: results.length });
+// ─── 统计数据（公开）───────────────────────────────
+app.get('/api/stats', (req, res) => {
+  const results = loadResults();
+  const stats = {
+    total: results.length,
+    by_rarity: { Common: 0, Rare: 0, Special: 0, Legendary: 0 },
+    top_types: [],
+  };
+  results.forEach(r => {
+    stats.by_rarity[r.rarity] = (stats.by_rarity[r.rarity] || 0) + 1;
+  });
+  stats.top_types = Object.entries(
+    results.reduce((acc, r) => {
+      acc[r.sbti_type] = (acc[r.sbti_type] || 0) + 1;
+      return acc;
+    }, {})
+  ).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([t, c]) => ({ type: t, count: c }));
+
+  res.json(stats);
 });
 
-app.delete('/api/admin/results', function(req, res) {
-  if (req.headers['x-admin-password'] !== ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
-  var count = results.length;
-  results = [];
-  saveResults();
-  res.json({ success: true, deleted: count });
+// ─── 删除单条结果 ─────────────────────────────────
+app.delete('/api/admin/results/:id', (req, res) => {
+  const password = req.headers['x-admin-password'];
+  if (password !== ADMIN_PASSWORD) {
+    return res.status(401).json({ error: '未授权' });
+  }
+  const results = loadResults().filter(r => r.id !== req.params.id);
+  saveResults(results);
+  res.json({ success: true, total: results.length });
 });
 
-app.get('/health', function(req, res) {
-  res.json({ status: 'ok', total: results.length, uptime: Math.floor(process.uptime()) });
+// ─── 清空全部结果 ────────────────────────────────
+app.delete('/api/admin/results', (req, res) => {
+  const password = req.headers['x-admin-password'];
+  if (password !== ADMIN_PASSWORD) {
+    return res.status(401).json({ error: '未授权' });
+  }
+  saveResults([]);
+  res.json({ success: true });
 });
 
-app.get('/', function(req, res) {
-  res.redirect('/animal_quiz.html');
+// ─── 提交留言 ───────────────────────────────────────
+app.post('/api/comments', (req, res) => {
+  const { name, location, phone, content, animal_result, animal_rarity } = req.body;
+
+  if (!name || !name.trim()) {
+    return res.status(400).json({ error: '请填写姓名' });
+  }
+  if (!content || !content.trim()) {
+    return res.status(400).json({ error: '请填写留言内容' });
+  }
+
+  const comment = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    name: name.trim(),
+    location: location ? location.trim() : '',
+    phone: phone ? phone.trim() : '',
+    content: content.trim(),
+    animal_result: animal_result || '',
+    animal_rarity: animal_rarity || '',
+    submitted_at: new Date().toISOString(),
+  };
+
+  const comments = loadComments();
+  comments.unshift(comment);
+  saveComments(comments);
+
+  res.json({ success: true, id: comment.id, total: comments.length });
 });
 
-app.listen(PORT, '0.0.0.0', function() {
-  console.log('Server running on port: ' + PORT);
-  console.log('Admin password: ' + ADMIN_PASSWORD);
-  console.log('Data file: ' + DATA_FILE);
+// ─── 获取全部留言（需密码）────────────────────────────
+app.get('/api/admin/comments', (req, res) => {
+  const password = req.headers['x-admin-password'];
+  if (password !== ADMIN_PASSWORD) {
+    return res.status(401).json({ error: '未授权' });
+  }
+
+  const comments = loadComments();
+  const stats = {
+    total: comments.length,
+    by_location: {},
+    has_phone: 0,
+  };
+
+  comments.forEach(c => {
+    if (c.location) {
+      stats.by_location[c.location] = (stats.by_location[c.location] || 0) + 1;
+    }
+    if (c.phone) stats.has_phone++;
+  });
+
+  res.json({ comments, stats });
+});
+
+// ─── 删除单条留言 ─────────────────────────────────
+app.delete('/api/admin/comments/:id', (req, res) => {
+  const password = req.headers['x-admin-password'];
+  if (password !== ADMIN_PASSWORD) {
+    return res.status(401).json({ error: '未授权' });
+  }
+  const comments = loadComments().filter(c => c.id !== req.params.id);
+  saveComments(comments);
+  res.json({ success: true, total: comments.length });
+});
+
+// ─── 清空全部留言 ────────────────────────────────
+app.delete('/api/admin/comments', (req, res) => {
+  const password = req.headers['x-admin-password'];
+  if (password !== ADMIN_PASSWORD) {
+    return res.status(401).json({ error: '未授权' });
+  }
+  saveComments([]);
+  res.json({ success: true });
+});
+
+// ─── 提交结果时从问卷页调用 ──────────────────────────
+app.get('/submit', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'submit.html'));
+});
+
+app.listen(PORT, () => {
+  console.log(`SBTI Backend running on port ${PORT}`);
+  console.log(`Admin password: ${ADMIN_PASSWORD}`);
 });

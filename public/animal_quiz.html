@@ -185,21 +185,21 @@ function showQuestion(index) {
 
   body.innerHTML = `
     <div class="q-block">
-      <div class="q-meta">\${getSectionLabel(q)} · \${isEnglish ? 'Q' + (index + 1) : '第'+(index+1)+'题'}</div>
-      <div class="q-text">\${q.text}</div>
+      <div class="q-meta">${getSectionLabel(q)} · ${isEnglish ? 'Q' + (index + 1) : '第'+(index+1)+'题'}</div>
+      <div class="q-text">${q.text}</div>
       <div class="q-opts">
-        \${q.opts.map((o, i) => \`
-          <div class="q-opt" onclick="selectOpt(\${i}, \${o.s})">
-            <span class="ol">\${o.l}</span>
-            <span>\${o.t}</span>
+        ${q.opts.map((o, i) => \`
+          <div class="q-opt" onclick="selectOpt(${i}, ${o.s})">
+            <span class="ol">${o.l}</span>
+            <span>${o.t}</span>
           </div>
         \`).join('')}
       </div>
     </div>
     <div class="ad-container" id="qAdContainer"></div>
     <div class="nav-row">
-      \${index > 0 ? '<button class="btn-back" onclick="prevQ()">' + PREV_BTN + '</button>' : ''}
-      <button class="btn-next" id="nextBtn" onclick="nextQ()" disabled>\${index === total - 1 ? SUBMIT_BTN : NEXT_BTN}</button>
+      ${index > 0 ? '<button class="btn-back" onclick="prevQ()">' + PREV_BTN + '</button>' : ''}
+      <button class="btn-next" id="nextBtn" onclick="nextQ()" disabled>${index === total - 1 ? SUBMIT_BTN : NEXT_BTN}</button>
     </div>
   `;
 
@@ -217,9 +217,9 @@ function showQuestion(index) {
     if ((index + 1) % 5 === 0 && index < total - 1) {
       const adText = isEnglish ? 'Scan for exclusive personality analysis' : '扫码领取独家性格分析资料';
       adContainer.innerHTML = `<div class="quiz-ad">
-        <div class="quiz-ad-label">\${isEnglish ? 'Ad' : '广告'}</div>
+        <div class="quiz-ad-label">${isEnglish ? 'Ad' : '广告'}</div>
         <div class="quiz-ad-content">
-          <div class="quiz-ad-text">\${adText}</div>
+          <div class="quiz-ad-text">${adText}</div>
           <div class="quiz-ad-qr" id="quizAdQR"></div>
         </div>
       </div>`;

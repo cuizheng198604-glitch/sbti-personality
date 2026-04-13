@@ -38,10 +38,19 @@ function saveResults() {
 loadResults();
 
 app.use(cors({ origin: '*', methods: ['GET', 'POST', 'DELETE', 'OPTIONS'], allowedHeaders: ['Content-Type', 'X-Admin-Password'] }));
+// Trust proxy for correct IP detection behind Render load balancer
+app.set('trust proxy', 1);
 app.use(express.json({ limit: '5mb' }));
 app.use(express.static(STATIC_DIR));
 
 // 提取rarity字符串
+function getCallerIP(req) {
+  return req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim()
+    : req.headers['x-real-ip'] ? req.headers['x-real-ip']
+    : req.socket ? (req.socket.remoteAddress || '').replace('::ffff:', '')
+    : '';
+}
+
 function getRarityKey(r) {
   var rar = r.rarity;
   if (typeof rar === 'string') return rar.toLowerCase();
@@ -87,6 +96,7 @@ app.post('/api/results', function(req, res) {
   var result = {
     id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
     resultType: 'animal',
+    ip: getCallerIP(req),
     animalId: String(data.animalId),
     animal: data.animal || {},
     rarity: rarity,

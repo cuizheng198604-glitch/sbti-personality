@@ -435,7 +435,7 @@ function exportCSV() {
       return (r.id||'')+',动物,'+(r.mbti||'')+','+(r.rarity&&r.rarity.name||r.rarity||'')+','+((animal.name||'')+' '+(r.animalId?'('+r.animalId+')':''))+','+bfText+','+ts;
     }
   });
-  const csvContent = '\ufeff' + header + rows.join('\n'); const blob = new Blob([csvContent],{type:'text/csv;charset=utf-8'});
+  const  const blob = new Blob([String.fromCharCode(0xFEFF)+header+rows.join('\n')],{type:'text/csv;charset=utf-8'});
   const link = document.createElement('a'); link.download='all_results_'+Date.now()+'.csv'; link.href=URL.createObjectURL(blob); link.click();
   showAlert('CSV 导出成功', 'success');
 }

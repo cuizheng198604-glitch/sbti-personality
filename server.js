@@ -12,7 +12,6 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'sbti-admin-2026';
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
-app.use(express.static(path.join(__dirname, 'public')));
 
 // ─── 结果存储 ───────────────────────────────────────
 function loadResults() {
@@ -225,11 +224,6 @@ app.delete('/api/admin/comments', (req, res) => {
   }
   saveComments([]);
   res.json({ success: true });
-});
-
-// ─── 提交结果时从问卷页调用 ──────────────────────────
-app.get('/submit', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'submit.html'));
 });
 
 app.listen(PORT, () => {

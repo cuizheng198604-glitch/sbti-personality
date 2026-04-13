@@ -12,6 +12,8 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'sbti-admin-2026';
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
+const STATIC_DIR = process.env.STATIC_DIR || '/opt/render/project/src/public';
+app.use(express.static(STATIC_DIR));
 
 // ─── 结果存储 ───────────────────────────────────────
 function loadResults() {

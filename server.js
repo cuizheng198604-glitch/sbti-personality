@@ -6,6 +6,7 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const DATA_FILE = path.join(__dirname, 'results.json');
+const COMMENTS_FILE = path.join(__dirname, 'comments.json');
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'sbti-admin-2026';
 
 // Middleware
@@ -26,6 +27,20 @@ function loadResults() {
 
 function saveResults(results) {
   fs.writeFileSync(DATA_FILE, JSON.stringify(results, null, 2), 'utf-8');
+}
+
+// ─── 留言存储 ───────────────────────────────────────
+function loadComments() {
+  try {
+    if (fs.existsSync(COMMENTS_FILE)) {
+      return JSON.parse(fs.readFileSync(COMMENTS_FILE, 'utf-8'));
+    }
+  } catch (e) {}
+  return [];
+}
+
+function saveComments(comments) {
+  fs.writeFileSync(COMMENTS_FILE, JSON.stringify(comments, null, 2), 'utf-8');
 }
 
 // ─── 提交结果 ───────────────────────────────────────
@@ -135,6 +150,80 @@ app.delete('/api/admin/results', (req, res) => {
     return res.status(401).json({ error: '未授权' });
   }
   saveResults([]);
+  res.json({ success: true });
+});
+
+// ─── 提交留言 ───────────────────────────────────────
+app.post('/api/comments', (req, res) => {
+  const { name, location, phone, content, animal_result, animal_rarity } = req.body;
+
+  if (!name || !name.trim()) {
+    return res.status(400).json({ error: '请填写姓名' });
+  }
+  if (!content || !content.trim()) {
+    return res.status(400).json({ error: '请填写留言内容' });
+  }
+
+  const comment = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    name: name.trim(),
+    location: location ? location.trim() : '',
+    phone: phone ? phone.trim() : '',
+    content: content.trim(),
+    animal_result: animal_result || '',
+    animal_rarity: animal_rarity || '',
+    submitted_at: new Date().toISOString(),
+  };
+
+  const comments = loadComments();
+  comments.unshift(comment);
+  saveComments(comments);
+
+  res.json({ success: true, id: comment.id, total: comments.length });
+});
+
+// ─── 获取全部留言（需密码）────────────────────────────
+app.get('/api/admin/comments', (req, res) => {
+  const password = req.headers['x-admin-password'];
+  if (password !== ADMIN_PASSWORD) {
+    return res.status(401).json({ error: '未授权' });
+  }
+
+  const comments = loadComments();
+  const stats = {
+    total: comments.length,
+    by_location: {},
+    has_phone: 0,
+  };
+
+  comments.forEach(c => {
+    if (c.location) {
+      stats.by_location[c.location] = (stats.by_location[c.location] || 0) + 1;
+    }
+    if (c.phone) stats.has_phone++;
+  });
+
+  res.json({ comments, stats });
+});
+
+// ─── 删除单条留言 ─────────────────────────────────
+app.delete('/api/admin/comments/:id', (req, res) => {
+  const password = req.headers['x-admin-password'];
+  if (password !== ADMIN_PASSWORD) {
+    return res.status(401).json({ error: '未授权' });
+  }
+  const comments = loadComments().filter(c => c.id !== req.params.id);
+  saveComments(comments);
+  res.json({ success: true, total: comments.length });
+});
+
+// ─── 清空全部留言 ────────────────────────────────
+app.delete('/api/admin/comments', (req, res) => {
+  const password = req.headers['x-admin-password'];
+  if (password !== ADMIN_PASSWORD) {
+    return res.status(401).json({ error: '未授权' });
+  }
+  saveComments([]);
   res.json({ success: true });
 });
 

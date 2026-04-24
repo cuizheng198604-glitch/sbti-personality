@@ -1,6 +1,35 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-S29BGTFNLT"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-S29BGTFNLT', { send_page_view: true });
+
+  // Auto-tag UTM parameters across pages
+  function getUTM() {
+    var params = new URLSearchParams(window.location.search);
+    var utm = {};
+    ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'].forEach(function(k){
+      var v = params.get(k);
+      if (v) utm[k] = v;
+    });
+    if (Object.keys(utm).length > 0) {
+      sessionStorage.setItem('fb_utm', JSON.stringify(utm));
+    }
+  }
+  function tagEvent(name, params) {
+    var stored = sessionStorage.getItem('fb_utm');
+    var utm = stored ? JSON.parse(stored) : {};
+    gtag('event', name, Object.assign({}, utm, params || {}));
+  }
+  window.tagEvent = tagEvent;
+  getUTM();
+</script>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>动物性格测试 - 结果</title>
@@ -136,6 +165,61 @@ body{font-family:Segoe UI,PingFang SC,Microsoft YaHei,sans-serif;background:var(
 /* ── 通用 ── */
 .disclaimer{font-size:0.72rem;color:var(--muted);text-align:center;line-height:1.8;padding:1rem 0;max-width:480px;margin:0 auto}
 .ad-container{margin:1.5rem auto;max-width:700px;text-align:center}
+<style>
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;justify-content:center;align-items:center}
+.modal-overlay.show{display:flex}
+.modal-box{background:#1a1a2e;border:1px solid #333;border-radius:16px;padding:2rem;width:90%;max-width:420px;margin:0 auto;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.5);max-height:90vh;overflow-y:auto}
+.modal-close{position:absolute;top:12px;right:16px;background:none;border:none;color:#888;font-size:1.5rem;cursor:pointer;line-height:1}
+.modal-close:hover{color:#fff}
+.modal-tabs{display:flex;gap:0;margin-bottom:1.5rem;border-bottom:1px solid #333}
+.modal-tab{flex:1;padding:0.6rem;text-align:center;cursor:pointer;color:#888;font-weight:600;border-bottom:2px solid transparent;transition:all 0.2s}
+.modal-tab.active{color:#f59e0b;border-color:#f59e0b}
+.modal-tab:hover{color:#fff}
+.reg-form{display:none}
+.reg-form.active{display:block}
+.form-row{margin-bottom:0.9rem}
+.form-row label{display:block;color:#94a3b8;font-size:0.8rem;margin-bottom:0.3rem}
+.form-row input,.form-row select{width:100%;padding:0.6rem 0.8rem;background:#0f172a;border:1px solid #2d3748;border-radius:8px;color:#e2e8f0;font-size:0.9rem;box-sizing:border-box;outline:none;transition:border-color 0.2s}
+.form-row input:focus,.form-row select:focus{border-color:#f59e0b}
+.form-row select{cursor:pointer}
+.form-row .hint{color:#64748b;font-size:0.75rem;margin-top:0.2rem}
+.form-submit{width:100%;padding:0.75rem;background:#f59e0b;color:#000;border:none;border-radius:8px;font-weight:700;font-size:1rem;cursor:pointer;margin-top:0.5rem;transition:background 0.2s}
+.form-submit:hover{background:#d97706}
+.form-submit:disabled{background:#444;color:#888;cursor:not-allowed}
+.form-error{color:#ef4444;font-size:0.85rem;margin-top:0.5rem;text-align:center;min-height:1.2rem}
+.form-success{color:#22c55e;font-size:0.9rem;margin-top:0.5rem;text-align:center}
+.comment-section{margin:2rem auto 0;max-width:700px;padding:1.5rem 1rem;border-top:1px solid #2d2d4a}
+.comment-title{font-size:1.1rem;color:#e2e8f0;margin-bottom:1rem;font-weight:600}
+.comment-list{max-height:300px;overflow-y:auto;margin-bottom:1rem}
+.comment-item{padding:0.8rem;background:#0f172a;border-radius:8px;margin-bottom:0.6rem}
+.comment-meta{color:#f59e0b;font-size:0.8rem;margin-bottom:0.3rem}
+.comment-text{color:#cbd5e1;font-size:0.9rem;line-height:1.5}
+.comment-time{color:#475569;font-size:0.75rem;margin-top:0.3rem}
+.comment-form-area{margin-top:1rem}
+.comment-guest{color:#64748b;font-size:0.9rem;text-align:center;padding:1rem}
+.comment-guest a{color:#f59e0b;cursor:pointer;text-decoration:underline}
+.comment-textarea{width:100%;padding:0.7rem;background:#0f172a;border:1px solid #2d3748;border-radius:8px;color:#e2e8f0;font-size:0.9rem;resize:vertical;min-height:80px;box-sizing:border-box;outline:none;font-family:inherit}
+.comment-textarea:focus{border-color:#f59e0b}
+.comment-submit{margin-top:0.5rem;padding:0.5rem 1.2rem;background:#f59e0b;color:#000;border:none;border-radius:6px;font-weight:600;cursor:pointer;font-size:0.9rem}
+.comment-submit:hover{background:#d97706}
+.comment-msg{font-size:0.85rem;margin-top:0.5rem;min-height:1.2rem}
+.comment-msg.err{color:#ef4444}
+.comment-msg.ok{color:#22c55e}
+
+/* ── 赞赏引导 ───────────────────────────── */
+.appreciate-section{margin:2rem auto;max-width:700px;padding:1.5rem 1rem;border-top:1px solid #2d2d4a}
+.appreciate-inner{background:linear-gradient(135deg,#1a1a2e,#1e2a3a);border:1px solid #f59e0b;border-radius:16px;padding:2rem;text-align:center;max-width:400px;margin:0 auto}
+.appreciate-emoji{font-size:2.5rem;margin-bottom:0.5rem}
+.appreciate-title{font-size:1.2rem;font-weight:700;color:#f59e0b;margin-bottom:0.4rem}
+.appreciate-desc{font-size:0.8rem;color:#94a3b8;margin-bottom:1.2rem}
+.appreciate-qr-wrap{padding:1rem;background:#0f172a;border-radius:12px;margin-bottom:1rem}
+.appreciate-placeholder{padding:1.5rem;color:#475569}
+.appreciate-amount{display:flex;justify-content:center;gap:0.8rem;margin-bottom:0.8rem;flex-wrap:wrap}
+.appreciate-amount span{background:#1a1a2e;border:1px solid #f59e0b;color:#f59e0b;padding:0.3rem 0.8rem;border-radius:20px;font-size:0.85rem;font-weight:600}
+.appreciate-thanks{font-size:0.75rem;color:#475569}
+
+</style>
+
 </style>
 </head>
 <body>
@@ -216,9 +300,22 @@ function getBFLabels(lang) {
 
 // ── 渲染结果 ──
 function renderResult(result) {
-  const { animal, matchPercent, rarity, secondAnimal, thirdAnimal, mbti, bfScores } = result;
+  const { animal, matchPercent, rarity: _rarityStr, secondAnimal, thirdAnimal, mbti, bfScores } = result;
+  // Normalize rarity: if it's a string key, resolve to full object
+  var rarity = _rarityStr;
+  if (!rarity || typeof rarity === 'string') {
+    var rKey = (typeof _rarityStr === 'string') ? _rarityStr : ((result.animal && result.animal.rarity) || 'common');
+    rarity = cfg.rarities[rKey] || cfg.rarities.common || { name: '普通', stars: 2, color: '#64748b', gradient: 'linear-gradient(135deg, #64748b, #94a3b8)', emoji: '✨' };
+  }
   const screen = document.getElementById('resultScreen');
-  const lang = I18N ? I18N.getLang() : 'zh';
+  // Apply lang from URL param if present (for EN quiz completing -> EN result page)
+  // Determine language from URL param (quiz passes ?lang=en or ?lang=zh)
+  var urlLang = new URLSearchParams(window.location.search).get('lang') || 'zh';
+  var lang = (urlLang === 'en') ? 'en' : 'zh';
+  // Sync with I18N if available
+  if (typeof I18N !== 'undefined' && I18N.setLang) {
+    I18N.setLang(lang);
+  }
   const BF_LABELS = getBFLabels(lang);
   const stars = '★'.repeat(rarity.stars) + '☆'.repeat(5 - rarity.stars);
 
@@ -237,11 +334,12 @@ function renderResult(result) {
   screen.innerHTML = `
     <!-- 主卡片 -->
     <div class="result-hero">
-      <span class="hero-badge" style="background:${rarity.gradient};color:#0a0f1a">${rarity.emoji} ${rarity.name}</span>
+      <span class="hero-badge" style="background:${rarity.gradient};color:#0a0f1a">${rarity.name}</span>
       <div class="hero-animal">${animal.emoji}</div>
       <div class="hero-name">${animal.name}</div>
       <div class="hero-rarity">
-        <div class="stars" style="color:${rarity.color}">${stars}</div>
+        <div style="text-align:center;margin-top:0.8rem"><span style="background:rgba(255,255,255,0.15);padding:0.3rem 0.8rem;border-radius:20px;font-size:0.7rem;color:#fff;font-weight:600">${t('result_cta')}</span></div>
+      <div class="stars" style="color:${rarity.color}">${stars}</div>
       </div>
       ${mbti ? `<div class="bf-names"><span class="bf-mbti-badge">${mbti}</span></div>` : ''}
       <div class="hero-match">${t('result_match')} ${matchPercent}%</div>
@@ -259,7 +357,7 @@ function renderResult(result) {
 
     <!-- 详细解读 -->
     <div class="detail-section">
-      <div class="section-title">${lang === 'en' ? 'Personality Analysis' : '性格解析'}</div>
+      <div class="section-title">${((lang === 'en') ? 'Detailed Analysis' : '详细解读')}</div>
       <div class="detail-row">
         <div class="detail-icon">💪</div>
         <div class="detail-content">
@@ -278,7 +376,7 @@ function renderResult(result) {
         <div class="detail-icon">🔮</div>
         <div class="detail-content">
           <div class="detail-label">${t('result_life')}</div>
-          <div class="detail-text">${animal.keyword}</div>
+          <div class="detail-text">${animal.keyword || (lang==='en'?'To be explored':'待探索')}</div>
         </div>
       </div>
     </div>
@@ -305,20 +403,20 @@ function renderResult(result) {
 
     <!-- 分享卡片 -->
     <div class="share-section">
-      <div class="section-title" style="text-align:center;border-bottom:none;padding-bottom:0">${lang==='en'?'🌟 Share Your Animal Personality':'🌟 分享你的动物人格'}</div>
+      <div class="section-title" style="text-align:center;border-bottom:none;padding-bottom:0">${t('result_share') || (lang==='en'?'🌟 Share Your Animal Personality':'🌟 分享你的动物人格')}</div>
       <div class="share-card-wrap">
         <div class="share-card" id="shareCard">
           <div class="sc-bg" style="background:${rarity.gradient}">
             <div class="sc-overlay">
               <div class="sc-top">
                 <span class="sc-badge" style="background:rgba(0,0,0,0.3);color:#fff">🐾 ${lang==='en'?'Animal Personality Test':'动物性格测试'}</span>
-                <span class="sc-badge" style="background:rgba(0,0,0,0.3);color:#fff">${rarity.emoji} ${rarity.name}</span>
+                <span class="sc-badge" style="background:rgba(0,0,0,0.3);color:#fff">${rarity.name}</span>
               </div>
               <div class="sc-animal">${animal.emoji}</div>
               <div class="sc-name" style="color:#fff">${animal.name}</div>
               ${mbti ? `<div style="text-align:center;margin-bottom:0.5rem"><span style="background:rgba(255,255,255,0.2);padding:0.2rem 0.6rem;border-radius:6px;font-size:0.75rem;color:#fff;font-weight:700;letter-spacing:0.1em">${mbti}</span></div>` : ''}
-              <div class="sc-rarity"><div class="sc-stars" style="color:rgba(255,255,255,0.9)">${stars}</div></div>
-              <div class="sc-match" style="color:rgba(255,255,255,0.7)">匹配度 ${matchPercent}%</div>
+              <div class="sc-rarity"><div style="text-align:center;font-size:0.85rem;font-weight:700;color:#ffd700;margin-bottom:0.2rem">${rarity.name}</div><div class="sc-stars" style="color:#ffd700">${stars}</div></div>
+              <div class="sc-match" style="color:rgba(255,255,255,0.7)">${t('result_match')} ${matchPercent}%</div>
               <div class="sc-traits">${animal.traits.map(t => `<span class="sc-trait">${t}</span>`).join('')}</div>
               <div class="sc-desc">${(animal.description||'').substring(0, 80)}...</div>
               <div class="sc-url">🔗 <span id="scQuizUrl">${(cfg && cfg.share && cfg.share.quizUrl) || 'https://www.fbti.net'}</span></div>
@@ -327,7 +425,7 @@ function renderResult(result) {
           </div>
         </div>
         <div class="share-actions">
-          <button class="share-btn save" onclick="showAdOverlay('save')">📥 ${lang==='en'?'Save Image':'保存图片'}</button>
+          <button class="share-btn save" onclick="showAdOverlay('save')">📥 ${lang==='en'?'Save & Share':'保存图片发朋友圈'}</button>
           <button class="share-btn wechat" onclick="showAdOverlay('wechat')">💬 ${lang==='en'?'Share WeChat':'分享微信'}</button>
           <button class="share-btn qr" onclick="showAdOverlay('qr')">📱 ${lang==='en'?'QR Code':'二维码'}</button>
         </div>
@@ -410,7 +508,14 @@ function renderResult(result) {
 function showAdOverlay(type) {
   const overlay = document.getElementById('adOverlay');
   const content = document.getElementById('adOverlayContent');
-  const lang = I18N ? I18N.getLang() : 'zh';
+  // Apply lang from URL param if present (for EN quiz completing -> EN result page)
+  // Determine language from URL param (quiz passes ?lang=en or ?lang=zh)
+  var urlLang = new URLSearchParams(window.location.search).get('lang') || 'zh';
+  var lang = (urlLang === 'en') ? 'en' : 'zh';
+  // Sync with I18N if available
+  if (typeof I18N !== 'undefined' && I18N.setLang) {
+    I18N.setLang(lang);
+  }
 
   if (type === 'qr') {
     content.innerHTML = `
@@ -478,7 +583,7 @@ function downloadCard() {
   if (typeof html2canvas !== 'undefined') {
     html2canvas(card, { scale: 2, backgroundColor: null }).then(canvas => {
       const link = document.createElement('a');
-      link.download = (lang==='en' ? 'MyAnimalPersonality_' : '我的动物人格_') + (window._animalResult && window._animalResult.animal ? window._animalResult.animal.name : 'Test') + '.png';
+      link.download = (lang==='en' ? 'MyAnimalPersonality_' : '我的动物人格_') + ((window._animalResult && window._animalResult.animal) ? window._animalResult.animal.name : (result.animal ? result.animal.name : 'Test')) + '.png';
       link.href = canvas.toDataURL('image/png');
       link.click();
     });
@@ -504,6 +609,120 @@ document.addEventListener('DOMContentLoaded', function() {
   } catch(e) {
     console.error('Result error:', e);
     document.getElementById('resultScreen').innerHTML = '<div style="color:#fff;padding:2rem;text-align:center;font-size:1.2rem">加载失败：' + e.message + '</div>';
+  }
+});
+</script>
+
+<!-- 注册/登录模态框 -->
+<div id="authModal" class="modal-overlay">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeAuthModal()">&times;</button>
+    <div class="modal-tabs">
+      <div class="modal-tab active" id="tabLogin" onclick="switchTab('login')">登录</div>
+      <div class="modal-tab" id="tabReg" onclick="switchTab('reg')">注册</div>
+    </div>
+    <div id="formLogin" class="reg-form active">
+      <div class="form-row"><label>账号</label><input type="text" id="loginUsername" placeholder="输入账号" autocomplete="username"></div>
+      <div class="form-row"><label>密码</label><input type="password" id="loginPassword" placeholder="输入密码" autocomplete="current-password" onkeydown="if(event.key==='Enter')doModalLogin()"></div>
+      <button class="form-submit" onclick="doModalLogin()">登录</button>
+      <div class="form-error" id="loginErr"></div>
+    </div>
+    <div id="formReg" class="reg-form">
+      <div class="form-row"><label>账号 *</label><input type="text" id="regUsername" placeholder="设置登录账号" autocomplete="username"></div>
+      <div class="form-row"><label>密码 *</label><input type="password" id="regPassword" placeholder="至少6位密码" autocomplete="new-password"></div>
+      <div class="form-row"><label>姓名</label><input type="text" id="regName" placeholder="你的姓名（选填）" autocomplete="name"></div>
+      <div class="form-row"><label>城市</label><input type="text" id="regCity" placeholder="所在城市（选填）" autocomplete="address-level2"></div>
+      <div class="form-row"><label>性别</label><select id="regGender"><option value="">请选择（选填）</option><option value="男">男</option><option value="女">女</option><option value="保密">保密</option></select></div>
+      <div class="form-row"><label>手机</label><input type="tel" id="regPhone" placeholder="手机号（选填）" autocomplete="tel"></div>
+      <div class="form-row"><label>QQ</label><input type="text" id="regQQ" placeholder="QQ号（选填）"></div>
+      <div class="form-row"><label>微信</label><input type="text" id="regWechat" placeholder="微信号（选填）"></div>
+      <div class="form-row hint">* 为必填项，其他信息选填</div>
+      <button class="form-submit" onclick="doModalRegister()">注册</button>
+      <div class="form-error" id="regErr"></div>
+      <div class="form-success" id="regSuccess" style="display:none"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 留言板 -->
+<div class="comment-section">
+  <div class="comment-title">留言板 <span id="commentCount" style="color:#64748b;font-weight:normal;font-size:0.85rem"></span></div>
+  <div class="comment-list" id="commentList"><div style="text-align:center;color:#475569;padding:1rem">加载中...</div></div>
+  <div class="comment-form-area" id="commentFormArea">
+    <div class="comment-guest" id="commentGuest">登录后可留言 &nbsp;<a onclick="openAuthModal('login')">登录</a> 或 <a onclick="openAuthModal('reg')">注册</a></div>
+    <div id="commentLoggedIn" style="display:none">
+      <textarea class="comment-textarea" id="commentText" placeholder="分享你的测试感受..." maxlength="500"></textarea>
+      <div style="display:flex;align-items:center;gap:0.8rem;margin-top:0.5rem">
+        <span id="commentUserLabel" style="color:#f59e0b;font-size:0.8rem"></span>
+        <button class="comment-submit" onclick="submitComment()">发布留言</button>
+      </div>
+      <div class="comment-msg" id="commentMsg"></div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+var API_BASE = 'https://fbti-new.onrender.com';
+var CURRENT_USER = null;
+var USER_TOKEN = localStorage.getItem('fbti_token') || '';
+function switchTab(tab){document.getElementById('tabLogin').classList.toggle('active',tab==='login');document.getElementById('tabReg').classList.toggle('active',tab==='reg');document.getElementById('formLogin').classList.toggle('active',tab==='login');document.getElementById('formReg').classList.toggle('active',tab==='reg');document.getElementById('loginErr').textContent='';document.getElementById('regErr').textContent=''}
+function openAuthModal(tab){if(!tab)tab='login';switchTab(tab);document.getElementById('authModal').classList.add('show')}
+function closeAuthModal(){document.getElementById('authModal').classList.remove('show')}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeAuthModal()});
+function doModalLogin(){var u=document.getElementById('loginUsername').value.trim();var p=document.getElementById('loginPassword').value;var e=document.getElementById('loginErr');e.textContent='';if(!u||!p){e.textContent='请填写账号和密码';return}fetch(API_BASE+'/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})}).then(function(r){return r.json()}).then(function(d){if(!d.success){e.textContent=d.error||'登录失败';return}CURRENT_USER=d.user;USER_TOKEN=d.token;localStorage.setItem('fbti_token',USER_TOKEN);localStorage.setItem('fbti_user',JSON.stringify(CURRENT_USER));closeAuthModal();onUserLoggedIn()}).catch(function(){e.textContent='网络错误'})}
+function doModalRegister(){var u=document.getElementById('regUsername').value.trim();var p=document.getElementById('regPassword').value;var n=document.getElementById('regName').value.trim();var c=document.getElementById('regCity').value.trim();var g=document.getElementById('regGender').value;var ph=document.getElementById('regPhone').value.trim();var qq=document.getElementById('regQQ').value.trim();var wc=document.getElementById('regWechat').value.trim();var e=document.getElementById('regErr');var s=document.getElementById('regSuccess');e.textContent='';s.style.display='none';if(!u||!p){e.textContent='账号和密码为必填项';return}if(p.length<6){e.textContent='密码至少6位';return}var btn=document.querySelector('#formReg .form-submit');btn.disabled=true;fetch(API_BASE+'/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p,name:n,city:c,gender:g,phone:ph,qq:qq,wechat:wc})}).then(function(r){return r.json()}).then(function(d){btn.disabled=false;if(!d.success){e.textContent=d.error||'注册失败';return}s.textContent='注册成功！';s.style.display='block';CURRENT_USER=d.user;USER_TOKEN=d.token;localStorage.setItem('fbti_token',USER_TOKEN);localStorage.setItem('fbti_user',JSON.stringify(CURRENT_USER));setTimeout(function(){closeAuthModal();onUserLoggedIn()},1200)}).catch(function(){btn.disabled=false;e.textContent='网络错误'})}
+function validateSession(){if(!USER_TOKEN)return;fetch(API_BASE+'/api/auth/me',{headers:{'X-User-Token':USER_TOKEN}}).then(function(r){return r.json()}).then(function(d){if(d.user){CURRENT_USER=d.user;onUserLoggedIn()}else{USER_TOKEN='';localStorage.removeItem('fbti_token');localStorage.removeItem('fbti_user')}}).catch(function(){})}
+function onUserLoggedIn(){var g=document.getElementById('commentGuest');var li=document.getElementById('commentLoggedIn');var lbl=document.getElementById('commentUserLabel');if(g&&li){g.style.display='none';li.style.display='block';if(lbl&&CURRENT_USER)lbl.textContent='欢迎，'+(CURRENT_USER.name||CURRENT_USER.username)}var ta=document.getElementById('commentText');if(ta)ta.placeholder='分享你的测试感受...'}
+function escHtml(s){if(s==null)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function loadComments(){fetch(API_BASE+'/api/comments').then(function(r){return r.json()}).then(function(d){var list=document.getElementById('commentList');var count=document.getElementById('commentCount');if(!list)return;var cs=d.comments||[];if(count)count.textContent='('+cs.length+')';if(cs.length===0){list.innerHTML='<div style="text-align:center;color:#475569;padding:1rem">还没有留言，来做第一个吧！</div>';return}list.innerHTML=cs.map(function(c){var dt=new Date(c.createdAt);var t=dt.toLocaleDateString('zh-CN',{year:'numeric',month:'short',day:'numeric'});return'<div class="comment-item"><div class="comment-meta">'+escHtml(c.name||c.username)+'</div><div class="comment-text">'+escHtml(c.text).replace(/\n/g,'<br>')+'</div><div class="comment-time">'+t+'</div></div>'}).join('')}).catch(function(){var list=document.getElementById('commentList');if(list)list.innerHTML='<div style="text-align:center;color:#475569;padding:1rem">加载失败</div>'})}
+function submitComment(){var t=document.getElementById('commentText').value.trim();var m=document.getElementById('commentMsg');m.textContent='';m.className='comment-msg';if(!t||t.length<2){m.textContent='留言内容至少2个字';m.classList.add('err');return}if(!USER_TOKEN){m.textContent='请先登录';m.classList.add('err');openAuthModal('login');return}m.textContent='发布中...';fetch(API_BASE+'/api/comments',{method:'POST',headers:{'Content-Type':'application/json','X-User-Token':USER_TOKEN},body:JSON.stringify({text:t})}).then(function(r){return r.json()}).then(function(d){if(!d.success){m.textContent=d.error||'发布失败';m.classList.add('err');return}m.textContent='发布成功！';m.classList.add('ok');document.getElementById('commentText').value='';loadComments()}).catch(function(){m.textContent='网络错误';m.classList.add('err')})}
+document.addEventListener('DOMContentLoaded',function(){loadComments();validateSession();if(USER_TOKEN&&CURRENT_USER)onUserLoggedIn()});
+</script>
+
+
+赞赏引导 -->
+<div class="appreciate-section">
+  <div class="appreciate-inner">
+    <div class="appreciate-emoji">☕</div>
+    <div class="appreciate-title">请我喝杯咖啡</div>
+    <div class="appreciate-desc">您的支持是我持续优化的动力</div>
+    <div class="appreciate-qr-wrap" id="appreciateQR">
+<img src="wechat-qr.png?v=2" alt="微信赞赏码" style="max-width:200px;border-radius:12px;border:1px solid #333">
+      
+        <div style="font-size:0.85rem;color:#64748b">点击测试结果页右上角<br>「分享」给朋友也是支持 🙏</div>
+      </div>
+    </div>
+    <div class="appreciate-amount">
+      <span>¥1</span>
+      <span>¥3</span>
+      <span>¥6</span>
+      <span>¥9.9</span>
+    </div>
+    <div class="appreciate-thanks">感谢您的支持 🙏</div>
+  </div>
+</div>
+
+
+<script>
+// Result page event tracking
+document.addEventListener('DOMContentLoaded', function() {
+  tagEvent('result_page_view', { page: window.location.href });
+
+  // Track share button clicks
+  var shareBtns = document.querySelectorAll('.share-btn, [onclick*="share"], [onclick*="download"], [onclick*="save"]');
+  shareBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      tagEvent('share_action', { button: this.className || this.id || 'unknown' });
+    });
+  });
+
+  // Track appreciation/QR scans
+  var qrBtn = document.querySelector('[onclick*="appreciate"], .appreciate-btn, #appreciateQR');
+  if (qrBtn) {
+    qrBtn.addEventListener('click', function() {
+      tagEvent('appreciate_click', {});
+    });
   }
 });
 </script>

@@ -57,7 +57,7 @@ tr:hover{background:rgba(255,255,255,0.03)}
 </style>
 </head>
 <body>
-<header><h1>🐾 动物性格测试 · 管理后台</h1><span id="totalCount" style="font-size:0.8rem;color:var(--muted)">--</span></header>
+<header><h1>🐾 动物性格测试 · 管理后台</h1><span id="totalCount" style="font-size:0.8rem;color:var(--muted)">--</span><span id="sbStatus" style="font-size:0.75rem;color:var(--muted);margin-left:1rem"></span></header>
 
 <div class="wrap">
   <div class="login-wrap" id="loginPage">
@@ -83,6 +83,7 @@ tr:hover{background:rgba(255,255,255,0.03)}
       <button class="tab-btn active" onclick="switchTab('overview')">📊 数据概览</button>
       <button class="tab-btn" onclick="switchTab('results')">📋 提交记录</button>
       <button class="tab-btn" onclick="switchTab('export')">📤 导出</button>
+      <button class="tab-btn" onclick="switchTab('debug')">🔧 调试</button>
     </div>
 
     <div class="tab-panel active" id="tab-overview">
@@ -122,6 +123,36 @@ tr:hover{background:rgba(255,255,255,0.03)}
           <button class="filter-btn" onclick="doExport('txt')">📝 导出 TXT</button>
         </div>
         <div id="exportInfo" style="font-size:0.85rem;color:var(--muted)"></div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="tab-debug">
+      <div class="panel-card">
+        <h3 style="margin-bottom:1rem">🔧 Supabase 调试面板</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem">
+            <div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.3rem">API 服务</div>
+            <div style="font-size:0.85rem;word-break:break-all" id="dbgApiBase">https://fbti-new.onrender.com</div>
+          </div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem">
+            <div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.3rem">Supabase 项目</div>
+            <div style="font-size:0.85rem;word-break:break-all" id="dbgSbProject">fcivevgxynpbsomosxmc</div>
+          </div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem">
+            <div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.3rem">数据库表</div>
+            <div style="font-size:0.85rem">public.animal_results</div>
+          </div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem">
+            <div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.3rem">REST API</div>
+            <div style="font-size:0.85rem;word-break:break-all">https://fcivevgxynpbsomosxmc.supabase.co/rest/v1/</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:0.8rem;flex-wrap:wrap;margin-bottom:1rem">
+          <button class="filter-btn" onclick="testHealth()">🔄 测试 /health</button>
+          <button class="filter-btn" onclick="testSupabase()">🗄 测试 Supabase 直连</button>
+          <button class="filter-btn" onclick="testAdminApi()">📡 测试 /api/admin/results</button>
+        </div>
+        <div id="dbgOutput" style="background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:1rem;font-size:0.8rem;font-family:monospace;max-height:300px;overflow:auto;white-space:pre-wrap;word-break:break-all;color:#a3e635"></div>
       </div>
     </div>
   </div>
@@ -667,6 +698,8 @@ function doLogin() {
     renderAnimalDist();
     populateAnimalFilter();
     loadPage(1);
+    // 自动刷新 Supabase 状态
+    testHealth();
   })
   .catch(function(e) { document.getElementById('loginErr').textContent = e.message || '连接失败，请重试'; });
 }
@@ -942,6 +975,93 @@ function populateAnimalFilter() {
   }).join('');
   sel.innerHTML = options;
   sel.value = cur;
+}
+
+function dbgLog(msg, color) {
+  var el = document.getElementById('dbgOutput');
+  if (!el) return;
+  var colorStyle = color ? 'style="color:' + color + '"' : '';
+  var ts = new Date().toLocaleTimeString('zh-CN', {hour12:false});
+  el.innerHTML += '<span ' + colorStyle + '>[' + ts + '] ' + escHtml(msg) + '</span>\n';
+  el.scrollTop = el.scrollHeight;
+}
+
+function dbgClear() {
+  var el = document.getElementById('dbgOutput');
+  if (el) el.innerHTML = '';
+}
+
+function testHealth() {
+  dbgClear();
+  dbgLog('测试 /health...', '#60a5fa');
+  fetch(BASE + '/health')
+    .then(function(r) {
+      return r.json().then(function(j) { return { status: r.status, data: j }; });
+    })
+    .then(function(ret) {
+      dbgLog('HTTP ' + ret.status, ret.status === 200 ? '#22c55e' : '#ef4444');
+      dbgLog('db_ready: ' + ret.data.db_ready, ret.data.db_ready ? '#22c55e' : '#ef4444');
+      dbgLog('total (in-memory): ' + ret.data.total, '#22c55e');
+      dbgLog('uptime: ' + ret.data.uptime + 's', '#a3e635');
+      dbgLog('supabase_key_set: ' + ret.data.supabase_key_set, ret.data.supabase_key_set ? '#22c55e' : '#ef4444');
+      // Update header status bar
+      var sbEl = document.getElementById('sbStatus');
+      if (sbEl) {
+        var ok = ret.data.db_ready && ret.status === 200;
+        sbEl.textContent = ' | 🟢 API:ok | ' + (ok ? '🟢 db:就绪' : '🔴 db:未就绪') + ' | 内存:' + ret.data.total + '条 | ' + ret.data.uptime + 's';
+        sbEl.style.color = ok ? '#22c55e' : '#ef4444';
+      }
+    })
+    .catch(function(e) {
+      dbgLog('失败: ' + e.message, '#ef4444');
+      var sbEl = document.getElementById('sbStatus');
+      if (sbEl) { sbEl.textContent = ' | 🔴 API连接失败'; sbEl.style.color = '#ef4444'; }
+    });
+}
+
+function testSupabase() {
+  dbgClear();
+  dbgLog('直接查询 Supabase animal_results 表...', '#f97316');
+  var SB_URL = 'https://fcivevgxynpbsomosxmc.supabase.co';
+  var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZjaXZldmd4eW5wYnNvbW9zeG1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5MTE4MTEsImV4cCI6MjA5MjQ4NzgxMX0.4OEA-tuGBfi36ia20Pb2cmR48K-dkiKLkc0u2fOuP-g';
+  fetch(SB_URL + '/rest/v1/animal_results?select=id,animal_id,rarity,submitted_at&order=submitted_at.desc&limit=5', {
+    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+  })
+    .then(function(r) {
+      dbgLog('HTTP ' + r.status, r.ok ? '#22c55e' : '#ef4444');
+      return r.json();
+    })
+    .then(function(data) {
+      if (Array.isArray(data)) {
+        dbgLog('Supabase 记录总数: ' + (data.total || data.length) + ' (显示最新5条)', '#22c55e');
+        data.slice(0, 5).forEach(function(r) {
+          dbgLog('  ' + r.id + ' | ' + r.animal_id + ' | ' + r.rarity + ' | ' + r.submitted_at, '#a3e635');
+        });
+      } else {
+        dbgLog('返回: ' + JSON.stringify(data).substring(0, 200), '#f59e0b');
+      }
+    })
+    .catch(function(e) { dbgLog('Supabase 查询失败: ' + e.message, '#ef4444'); });
+}
+
+function testAdminApi() {
+  dbgClear();
+  dbgLog('测试 /api/admin/results (当前内存数据)...', '#f97316');
+  var pw = document.getElementById('passwordInput') ? document.getElementById('passwordInput').value : '';
+  fetch(BASE + '/api/admin/results', {
+    headers: { 'X-Admin-Password': pw || 'sbti-admin-2026' }
+  })
+    .then(function(r) {
+      dbgLog('HTTP ' + r.status, r.ok ? '#22c55e' : '#ef4444');
+      return r.json();
+    })
+    .then(function(data) {
+      dbgLog('API 返回记录数: ' + (data.results ? data.results.length : 0), '#22c55e');
+      dbgLog('stats.total: ' + (data.stats ? data.stats.total : 'N/A'), '#a3e635');
+      dbgLog('rarity 分布: ' + JSON.stringify(data.stats ? data.stats.by_rarity : {}), '#a3e635');
+      dbgLog('top_types: ' + JSON.stringify((data.stats && data.stats.top_types) ? data.stats.top_types.slice(0,3) : []), '#a3e635');
+    })
+    .catch(function(e) { dbgLog('/api/admin/results 失败: ' + e.message, '#ef4444'); });
 }
 </script>
 </body>

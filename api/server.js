@@ -241,7 +241,7 @@ app.post('/api/results', async function(req, res) {
   if (results.length > 50000) results = results.slice(0, 50000);
 
   // Async Supabase insert (non-blocking)
-  insertResult(result).catch(() => {});
+  insertResult(result).catch(function(e) { console.log('Supabase insert error:', e.message); });
   // Local save as fallback
   saveResults();
 
@@ -277,6 +277,19 @@ app.get('/api/stats', function(req, res) {
 
 // GET /api/admin/results
 app.get('/api/admin/results', function(req, res) {
+  // Fix: if in-memory is empty but Supabase is ready, load from DB first
+  if (results.length === 0 && dbReady) {
+    loadResultsFromDB().then(function() {
+      return respondWithResults(req, res);
+    }).catch(function() {
+      return respondWithResults(req, res);
+    });
+    return;
+  }
+  return respondWithResults(req, res);
+});
+
+function respondWithResults(req, res) {
   try {
     var password = req.headers['x-admin-password'];
     if (password !== ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
@@ -305,7 +318,7 @@ app.get('/api/admin/results', function(req, res) {
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
-});
+}
 
 // DELETE /api/admin/results/:id
 app.delete('/api/admin/results/:id', function(req, res) {

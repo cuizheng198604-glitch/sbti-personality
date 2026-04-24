@@ -443,12 +443,12 @@ function showResult() {
       if (controller) controller.abort();
       controller = new AbortController();
       window._submitCtrl = controller;
-      var timeout = setTimeout(function() { controller.abort(); }, 8000);
+      var timeout = setTimeout(function() { controller.abort(); }, 15000);
       return fetch('https://fbti-new.onrender.com/api/results', Object.assign({}, opts, {signal: controller.signal}))
         .finally(function() { clearTimeout(timeout); })
         .catch(function(e) {
-          if (attempt < 2 && e.name !== 'AbortError') {
-            // 第一次失败，重试一次
+          if (attempt < 2) {
+            // 第一次失败（任意错误，包括 AbortError），重试一次
             return submitWithTimeout(opts, 2);
           }
           throw e; // 两次都失败，抛出
@@ -457,18 +457,18 @@ function showResult() {
 
     submitWithTimeout(fetchOpts)
       .then(function(r) {
+        // 检查 HTTP 状态码，非 2xx 当作错误处理
+        if (!r || r.status < 200 || r.status >= 300) throw new Error('server_error');
         tagEvent('quiz_completed', {
           animal: result.animal || 'unknown',
           rarity: result.rarity || 'unknown',
           mbti: result.mbti || 'unknown'
         });
         tagEvent('quiz_api_success', {animal: result.animal || ''});
-        // 完成后跳转
         window.location.href = 'animal_result.html?lang=' + (new URLSearchParams(window.location.search).get('lang') || 'zh');
       })
       .catch(function(e) {
         tagEvent('quiz_api_error', {animal: result.animal || ''});
-        // 失败也跳转（数据已在 localStorage 备份）
         window.location.href = 'animal_result.html?lang=' + (new URLSearchParams(window.location.search).get('lang') || 'zh');
       });
 

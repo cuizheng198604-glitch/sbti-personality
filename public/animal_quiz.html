@@ -423,27 +423,36 @@ function showResult() {
   setTimeout(() => {
     const result = calcResult();
 
-    // 提交到后端API，成功后触发 quiz_completed
-    fetch('https://fbti-new.onrender.com/api/results', {
+    const payload = Object.assign({}, result, {
+      utm_source: (JSON.parse(sessionStorage.getItem('fb_utm')||'{}')||{}).utm_source||'',
+      utm_medium: (JSON.parse(sessionStorage.getItem('fb_utm')||'{}')||{}).utm_medium||'',
+      utm_campaign: (JSON.parse(sessionStorage.getItem('fb_utm')||'{}')||{}).utm_campaign||'',
+      utm_content: (JSON.parse(sessionStorage.getItem('fb_utm')||'{}')||{}).utm_content||'',
+      utm_term: (JSON.parse(sessionStorage.getItem('fb_utm')||'{}')||{}).utm_term||''
+    });
+    var fetchOpts = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(Object.assign({}, result, {
-        utm_source: (JSON.parse(sessionStorage.getItem('fb_utm')||'{}')||{}).utm_source||'',
-        utm_medium: (JSON.parse(sessionStorage.getItem('fb_utm')||'{}')||{}).utm_medium||'',
-        utm_campaign: (JSON.parse(sessionStorage.getItem('fb_utm')||'{}')||{}).utm_campaign||'',
-        utm_content: (JSON.parse(sessionStorage.getItem('fb_utm')||'{}')||{}).utm_content||'',
-        utm_term: (JSON.parse(sessionStorage.getItem('fb_utm')||'{}')||{}).utm_term||''
-      }))
-    }).then(function() {
-      tagEvent('quiz_completed', {
-        animal: result.animal || 'unknown',
-        rarity: result.rarity || 'unknown',
-        mbti: result.mbti || 'unknown'
+      body: JSON.stringify(payload)
+    };
+
+    // 提交到后端API，失败重试一次，成功后触发 quiz_completed
+    fetch('https://fbti-new.onrender.com/api/results', fetchOpts)
+      .catch(function() {
+        // 第一次失败，重试一次（应对 Render 冷启动）
+        return fetch('https://fbti-new.onrender.com/api/results', fetchOpts);
+      })
+      .then(function() {
+        tagEvent('quiz_completed', {
+          animal: result.animal || 'unknown',
+          rarity: result.rarity || 'unknown',
+          mbti: result.mbti || 'unknown'
+        });
+        tagEvent('quiz_api_success', {animal: result.animal || ''});
+      })
+      .catch(function() {
+        tagEvent('quiz_api_error', {animal: result.animal || ''});
       });
-      tagEvent('quiz_api_success', {animal: result.animal || ''});
-    }).catch(function() {
-      tagEvent('quiz_api_error', {animal: result.animal || ''});
-    });
 
     // 同时保存本地（备份）
     try {

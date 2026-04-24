@@ -423,12 +423,7 @@ function showResult() {
   setTimeout(() => {
     const result = calcResult();
 
-    tagEvent('quiz_completed', {
-      animal: result.animal || 'unknown',
-      rarity: result.rarity || 'unknown',
-      mbti: result.mbti || 'unknown'
-    });
-    // 提交到后端API
+    // 提交到后端API，成功后触发 quiz_completed
     fetch('https://fbti-new.onrender.com/api/results', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -440,6 +435,11 @@ function showResult() {
         utm_term: (JSON.parse(sessionStorage.getItem('fb_utm')||'{}')||{}).utm_term||''
       }))
     }).then(function() {
+      tagEvent('quiz_completed', {
+        animal: result.animal || 'unknown',
+        rarity: result.rarity || 'unknown',
+        mbti: result.mbti || 'unknown'
+      });
       tagEvent('quiz_api_success', {animal: result.animal || ''});
     }).catch(function() {
       tagEvent('quiz_api_error', {animal: result.animal || ''});

@@ -1,62 +1,203 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-S29BGTFNLT"></script>
+<script>
+ window.dataLayer = window.dataLayer || [];
+ function gtag(){dataLayer.push(arguments);}
+ gtag('js', new Date());
+ gtag('config', 'G-S29BGTFNLT', { send_page_view: true });
+
+ function getUTM() {
+   var params = new URLSearchParams(window.location.search);
+   var utm = {};
+   ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'].forEach(function(k){
+     var v = params.get(k);
+     if (v) utm[k] = v;
+   });
+   if (Object.keys(utm).length > 0) {
+     sessionStorage.setItem('fb_utm', JSON.stringify(utm));
+   }
+ }
+ function tagEvent(name, params) {
+   var stored = sessionStorage.getItem('fb_utm');
+   var utm = stored ? JSON.parse(stored) : {};
+   gtag('event', name, Object.assign({}, utm, params || {}));
+ }
+ window.tagEvent = tagEvent;
+ getUTM();
+</script>
+
 <meta charset="UTF-8">
-<title>SBTI × Big Five</title>
-<script src="lang.js"></script>
+<title>Animal Personality Test | SBTI × Big Five</title>
+<!-- force-refresh-test-1776845489 -->
+
 <style>
-  body { font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #0f0f1a; color: #e2e8f0; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; flex-direction: column; gap: 1rem; }
-  .lang-switch { position: fixed; top: 1rem; right: 1rem; }
-  .lang-btn { background: #1a1a2e; border: 1px solid #2d2d4a; color: #64748b; border-radius: 8px; padding: 0.4rem 0.8rem; font-size: 0.78rem; cursor: pointer; }
-  .lang-btn:hover { border-color: #f59e0b; color: #f59e0b; }
-  a { color: #60a5fa; text-decoration: none; font-size: 1.1rem; }
-  .cards { display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap; justify-content: center; }
-  .card { background: #1a1a2e; border: 1px solid #2d2d4a; border-radius: 12px; padding: 1rem 1.5rem; text-align: center; transition: transform 0.2s; min-width: 160px; }
-  .card:hover { transform: translateY(-3px); }
-  .card-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.3rem; }
-  .card-desc { font-size: 0.8rem; color: #64748b; }
-  .card-link { display: block; margin-top: 0.5rem; color: #60a5fa; font-size: 0.85rem; }
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:#0f0f1a;color:#e2e8f0;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:3rem 1rem 2rem}
+.lang-switch{position:fixed;top:1rem;right:1rem;display:flex;gap:0.3rem}
+.lang-btn{background:#1a1a2e;border:2px solid #2d2d4a;color:#64748b;border-radius:10px;padding:0.55rem 1.4rem;font-size:0.95rem;font-weight:700;cursor:pointer;transition:all 0.2s}.lang-btn.active,.lang-btn:hover{background:#fff;color:#0a0f1a;border-color:#fff}.lang-btn:hover{background:#f0f0f0;border-color:#e0e0e0}
+.lang-btn:hover{border-color:#f59e0b;color:#f59e0b}
+.main-title{text-align:center;margin-bottom:2rem}
+.main-title h1{font-size:1.8rem;font-weight:900;color:#fff;margin-bottom:0.3rem}
+.main-title p{color:#64748b;font-size:0.9rem}
+.cards{display:flex;flex-direction:column;gap:0.75rem;margin-top:1rem;align-items:center;max-width:380px;width:100%}
+.card{background:#1a1a2e;border:1px solid #2d2d4a;border-radius:14px;padding:1rem 1.2rem;text-align:center;transition:transform 0.2s;width:100%;cursor:pointer;text-decoration:none;display:flex;align-items:center;gap:1rem}
+.card:hover{transform:translateY(-3px);border-color:#f59e0b}
+.card-emoji{font-size:2rem;flex-shrink:0}
+.card-info{text-align:left;flex:1}
+.card-title{font-size:1rem;font-weight:700;color:#fff;margin-bottom:0.2rem}
+.card-desc{font-size:0.8rem;color:#64748b}
+.card-link{display:block;color:#60a5fa;font-size:0.8rem;margin-top:0.2rem}
+.card.quiz{background:linear-gradient(135deg,#1a1a2e,#2d1b4e);border-color:#7c3aed}
+.card.quiz:hover{border-color:#a855f7}
+.card.wc{background:linear-gradient(135deg,#1a1a2e,#1e3a5f);border-color:#2563eb}
+.card.wc:hover{border-color:#3b82f6}
 </style>
 </head>
 <body>
 
 <div class="lang-switch">
-  <button class="lang-btn" onclick="switchLang('zh')">中文</button>
-  <button class="lang-btn" onclick="switchLang('en')">EN</button>
+ <button class="lang-btn" onclick="switchLang('zh')">中文</button>
+ <button class="lang-btn" onclick="switchLang('en')">EN</button>
 </div>
 
-<div style="text-align:center">
-  <div style="font-size:1.5rem;font-weight:700;margin-bottom:0.3rem" data-i18n="home_title">SBTI × Big Five</div>
-  <div style="color:#64748b;font-size:0.9rem" data-i18n="home_subtitle">人格测试系统</div>
+<div class="main-title">
+ <h1 data-i18n="home_title" id="main-h1">🐾 动物性格测试</h1>
+ <p data-i18n="home_subtitle" id="main-subtitle">SBTI × Big Five · 发现你的动物人格</p>
 </div>
 
 <div class="cards">
-  <div class="card">
-    <div class="card-title" data-i18n="home_card1_title">人格测试</div>
-    <div class="card-desc" data-i18n="home_card1_desc">36题情境问卷</div>
-    <a class="card-link" href="personality_test.html" data-i18n="home_card1_link">开始测试 →</a>
-  </div>
-  <div class="card">
-    <div class="card-title" data-i18n="home_card2_title">手动评估</div>
-    <div class="card-desc" data-i18n="home_card2_desc">滑块输入 + 报告</div>
-    <a class="card-link" href="personality_eval.html" data-i18n="home_card2_link">立即体验 →</a>
-  </div>
-  <div class="card">
-    <div class="card-title" data-i18n="home_card3_title">抽卡模拟</div>
-    <div class="card-desc" data-i18n="home_card3_desc">Gacha 风格</div>
-    <a class="card-link" href="gacha_frontend.html" data-i18n="home_card3_link">开始抽卡 →</a>
-  </div>
+
+ <!-- Card 1: Animal Quiz -->
+ <a class="card quiz" href="animal_quiz.html" data-lang-preserve>
+   <div class="card-emoji">🦊</div>
+   <div class="card-info">
+     <div class="card-title" id="card1-title">动物性格测试</div>
+     <div class="card-desc" id="card1-desc">38题测出你的动物人格</div>
+     <span class="card-link" id="card1-link">立即测试 →</span>
+   </div>
+ </a>
+
+ <!-- Card 2: Personality Test -->
+ <a class="card" href="personality_test.html" data-lang-preserve>
+   <div class="card-emoji">🧠</div>
+   <div class="card-info">
+     <div class="card-title" id="card2-title">人格测试</div>
+     <div class="card-desc" id="card2-desc">36题情境问卷</div>
+     <span class="card-link" id="card2-link">开始测试 →</span>
+   </div>
+ </a>
+
+ <!-- Card 3: Manual Eval -->
+ <a class="card" href="personality_eval.html" data-lang-preserve>
+   <div class="card-emoji">📊</div>
+   <div class="card-info">
+     <div class="card-title" id="card3-title">手动评估</div>
+     <div class="card-desc" id="card3-desc">滑块输入 + 报告</div>
+     <span class="card-link" id="card3-link">立即体验 →</span>
+   </div>
+ </a>
+
+ <!-- Card 4: Gacha -->
+ <a class="card" href="gacha_frontend.html" data-lang-preserve>
+   <div class="card-emoji">🎰</div>
+   <div class="card-info">
+     <div class="card-title" id="card4-title">抽卡模拟</div>
+     <div class="card-desc" id="card4-desc">Gacha 风格</div>
+     <span class="card-link" id="card4-link">开始抽卡 →</span>
+   </div>
+ </a>
+
+ <!-- Card 5: World Cup -->
+ <a class="card wc" href="worldcup.html" data-lang-preserve>
+   <div class="card-emoji">🏆</div>
+   <div class="card-info">
+     <div class="card-title" id="card5-title">世界杯球队 × 动物人格</div>
+     <div class="card-desc" id="card5-desc">每支球队有独特的动物人格 🐾</div>
+     <span class="card-link" id="card5-link">立即查看 →</span>
+   </div>
+ </a>
+
 </div>
 
 <script>
+var _txt = {
+ zh: {
+   h1: '🐾 动物性格测试',
+   subtitle: 'SBTI × Big Five · 发现你的动物人格',
+   card1: ['动物性格测试','38题测出你的动物人格','立即测试 →'],
+   card2: ['人格测试','36题情境问卷','开始测试 →'],
+   card3: ['手动评估','滑块输入 + 报告','立即体验 →'],
+   card4: ['抽卡模拟','Gacha 风格','开始抽卡 →'],
+   card5: ['世界杯球队 × 动物人格','每支球队有独特的动物人格 🐾','立即查看 →']
+ },
+ en: {
+   h1: '🐾 Animal Personality Test',
+   subtitle: 'SBTI × Big Five · Discover Your Animal Archetype',
+   card1: ['Animal Personality Test','38 questions to find your animal','Take Test →'],
+   card2: ['Personality Test','36 situational questions','Start Test →'],
+   card3: ['Manual Assessment','Slider input + full report','Try Now →'],
+   card4: ['Gacha Simulator','Gacha-style experience','Draw Now →'],
+   card5: ['World Cup Teams × Animal Archetype','Every team has a unique animal personality','View Now →']
+ }
+};
+
 function switchLang(lang) {
-  I18N.setLang(lang);
-  // 更新 URL 参数
-  var url = new URL(window.location.href);
-  url.searchParams.set('lang', lang);
-  window.history.replaceState({}, '', url);
+ var url = new URL(window.location.href);
+ url.searchParams.set('lang', lang);
+ window.history.replaceState({}, '', url);
+ applyLang(lang);
+  // Highlight active button
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.remove('active')});
+  var btn = document.querySelector('.lang-btn[onclick*="'+lang+'"]');
+  if(btn) btn.classList.add('active');
 }
-I18N.applyLang();
+function applyLang(lang) {
+ var t = _txt[lang] || _txt.zh;
+ document.getElementById('main-h1').textContent = t.h1;
+ document.getElementById('main-subtitle').textContent = t.subtitle;
+ for (var i = 1; i <= 5; i++) {
+   var c = t['card' + i];
+   document.getElementById('card' + i + '-title').textContent = c[0];
+   document.getElementById('card' + i + '-desc').textContent = c[1];
+   document.getElementById('card' + i + '-link').textContent = c[2];
+ }
+ document.querySelectorAll('[data-lang-preserve]').forEach(function(el) {
+   var href = el.getAttribute('href') || '';
+   var hash = href.indexOf('#');
+   var hashStr = hash >= 0 ? href.substring(hash) : '';
+   var baseAndQuery = hash >= 0 ? href.substring(0, hash) : href;
+   var qIdx = baseAndQuery.indexOf('?');
+   var base = qIdx >= 0 ? baseAndQuery.substring(0, qIdx) : baseAndQuery;
+   var query = qIdx >= 0 ? baseAndQuery.substring(qIdx + 1) : '';
+   // Remove existing lang= and utm_ params
+   query = query.split('&').filter(function(p) {
+     return p.indexOf('lang=') !== 0 && p.indexOf('utm_') !== 0 && p.length > 0;
+   }).join('&');
+   var newHref = base + (query.length > 0 ? '?' + query + '&' : '?') + 'lang=' + lang + hashStr;
+   el.setAttribute('href', newHref);
+ });;
+}
+document.addEventListener('DOMContentLoaded', function() {
+ var lang = new URL(window.location.href).searchParams.get('lang') || 'zh'; try { document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.remove('active')}); var lb = document.querySelector('.lang-btn[onclick*="'+lang+'"]'); if(lb) lb.classList.add('active'); } catch(e){};
+ applyLang(lang);
+ // Add lang param to data-lang-preserve links
+ document.querySelectorAll('[data-lang-preserve]').forEach(function(el) {
+   var href = el.getAttribute('href');
+   if (href && !href.includes('lang=')) {
+     var sep = href.includes('?') ? '&' : '?';
+     el.setAttribute('href', href + sep + 'lang=' + lang);
+   }
+ });
+});
 </script>
 </body>
 </html>
+
+<!-- force-redeploy 1776848242 -->
+
+<!-- deploy-trigger 1776848686 -->
+
+<!-- redeploy 1776849717 -->

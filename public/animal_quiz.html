@@ -436,22 +436,40 @@ function showResult() {
       body: JSON.stringify(payload)
     };
 
-    // 提交到后端API，失败重试一次，成功后触发 quiz_completed
-    fetch('https://fbti-new.onrender.com/api/results', fetchOpts)
-      .catch(function() {
-        // 第一次失败，重试一次（应对 Render 冷启动）
-        return fetch('https://fbti-new.onrender.com/api/results', fetchOpts);
-      })
-      .then(function() {
+    // 提交到后端API，带 timeout，成功后跳转
+    function submitWithTimeout(opts, attempt) {
+      attempt = attempt || 1;
+      var controller = window._submitCtrl;
+      if (controller) controller.abort();
+      controller = new AbortController();
+      window._submitCtrl = controller;
+      var timeout = setTimeout(function() { controller.abort(); }, 8000);
+      return fetch('https://fbti-new.onrender.com/api/results', Object.assign({}, opts, {signal: controller.signal}))
+        .finally(function() { clearTimeout(timeout); })
+        .catch(function(e) {
+          if (attempt < 2 && e.name !== 'AbortError') {
+            // 第一次失败，重试一次
+            return submitWithTimeout(opts, 2);
+          }
+          throw e; // 两次都失败，抛出
+        });
+    }
+
+    submitWithTimeout(fetchOpts)
+      .then(function(r) {
         tagEvent('quiz_completed', {
           animal: result.animal || 'unknown',
           rarity: result.rarity || 'unknown',
           mbti: result.mbti || 'unknown'
         });
         tagEvent('quiz_api_success', {animal: result.animal || ''});
+        // 完成后跳转
+        window.location.href = 'animal_result.html?lang=' + (new URLSearchParams(window.location.search).get('lang') || 'zh');
       })
-      .catch(function() {
+      .catch(function(e) {
         tagEvent('quiz_api_error', {animal: result.animal || ''});
+        // 失败也跳转（数据已在 localStorage 备份）
+        window.location.href = 'animal_result.html?lang=' + (new URLSearchParams(window.location.search).get('lang') || 'zh');
       });
 
     // 同时保存本地（备份）
@@ -466,7 +484,6 @@ function showResult() {
 
     try { sessionStorage.setItem('animal_result', JSON.stringify(result)); } catch(e) {}
     try { localStorage.setItem('animal_last_result', JSON.stringify(result)); } catch(e) {}
-    window.location.href = 'animal_result.html?lang=' + (new URLSearchParams(window.location.search).get('lang') || 'zh');
   }, 1800);
 }
 

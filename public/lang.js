@@ -260,6 +260,24 @@
   function getEnglishQuestions() {
     return EN_QUESTIONS;
   }
+  // ── 英语精选10题 ──────────────────────────────────────
+  const EN_SHORT_QUESTIONS = [
+    { section:"MBTI · Energy", type:"mbti", dim:"E", text:"What do you usually prefer on weekends?", opts:[{l:"A",t:"Partying with a big group of friends, recharging socially",s:5},{l:"B",t:"Hanging out with a few close friends",s:4},{l:"C",t:"Quiet time alone, reading or daydreaming",s:2},{l:"D",t:"Avoid talking unless necessary",s:1}]},
+    { section:"MBTI · Energy", type:"mbti", dim:"E", text:"In social situations, you tend to:", opts:[{l:"A",t:"Initiate topics, become the center of attention",s:5},{l:"B",t:"Participate naturally in conversation",s:4},{l:"C",t:"Listen quietly, respond when appropriate",s:2},{l:"D",t:"Prefer to be an observer",s:1}]},
+    { section:"MBTI · Awareness", type:"mbti", dim:"N", text:"When solving a problem, you rely more on?", opts:[{l:"A",t:"Intuition and inspiration, suddenly seeing the solution",s:5},{l:"B",t:"Observing patterns, inferring from past experience",s:3},{l:"C",t:"Concrete evidence and real data",s:1},{l:"D",t:"Step-by-step logical reasoning",s:2}]},
+    { section:"MBTI · Awareness", type:"mbti", dim:"N", text:"When facing a new project, you focus more on?", opts:[{l:"A",t:"Possibilities and long-term vision",s:5},{l:"B",t:"Specific execution steps and resources",s:2},{l:"C",t:"Realistic conditions and constraints",s:1},{l:"D",t:"Stakeholders' reactions",s:3}]},
+    { section:"MBTI · Decision", type:"mbti", dim:"F", text:"When making major decisions, what matters most to you?", opts:[{l:"A",t:"Whether it aligns with my values and inner feelings",s:5},{l:"B",t:"Whether it positively affects the people involved",s:4},{l:"C",t:"Objective pros/cons analysis and optimal solution",s:1},{l:"D",t:"Whether the logic is consistent",s:2}]},
+    { section:"MBTI · Decision", type:"mbti", dim:"F", text:"When a friend shares their troubles with you, your first reaction is?", opts:[{l:"A",t:"Empathize first, then offer advice",s:5},{l:"B",t:"Listen carefully and help them analyze the problem",s:3},{l:"C",t:"Give them practical solutions",s:2},{l:"D",t:"Let them handle it alone, no need for my input",s:1}]},
+    { section:"MBTI · Execution", type:"mbti", dim:"J", text:"When traveling far, your habit is?", opts:[{l:"A",t:"Plan everything ahead, book hotels and transport",s:5},{l:"B",t:"Plan the framework, adapt details as you go",s:3},{l:"C",t:"Book flights, figure out the rest when you arrive",s:2},{l:"D",t:"Just go, no planning at all",s:1}]},
+    { section:"MBTI · Execution", type:"mbti", dim:"J", text:"Your attitude toward planning your life is?", opts:[{l:"A",t:"Must have clear goals and plans, I control my life",s:5},{l:"B",t:"Have a general direction, but embrace surprises",s:3},{l:"C",t:"Don't want limits, take it step by step",s:2},{l:"D",t:"No planning at all, enjoy the present",s:1}]},
+    { section:"BigFive · Openness", type:"bigfive", dim:"O", text:"Your usual attitude toward new things and ideas is?", opts:[{l:"A",t:"Very interested, actively explore and try",s:5},{l:"B",t:"Interested, but may not try",s:4},{l:"C",t:"Average, familiar things make me more comfortable",s:2},{l:"D",t:"Not very interested, see no need",s:1}]},
+    { section:"BigFive · Neuroticism", type:"bigfive", dim:"N", text:"When facing pressure and setbacks, you usually:", opts:[{l:"A",t:"Get anxious and worried, sleep affected",s:5},{l:"B",t:"Some anxiety, but can self-regulate",s:3},{l:"C",t:"Stay calm, handle things rationally",s:2},{l:"D",t:"Completely unaffected, great mindset",s:1}]},
+  ];
+
+
+  function getEnglishShortQuestions() {
+    return EN_SHORT_QUESTIONS;
+  }
 
   // ── 人格测试数据（英语版本）──────────────────────────────
   function getPersonalityData(lang) {
@@ -355,6 +373,7 @@
       applyLang();
     },
     getEnglishQuestions: getEnglishQuestions,
+    getEnglishShortQuestions: getEnglishShortQuestions,
     detectLang: detectLang,
     getPersonalityData: getPersonalityData,
   };

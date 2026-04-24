@@ -93,8 +93,8 @@ body{font-family:Segoe UI,PingFang SC,Microsoft YaHei,sans-serif;background:var(
       <div class="info-item"><div class="info-n" data-i18n="quiz_rarity">稀有度</div><div class="info-v">4级掉落</div></div>
     </div>
     <div class="btn-group">
-      <button class="btn-start" data-i18n="quiz_start" onclick="startQuiz()">🐾 开始测试</button>
-      <button class="btn-ghost" data-i18n="quiz_try" onclick="startQuiz()">好奇试试</button>
+      <button class="btn-start" data-i18n="quiz_start" onclick="startQuiz('full')">🐾 开始测试</button>
+      <button class="btn-ghost" data-i18n="quiz_try" onclick="startQuiz('short')">好奇试试</button>
     </div>
   </div>
 </div>
@@ -168,7 +168,16 @@ function getSectionLabel(q) {
   return SECTION_LABELS.N;
 }
 
-function startQuiz() {
+var quizMode = 'full';
+
+function startQuiz(mode) {
+  quizMode = mode || 'full';
+  const questions = quizMode === 'short'
+    ? (isEnglish ? I18N.getEnglishShortQuestions() : cfg.short_questions || cfg.questions)
+    : QUESTIONS;
+  window._quizQuestions = questions;
+  currentQ = 0;
+  answers = {};
   document.getElementById('startScreen').style.display = 'none';
   document.getElementById('quizScreen').style.display = 'block';
   showQuestion(0);
@@ -176,7 +185,9 @@ function startQuiz() {
 
 function showQuestion(index) {
   currentQ = index;
-  const q = QUESTIONS[index];
+  const questions = window._quizQuestions;
+  const total = questions.length;
+  const q = questions[index];
   const body = document.getElementById('quizBody');
 
   document.getElementById('pgFill').style.width = ((index + 1) / total * 100) + '%';
@@ -214,7 +225,7 @@ function showQuestion(index) {
   // 每5题显示广告
   const adContainer = document.getElementById('qAdContainer');
   if (adContainer) {
-    if ((index + 1) % 5 === 0 && index < total - 1) {
+    if ((index + 1) % 5 === 0 && index < window._quizQuestions.length - 1) {
       const adText = isEnglish ? 'Scan for exclusive personality analysis' : '扫码领取独家性格分析资料';
       adContainer.innerHTML = `<div class="quiz-ad">
         <div class="quiz-ad-label">${isEnglish ? 'Ad' : '广告'}</div>
@@ -244,7 +255,7 @@ function selectOpt(index, score) {
 }
 
 function nextQ() {
-  if (currentQ < total - 1) showQuestion(currentQ + 1);
+  if (currentQ < window._quizQuestions.length - 1) showQuestion(currentQ + 1);
   else showResult();
 }
 
@@ -269,7 +280,8 @@ function calcResult() {
   const bf_scores  = { Openness:0, Conscientiousness:0, Extraversion:0, Agreeableness:0, Neuroticism:0 };
   const bf_counts  = { Openness:0, Conscientiousness:0, Extraversion:0, Agreeableness:0, Neuroticism:0 };
 
-  QUESTIONS.forEach((q, qi) => {
+  const questions = window._quizQuestions;
+  questions.forEach((q, qi) => {
     const ans = answers[qi];
     if (!ans) return;
     const s = ans.score;

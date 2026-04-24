@@ -50,22 +50,25 @@ body{font-family:Segoe UI,PingFang SC,Microsoft YaHei,sans-serif;background:var(
 /* ── 分享卡片 ── */
 .share-section{padding:1.5rem 0}
 .share-card-wrap{text-align:center;padding:1rem 0}
-.share-card{border-radius:18px;overflow:hidden;max-width:360px;margin:0 auto 1rem;box-shadow:0 8px 40px rgba(0,0,0,0.5);cursor:pointer;transition:transform 0.2s}
+.share-card{border-radius:20px;overflow:hidden;max-width:400px;margin:0 auto 1rem;box-shadow:0 12px 50px rgba(0,0,0,0.5);cursor:pointer;transition:transform 0.2s}
 .share-card:hover{transform:scale(1.02)}
-.sc-bg{min-height:500px;padding:1.5rem;display:flex;flex-direction:column;justify-content:space-between}
-.sc-overlay{min-height:500px;display:flex;flex-direction:column;justify-content:space-between}
+.sc-bg{padding:1.2rem;display:flex;flex-direction:column;min-height:520px}
+.sc-overlay{display:flex;flex-direction:column;min-height:520px}
 .sc-top{display:flex;justify-content:space-between;align-items:flex-start}
-.sc-badge{display:inline-block;padding:0.25rem 0.6rem;border-radius:12px;font-size:0.65rem;font-weight:700}
-.sc-animal{font-size:3.5rem;text-align:center;padding:1rem 0}
-.sc-name{font-size:1.8rem;font-weight:900;text-align:center;margin-bottom:0.3rem}
-.sc-rarity{text-align:center;margin-bottom:1rem}
-.sc-stars{letter-spacing:3px;font-size:0.9rem}
-.sc-match{font-size:0.8rem;text-align:center;margin-bottom:1rem}
-.sc-traits{display:flex;gap:0.4rem;justify-content:center;flex-wrap:wrap;margin-bottom:1.2rem}
-.sc-trait{background:rgba(255,255,255,0.08);border-radius:12px;padding:0.2rem 0.5rem;font-size:0.65rem;color:rgba(255,255,255,0.7)}
-.sc-desc{font-size:0.75rem;color:rgba(255,255,255,0.6);line-height:1.7;text-align:left;flex:1;padding:0 0.3rem}
-.sc-url{text-align:center;font-size:0.7rem;color:rgba(255,255,255,0.7);padding:0.5rem 0.3rem;background:rgba(0,0,0,0.2);border-radius:8px;margin:0.5rem 0.3rem;letter-spacing:0.02em;word-break:break-all}
-.sc-footer{text-align:center;font-size:0.65rem;color:rgba(255,255,255,0.35);padding-top:0.4rem}
+.sc-badge{display:inline-block;padding:0.2rem 0.5rem;border-radius:8px;font-size:0.6rem;font-weight:700}
+.sc-hero{display:flex;flex-direction:column;align-items:center;padding:1.2rem 0}
+.sc-animal-lg{font-size:5.5rem;text-align:center;line-height:1;margin-bottom:0.5rem}
+.sc-name-lg{font-size:2.2rem;font-weight:900;text-align:center;letter-spacing:0.05em;margin-bottom:0.4rem}
+.sc-type-badge{display:inline-block;background:rgba(255,255,255,0.18);border-radius:8px;padding:0.25rem 0.8rem;margin-top:0.2rem}
+.sc-type-badge span{color:#fff;font-size:0.85rem;font-weight:700;letter-spacing:0.15em}
+.sc-match-row{display:flex;align-items:center;justify-content:center;margin-bottom:0.8rem}
+.sc-traits-lg{display:flex;gap:0.4rem;justify-content:center;flex-wrap:wrap;margin-bottom:0.8rem}
+.sc-trait-lg{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:20px;padding:0.2rem 0.6rem;font-size:0.7rem;color:rgba(255,255,255,0.85);backdrop-filter:blur(4px)}
+.sc-desc-lg{font-size:0.72rem;color:rgba(255,255,255,0.6);line-height:1.6;text-align:center;max-width:280px;margin:0 auto 0.8rem}
+.sc-bottom{display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.2);border-radius:8px;padding:0.5rem 0.8rem}
+.sc-url-text{font-size:0.7rem;color:rgba(255,255,255,0.6);font-weight:600}
+.sc-cta-text{font-size:0.65rem;color:rgba(255,255,255,0.4)}
+
 .share-actions{display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap;margin-top:0.8rem}
 .share-btn{padding:0.6rem 1.4rem;border-radius:10px;border:none;font-size:0.85rem;cursor:pointer;font-weight:600;transition:opacity 0.2s}
 .share-btn:hover{opacity:0.85}
@@ -310,19 +313,31 @@ function renderResult(result) {
         <div class="share-card" id="shareCard">
           <div class="sc-bg" style="background:${rarity.gradient}">
             <div class="sc-overlay">
+              <!-- 顶部标题栏 -->
               <div class="sc-top">
-                <span class="sc-badge" style="background:rgba(0,0,0,0.3);color:#fff">🐾 ${lang==='en'?'Animal Personality Test':'动物性格测试'}</span>
-                <span class="sc-badge" style="background:rgba(0,0,0,0.3);color:#fff">${rarity.emoji} ${rarity.name}</span>
+                <span class="sc-badge" style="background:rgba(0,0,0,0.25);color:#fff;font-size:0.6rem">🐾 ${lang==='en'?'Animal Personality':'动物性格测试'}</span>
+                <span class="sc-badge" style="background:rgba(0,0,0,0.25);color:#fff;font-size:0.6rem">${rarity.emoji} ${rarity.name}</span>
               </div>
-              <div class="sc-animal">${animal.emoji}</div>
-              <div class="sc-name" style="color:#fff">${animal.name}</div>
-              ${mbti ? `<div style="text-align:center;margin-bottom:0.5rem"><span style="background:rgba(255,255,255,0.2);padding:0.2rem 0.6rem;border-radius:6px;font-size:0.75rem;color:#fff;font-weight:700;letter-spacing:0.1em">${mbti}</span></div>` : ''}
-              <div class="sc-rarity"><div class="sc-stars" style="color:rgba(255,255,255,0.9)">${stars}</div></div>
-              <div class="sc-match" style="color:rgba(255,255,255,0.7)">匹配度 ${matchPercent}%</div>
-              <div class="sc-traits">${animal.traits.map(t => `<span class="sc-trait">${t}</span>`).join('')}</div>
-              <div class="sc-desc">${(animal.description||'').substring(0, 80)}...</div>
-              <div class="sc-url">🔗 <span id="scQuizUrl">${(cfg && cfg.share && cfg.share.quizUrl) || 'https://www.fbti.net'}</span></div>
-              <div class="sc-footer">${lang==='en'?'Scan the QR code → Test your animal personality':'长按识别二维码 → 测测你的动物人格'}</div>
+              <!-- 核心动物展示 -->
+              <div class="sc-hero">
+                <div class="sc-animal-lg">${animal.emoji}</div>
+                <div class="sc-name-lg" style="color:#fff;text-shadow:0 2px 8px rgba(0,0,0,0.3)">${animal.name}</div>
+                ${mbti ? `<div class="sc-type-badge"><span>${mbti}</span></div>` : ''}
+              </div>
+              <!-- 匹配度 -->
+              <div class="sc-match-row">
+                <span style="color:rgba(255,255,255,0.7);font-size:0.75rem">${lang==='en'?'Match':'匹配度'}</span>
+                <span style="color:#fff;font-size:1.1rem;font-weight:800;margin-left:0.4rem">${matchPercent}%</span>
+              </div>
+              <!-- 特质标签 -->
+              <div class="sc-traits-lg">${animal.traits.map(t => `<span class="sc-trait-lg">${t}</span>`).join('')}</div>
+              <!-- 描述 -->
+              <div class="sc-desc-lg">${(animal.description||'').substring(0, 60)}...</div>
+              <!-- 底部：URL+CTA+二维码 -->
+              <div class="sc-bottom">
+                <div class="sc-url-text">🔗 fbti.net</div>
+                <div class="sc-cta-text">${lang==='en'?'Scan to test →':'长按识别二维码 →'}</div>
+              </div>
             </div>
           </div>
         </div>

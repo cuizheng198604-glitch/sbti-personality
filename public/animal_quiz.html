@@ -284,6 +284,14 @@ function showQuestion(index) {
   // 每5题显示广告
   const adContainer = document.getElementById('qAdContainer');
   if (adContainer) {
+    if ((index + 1) % 5 === 0 && index < total - 1) {
+      const adText = isEnglish ? 'Scan for exclusive personality analysis' : '扫码领取独家性格分析资料';
+      adContainer.innerHTML = `<div class="quiz-ad">
+        <div class="quiz-ad-label">${isEnglish ? 'Ad' : '广告'}</div>
+        <div class="quiz-ad-content">
+          <div class="quiz-ad-text">${adText}</div>
+          <div class="quiz-ad-qr" id="quizAdQR"></div>
+        </div>
       </div>`;
       setTimeout(() => {
         const qrTarget = document.getElementById('quizAdQR');

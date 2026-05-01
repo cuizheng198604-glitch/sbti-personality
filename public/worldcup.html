@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>世界杯球队 × 动物人格</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0a0a0a; color: #fff; font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; min-height: 100vh; }
+.hero { text-align: center; padding: 3rem 1rem 2rem; background: linear-gradient(180deg, #1a1a2e 0%, #0a0a0a 100%); }
+.hero-emoji { font-size: 4rem; margin-bottom: 1rem; }
+.hero h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem; background: linear-gradient(135deg, #f59e0b, #ef4444); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hero p { color: #94a3b8; font-size: 0.95rem; max-width: 400px; margin: 0 auto 1.5rem; }
+.hero-stats { display: flex; justify-content: center; gap: 2rem; }
+.hero-stat { text-align: center; }
+.hero-stat-num { font-size: 1.4rem; font-weight: 800; color: #f59e0b; }
+.hero-stat-label { font-size: 0.75rem; color: #64748b; }
+.section { padding: 2rem 1rem; max-width: 900px; margin: 0 auto; }
+.section-title { text-align: center; font-size: 1.1rem; color: #f59e0b; margin-bottom: 1.5rem; font-weight: 700; }
+.team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+.team-card { background: #161624; border: 1px solid #2a2a3e; border-radius: 16px; padding: 1.2rem; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
+.team-card:hover { border-color: #f59e0b; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(245,158,11,0.15); }
+.team-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #f59e0b, #ef4444); opacity: 0; transition: opacity 0.2s; }
+.team-card:hover::before { opacity: 1; }
+.team-header { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.8rem; }
+.team-emoji { font-size: 2rem; }
+.team-name { font-size: 1rem; font-weight: 700; }
+.team-animal { display: flex; align-items: center; gap: 0.5rem; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); border-radius: 8px; padding: 0.4rem 0.7rem; margin-bottom: 0.7rem; }
+.team-animal-emoji { font-size: 1.2rem; }
+.team-animal-name { font-size: 0.8rem; color: #f59e0b; font-weight: 600; }
+.team-traits { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.6rem; }
+.team-trait { background: rgba(255,255,255,0.06); border-radius: 20px; padding: 0.2rem 0.6rem; font-size: 0.7rem; color: #94a3b8; }
+.team-desc { font-size: 0.78rem; color: #64748b; line-height: 1.5; }
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; align-items: center; justify-content: center; padding: 1rem; }
+.modal-overlay.show { display: flex; }
+.modal-box { background: #161624; border: 1px solid #2a2a3e; border-radius: 20px; padding: 2rem; max-width: 380px; width: 100%; text-align: center; position: relative; }
+.modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: #64748b; font-size: 1.5rem; cursor: pointer; }
+.modal-emoji { font-size: 4rem; margin-bottom: 0.5rem; }
+.modal-animal { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.3rem; }
+.modal-team { font-size: 0.9rem; color: #94a3b8; margin-bottom: 1rem; }
+.modal-desc { font-size: 0.85rem; color: #94a3b8; line-height: 1.6; margin-bottom: 1.5rem; }
+.modal-traits { display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.modal-trait { background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); border-radius: 20px; padding: 0.3rem 0.8rem; font-size: 0.8rem; color: #f59e0b; }
+.modal-btn { display: block; width: 100%; background: linear-gradient(135deg, #f59e0b, #d97706); color: #000; border: none; border-radius: 12px; padding: 0.9rem; font-size: 1rem; font-weight: 700; cursor: pointer; text-decoration: none; margin-top: 0.5rem; }
+.modal-btn:hover { opacity: 0.9; }
+.bottom-cta { text-align: center; padding: 2rem 1rem 4rem; }
+.bottom-cta h2 { font-size: 1.3rem; margin-bottom: 0.5rem; }
+.bottom-cta p { color: #64748b; font-size: 0.85rem; margin-bottom: 1.2rem; }
+.cta-btn { display: inline-block; background: linear-gradient(135deg, #f59e0b, #d97706); color: #000; border-radius: 12px; padding: 0.9rem 2rem; font-size: 1rem; font-weight: 700; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-emoji">🏆</div>
+  <h1>世界杯球队 × 动物人格</h1>
+  <p>每支球队都有独特的动物人格！点击你支持的球队，看看它的性格秘密</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="hero-stat-num">32</div><div class="hero-stat-label">支球队</div></div>
+    <div class="hero-stat"><div class="hero-stat-num">17</div><div class="hero-stat-label">种动物人格</div></div>
+    <div class="hero-stat"><div class="hero-stat-num">5</div><div class="hero-stat-label">大洲代表</div></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🐾 点击你的主队，发现它的动物性格</div>
+  <div class="team-grid" id="teamGrid"></div>
+</div>
+
+<div class="bottom-cta">
+  <h2>想知道自己是哪种动物人格吗？</h2>
+  <p>完整38题测试，揭开你内心最真实的动物面孔</p>
+  <a href="animal_quiz.html" class="cta-btn">🐾 开始性格测试 →</a>
+</div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+var teams = [
+  {name:"阿根廷", emoji:"🇦🇷", animalName:"龙", traits:["进攻意识", "永不言败", "团队核心"], desc:"潘帕斯雄鹰，赛场上的绝对统治者"},
+  {name:"巴西", emoji:"🇧🇷", animalName:"凤凰", traits:["天赋异禀", "桑巴灵魂", "不可阻挡"], desc:"五星巴西，足球王国的永恒传奇"},
+  {name:"法国", emoji:"🇫🇷", animalName:"豹", traits:["优雅高效", "战术大师", "爆发力强"], desc:"高卢雄鸡，绿茵场上的优雅猎手"},
+  {name:"德国", emoji:"🇩🇪", animalName:"狼", traits:["战术纪律", "钢铁意志", "团队协作"], desc:"日耳曼战车，精密运转的赢球机器"},
+  {name:"西班牙", emoji:"🇪🇸", animalName:"海豚", traits:["传控艺术", "球商顶级", "团队默契"], desc:"斗牛士，Tiki-Taka的绿茵艺术家"},
+  {name:"葡萄牙", emoji:"🇵🇹", animalName:"鹰", traits:["个人能力", "关键先生", "领袖气质"], desc:"C罗领衔，凌空翱翔的空中霸主"},
+  {name:"英格兰", emoji:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", animalName:"狮子", traits:["身体对抗", "长传冲吊", "坚韧不拔"], desc:"三狮军团，英伦半岛的丛林之王"},
+  {name:"日本", emoji:"🇯🇵", animalName:"猫头鹰", traits:["战术素养", "勤奋坚韧", "智慧足球"], desc:"蓝武士，亚洲足球的智慧之光"},
+  {name:"荷兰", emoji:"🇳🇱", animalName:"麒麟", traits:["全攻全守", "青训雄厚", "华丽流畅"], desc:"橙衣军团，全攻全守的绿茵麒麟"},
+  {name:"意大利", emoji:"🇮🇹", animalName:"狐狸", traits:["防守艺术", "战术大师", "逆境求生"], desc:"蓝衣军团，链式防守的狡猾猎手"},
+  {name:"克罗地亚", emoji:"🇭🇷", animalName:"狼", traits:["铁血意志", "中场大师", "永动机"], desc:"格子军团，小国大梦想的狼群精神"},
+  {name:"摩洛哥", emoji:"🇲🇦", animalName:"兔子", traits:["速度反击", "坚固防守", "黑马奇迹"], desc:"亚特拉斯雄狮，世界杯最黑的黑马"}
+];
+var modalContent = document.getElementById('modalContent');
+var grid = document.getElementById('teamGrid');
+teams.forEach(function(t, i) {
+  var traitsHtml = t.traits.map(function(tr) { return '<span class="team-trait">' + tr + '</span>'; }).join('');
+  var card = document.createElement('div');
+  card.className = 'team-card';
+  card.onclick = (function(idx) { return function() { showModal(idx); }; })(i);
+  card.innerHTML = '<div class="team-header"><span class="team-emoji">' + t.emoji + '</span><span class="team-name">' + t.name + '</span></div>' +
+    '<div class="team-animal"><span class="team-animal-emoji">🐾</span><span class="team-animal-name">' + t.animalName + '人格</span></div>' +
+    '<div class="team-traits">' + traitsHtml + '</div>' +
+    '<div class="team-desc">' + t.desc + '</div>';
+  grid.appendChild(card);
+});
+function showModal(i) {
+  var t = teams[i];
+  var traitsHtml = t.traits.map(function(tr) { return '<span class="modal-trait">' + tr + '</span>'; }).join('');
+  modalContent.innerHTML = '<div class="modal-emoji">' + t.emoji + '</div>' +
+    '<div class="modal-animal">' + t.animalName + '人格</div>' +
+    '<div class="modal-team">' + t.name + '</div>' +
+    '<div class="modal-desc">' + t.desc + '</div>' +
+    '<div class="modal-traits">' + traitsHtml + '</div>' +
+    '<a href="animal_quiz.html" class="modal-btn">🐾 我也要测性格 →</a>';
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal() { document.getElementById('modal').classList.remove('show'); }
+document.getElementById('modal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+</script>
+</body>
+</html>

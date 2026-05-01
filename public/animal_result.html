@@ -273,7 +273,66 @@ function getResultFromURL() {
   return getDefaultResult();
 }
 
-function getDefaultResult() {
+// ── 分享解锁：预览版结果函数 ─────────────────────
+function renderResultLocked(result) {
+  var animal = result.animalObj || result.animal || {};
+  var rarity = result.rarityObj || result.rarity || {};
+  var mbti = result.mbti;
+  var matchPercent = result.matchPercent || 0;
+  var stars = rarity.stars || 1;
+  var lang = I18N ? I18N.getLang() : 'zh';
+  var t = function(k) {
+    var map = {
+      'result_locked': lang==='en' ? 'Share to Unlock Full Result' : '分享即可查看完整结果',
+      'result_locked_desc': lang==='en' ? 'Share with friends to reveal your full personality analysis!' : '分享给好友，解锁完整性格分析报告！',
+      'result_unlock_btn': lang==='en' ? 'Share & Unlock' : '分享并解锁完整结果',
+      'result_locked_note': lang==='en' ? 'Your result is ready — complete the share to see all details!' : '你的结果已生成 — 完成分享即可查看完整报告！',
+      'skip_unlock': lang==='en' ? 'Skip, view result now' : '跳过，直接看结果'
+    };
+    return map[k] || k;
+  };
+  var screen = document.getElementById('resultScreen');
+  screen.innerHTML = '\n    <div style="text-align:center;padding:2rem 1.5rem">\n      <div style="font-size:1rem;color:#f59e0b;margin-bottom:1.5rem;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:12px;padding:0.8rem;max-width:320px;margin:0 auto 1.5rem">\n        🔒 ' + t('result_locked') + '\n      </div>\n      <div style="font-size:3rem;margin-bottom:0.5rem">' + (animal.emoji || '🐾') + '</div>\n      <div style="color:#fff;font-size:1.4rem;font-weight:700;margin-bottom:0.4rem">' + (animal.name || '???') + '</div>\n      <div style="color:rgba(255,255,255,0.6);font-size:0.8rem;margin-bottom:2rem">' + (rarity.emoji || '') + ' ' + (rarity.name || '') + ' · ' + stars + '星</div>\n      <div style="color:#fde68a;font-size:0.9rem;margin-bottom:1.5rem;max-width:280px;margin-left:auto;margin-right:auto">' + t('result_locked_desc') + '</div>\n      <button onclick="unlockFullResult()" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;border:none;border-radius:12px;padding:0.9rem 2rem;font-size:1rem;font-weight:700;cursor:pointer;width:100%;max-width:300px;margin-bottom:1rem;box-shadow:0 4px 20px rgba(245,158,11,0.4)">📤 ' + t('result_unlock_btn') + '</button>\n      <div style="color:rgba(255,255,255,0.4);font-size:0.75rem;margin-bottom:2rem">' + t('result_locked_note') + '</div>\n      <div style="color:#64748b;font-size:0.75rem">\n        <button onclick="skipUnlock()" style="background:none;border:none;color:#64748b;text-decoration:underline;cursor:pointer;font-size:0.75rem">' + t('skip_unlock') + '</button>\n      </div>\n    </div>\n  ';
+}
+
+function unlockFullResult() {
+  var result = null;
+  try { result = JSON.parse(sessionStorage.getItem('animal_result')); } catch(e) {}
+  if (!result) result = window._animalResult;
+  if (navigator.share) {
+    var animal = result && (result.animalObj || result.animal) || {};
+    var shareText = animal.name ? '我的动物人格是' + animal.emoji + animal.name + '！你也来测测：fbti.net' : '来做动物人格测试：fbti.net';
+    navigator.share({ title: '动物性格测试', text: shareText, url: window.location.origin + '/animal_quiz.html' })
+      .then(function() { completeUnlock(result); })
+      .catch(function() { completeUnlock(result); });
+  } else {
+    // 桌面端：打开分享弹层
+    showAdOverlay('wechat');
+    completeUnlock(result);
+  }
+}
+
+function skipUnlock() {
+  var result = null;
+  try { result = JSON.parse(sessionStorage.getItem('animal_result')); } catch(e) {}
+  if (!result) result = window._animalResult;
+  completeUnlock(result);
+}
+
+function completeUnlock(result) {
+  try { sessionStorage.setItem('result_shared', '1'); } catch(e) {}
+  if (result) {
+    window._animalResult = result;
+    renderResult(result);
+  }
+  clearSessionResult();
+}
+
+function clearSessionResult() {
+  try { sessionStorage.removeItem('animal_result'); } catch(e) {}
+  try { sessionStorage.removeItem('result_shared'); } catch(e) {}
+}
+
   const animal = cfg.animals[0];
   return {
     animalId: animal.id,
@@ -654,10 +713,26 @@ function showAlert(msg, type) {
 // ── 启动 ──
 document.addEventListener('DOMContentLoaded', function() {
   try {
-    var result = getResultFromURL();
+    // 分享解锁：先检查 sessionStorage 状态，再读取结果
+    var isFromQuiz = false;
+    var result = null;
+    try {
+      var storedResult = sessionStorage.getItem('animal_result');
+      isFromQuiz = !!(storedResult || sessionStorage.getItem('result_shared'));
+      if (storedResult) result = JSON.parse(storedResult);
+    } catch(e) {}
+    if (!result) result = getResultFromURL();
     window._animalResult = result;
     document.getElementById('resultScreen').innerHTML = '<div style="color:#fff;padding:2rem;text-align:center;font-size:1.2rem">正在加载结果...</div>';
-    renderResult(result);
+    // 分享解锁检查：来自quiz流程 且 未解锁 → 显示预览版
+    var isShared = false;
+    try { isShared = sessionStorage.getItem('result_shared') === '1'; } catch(e) {}
+    if (isFromQuiz && !isShared && result) {
+      renderResultLocked(result);
+    } else {
+      renderResult(result);
+      clearSessionResult();
+    }
   } catch(e) {
     console.error('Result error:', e);
     document.getElementById('resultScreen').innerHTML = '<div style="color:#fff;padding:2rem;text-align:center;font-size:1.2rem">加载失败：' + e.message + '</div>';

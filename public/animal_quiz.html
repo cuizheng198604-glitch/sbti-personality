@@ -467,6 +467,7 @@ function showResult() {
         var friendFromStorage = localStorage.getItem('quiz_friend_animal') || '';
         var friendParam = friendFromStorage ? '&friend=' + encodeURIComponent(friendFromStorage) : '';
         localStorage.removeItem('quiz_friend_animal');
+        // 分享解锁：结果已存sessionStorage，不带URL参数（让结果页显示预览+解锁）
         window.location.href = 'animal_result.html?lang=' + flang + friendParam;
       })
       .catch(function(e) {
@@ -475,6 +476,7 @@ function showResult() {
         var friendFromStorage = localStorage.getItem('quiz_friend_animal') || '';
         var friendParam = friendFromStorage ? '&friend=' + encodeURIComponent(friendFromStorage) : '';
         localStorage.removeItem('quiz_friend_animal');
+        // 分享解锁：结果已存sessionStorage，不带URL参数（让结果页显示预览+解锁）
         window.location.href = 'animal_result.html?lang=' + flang + friendParam;
       });
 
@@ -489,6 +491,8 @@ function showResult() {
     } catch(e) {}
 
     try { sessionStorage.setItem('animal_result', JSON.stringify(result)); } catch(e) {}
+        // 标记未解锁（新增分享解锁）
+        try { sessionStorage.setItem('result_shared', '0'); } catch(e) {}
     try { localStorage.setItem('animal_last_result', JSON.stringify(result)); } catch(e) {}
   }, 1800);
 }

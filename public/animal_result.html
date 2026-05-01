@@ -270,7 +270,8 @@ function getResultFromURL() {
     if (allResults.length > 0) return allResults[0];
   } catch(e) {}
 
-  return getDefaultResult();
+  // 没有结果，重定向到 quiz
+  return null;
 }
 
 // ── 分享解锁：预览版结果函数 ─────────────────────
@@ -729,6 +730,11 @@ document.addEventListener('DOMContentLoaded', function() {
       if (storedResult) result = JSON.parse(storedResult);
     } catch(e) {}
     if (!result) result = getResultFromURL();
+    // 没有结果（直接打开页面、无session、无URL参数）→ 跳转回 quiz
+    if (!result) {
+      window.location.href = 'animal_quiz.html';
+      return;
+    }
     window._animalResult = result;
     document.getElementById('resultScreen').innerHTML = '<div style="color:#fff;padding:2rem;text-align:center;font-size:1.2rem">正在加载结果...</div>';
     // 分享解锁检查：来自quiz流程 且 未解锁 → 显示预览版

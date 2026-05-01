@@ -341,19 +341,6 @@ function clearSessionResult() {
   try { sessionStorage.removeItem('result_shared'); } catch(e) {}
 }
 
-  const animal = cfg.animals[0];
-  return {
-    animalId: animal.id,
-    animal,
-    mbti: 'INTJ',
-    matchPercent: 87,
-    rarity: cfg.rarities[animal.rarity],
-    bfScores: { Openness: 75, Conscientiousness: 80, Extraversion: 40, Agreeableness: 60, Neuroticism: 25 },
-    secondAnimal: cfg.animals[1],
-    thirdAnimal: cfg.animals[2]
-  };
-}
-
 var cfg = window.ANIMAL_CONFIG || { animals: [{id:'fox',name:'狐狸',emoji:'🦊',rarity:'common',traits:['聪明','灵活'],description:'狐狸',strength:'聪明',weakness:'有时狡猾',bestMatch:[],worstMatch:[],profile:{Openness:70,Conscientiousness:60,Extraversion:65,Agreeableness:55,Neuroticism:45}, share:{quizUrl:'https://www.fbti.net'}}], rarities: { common:{name:'普通',stars:1,color:'#888'}, rare:{name:'稀有',stars:3,color:'#4ade80'}, epic:{name:'史诗',stars:4,color:'#a78bfa'}, legendary:{name:'传说',stars:5,color:'#fbbf24'} }, share:{quizUrl:'https://www.fbti.net'}, ads:{enabled:false} };
 
 // ── 语言感知的 BF_LABELS ─────────────────────

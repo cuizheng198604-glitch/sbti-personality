@@ -145,6 +145,9 @@ body{font-family:Segoe UI,PingFang SC,Microsoft YaHei,sans-serif;background:var(
       <div class="info-item"><div class="info-n" data-i18n="quiz_result_types">结果类型</div><div class="info-v">17种动物</div></div>
       <div class="info-item"><div class="info-n" data-i18n="quiz_rarity">稀有度</div><div class="info-v">4级掉落</div></div>
     </div>
+    <div class="btn-group" id="friendHintBar" style="display:none;background:linear-gradient(135deg,rgba(251,191,36,0.15),rgba(251,191,36,0.05));border:1px solid rgba(251,191,36,0.3);border-radius:12px;padding:0.6rem 1rem;margin-bottom:0.8rem;text-align:center">
+      <span class="friend-hint-text" style="font-size:0.85rem;color:#fde68a">🎁 好友给你分享了动物人格测试！</span>
+    </div>
     <div class="btn-group">
       <button class="btn-start" data-i18n="quiz_start" onclick="startQuiz('full')">🐾 开始测试</button>
       <button class="btn-ghost" data-i18n="quiz_try" onclick="startQuiz('short')">好奇试试</button>
@@ -245,7 +248,14 @@ function startQuiz(mode) {
 function showQuestion(index) {
   currentQ = index;
   const questions = window._quizQuestions;
-  const total = questions.length;
+  const urlParams = new URLSearchParams(window.location.search);
+  const friendId = urlParams.get('friend');
+  if (friendId) {
+    localStorage.setItem('quiz_friend_animal', friendId);
+    var hint = document.getElementById('friendHintBar');
+    if (hint) { hint.style.display = 'flex'; hint.querySelector('.friend-hint-text').textContent = '🎁 好友给你分享了动物人格测试！'; }
+  }
+const total = questions.length;
   const q = questions[index];
   const body = document.getElementById('quizBody');
 
@@ -453,11 +463,19 @@ function showResult() {
           mbti: result.mbti || 'unknown'
         });
         tagEvent('quiz_api_success', {animal: result.animal || ''});
-        window.location.href = 'animal_result.html?lang=' + (new URLSearchParams(window.location.search).get('lang') || 'zh');
+        var flang = new URLSearchParams(window.location.search).get('lang') || 'zh';
+        var friendFromStorage = localStorage.getItem('quiz_friend_animal') || '';
+        var friendParam = friendFromStorage ? '&friend=' + encodeURIComponent(friendFromStorage) : '';
+        localStorage.removeItem('quiz_friend_animal');
+        window.location.href = 'animal_result.html?lang=' + flang + friendParam;
       })
       .catch(function(e) {
         tagEvent('quiz_api_error', {animal: result.animal || ''});
-        window.location.href = 'animal_result.html?lang=' + (new URLSearchParams(window.location.search).get('lang') || 'zh');
+        var flang = new URLSearchParams(window.location.search).get('lang') || 'zh';
+        var friendFromStorage = localStorage.getItem('quiz_friend_animal') || '';
+        var friendParam = friendFromStorage ? '&friend=' + encodeURIComponent(friendFromStorage) : '';
+        localStorage.removeItem('quiz_friend_animal');
+        window.location.href = 'animal_result.html?lang=' + flang + friendParam;
       });
 
     // 同时保存本地（备份）

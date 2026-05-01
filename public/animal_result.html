@@ -346,6 +346,20 @@ function renderResult(result) {
         <div style="text-align:center;margin-top:0.8rem"><span style="background:rgba(255,255,255,0.15);padding:0.3rem 0.8rem;border-radius:20px;font-size:0.7rem;color:#fff;font-weight:600">${t('result_cta')}</span></div>
       <div class="stars" style="color:${rarity.color}">${stars}</div>
       </div>
+      ${(function(){
+        var fp = (function(){
+          try { return new URLSearchParams(window.location.search).get('friend') || ''; } catch(e) { return ''; }
+        })();
+        if (!fp) return '';
+        var fa = cfg.animals.find(function(a){ return a.id === fp; });
+        if (!fa) return '';
+        var same = fa.id === animal.id;
+        var icon = same ? '🎉' : '💡';
+        var txt = same
+          ? '你和好友都是' + fa.emoji + fa.name + '！'
+          : '你的好友是' + fa.emoji + fa.name + '，你是' + animal.emoji + animal.name + '！';
+        return '<div style="background:rgba(255,255,255,0.08);border-radius:12px;padding:0.8rem;margin:0.6rem auto;max-width:300px;text-align:center;font-size:0.82rem;color:#fde68a;line-height:1.6">' + icon + ' ' + txt + '</div>';
+      })()}
       ${mbti ? `<div class="bf-names"><span class="bf-mbti-badge">${mbti}</span></div>` : ''}
       <div class="hero-match">${t('result_match')} ${matchPercent}%</div>
       <div class="hero-traits">
@@ -531,6 +545,13 @@ function getShareUrl(type) {
   else if (type === 'card') { utm_source = 'share_card'; utm_medium = 'card_cta'; }
   return base + '?utm_source=' + encodeURIComponent(utm_source) + '&utm_medium=' + encodeURIComponent(utm_medium) + '&utm_campaign=' + encodeURIComponent(utm_campaign);
 }
+function getShareUrlWithFriend(type, friendId) {
+  var base = getShareUrl(type).split('?')[0];
+  var params = getShareUrl(type).split('?')[1] || '';
+  var utm = params ? '?' + params : '';
+  if (friendId) utm += (utm ? '&' : '?') + 'friend=' + encodeURIComponent(friendId);
+  return base + utm;
+}
 
 function showAdOverlay(type) {
   const overlay = document.getElementById('adOverlay');
@@ -554,7 +575,8 @@ function showAdOverlay(type) {
     overlay.classList.add('show');
     setTimeout(function() {
       var target = document.getElementById('qrTarget');
-      var quizUrl = getShareUrl(type);
+      var friendId = window._animalResult ? window._animalResult.animal : '';
+      var quizUrl = getShareUrlWithFriend(type, friendId);
       if (target && typeof QRCode !== 'undefined') { target.innerHTML = ''; new QRCode(target, { text: quizUrl, width: 160, height: 160, colorDark: "#000000", colorLight: "#ffffff" }); }
     }, 50);
   } else if (type === 'save') {
@@ -578,9 +600,10 @@ function showAdOverlay(type) {
     `;
     overlay.classList.add('show');
     setTimeout(function() {
-      document.getElementById('shareUrlText').textContent = getShareUrl('wechat');
+      var friendId2 = window._animalResult ? window._animalResult.animal : '';
+      document.getElementById('shareUrlText').textContent = getShareUrlWithFriend('wechat', friendId2);
       var target = document.getElementById('qrTarget2');
-      var quizUrl = getShareUrl(type);
+      var quizUrl = getShareUrlWithFriend(type, friendId2);
       if (target && typeof QRCode !== 'undefined') { target.innerHTML = ''; new QRCode(target, { text: quizUrl, width: 140, height: 140, colorDark: "#000000", colorLight: "#ffffff" }); }
     }, 0);
   }
@@ -592,7 +615,8 @@ function closeAdOverlay() {
 
 function copyShareUrl() {
   var lang = I18N ? I18N.getLang() : 'zh';
-  var url = document.getElementById('shareUrlText') ? document.getElementById('shareUrlText').textContent : getShareUrl('wechat');
+  var friendId3 = window._animalResult ? window._animalResult.animal : '';
+  var url = document.getElementById('shareUrlText') ? document.getElementById('shareUrlText').textContent : getShareUrlWithFriend('wechat', friendId3);
   if (navigator.clipboard) {
     navigator.clipboard.writeText(url).then(function() {
       alert(lang==='en' ? 'Link copied! Paste and send to friends.' : '链接已复制！粘贴发送给好友');

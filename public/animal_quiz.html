@@ -285,21 +285,9 @@ function showQuestion(index) {
   const adContainer = document.getElementById('qAdContainer');
   if (adContainer) {
     if ((index + 1) % 5 === 0 && index < total - 1) {
-      const adText = isEnglish ? 'Scan for exclusive personality analysis' : '扫码领取独家性格分析资料';
-      adContainer.innerHTML = `<div class="quiz-ad">
-        <div class="quiz-ad-label">${isEnglish ? 'Ad' : '广告'}</div>
-        <div class="quiz-ad-content">
-          <div class="quiz-ad-text">${adText}</div>
-          <div class="quiz-ad-qr" id="quizAdQR"></div>
-        </div>
-      </div>`;
-      setTimeout(() => {
-        const qrTarget = document.getElementById('quizAdQR');
-        if (qrTarget && typeof QRCode !== 'undefined') {
-          qrTarget.innerHTML = '';
-          new QRCode(qrTarget, { text: window.location.href.split('?')[0] || 'quiz', width: 80, height: 80, colorDark: "#ffffff", colorLight: "#0d1525" });
-        }
-      }, 100);
+      const adText = isEnglish ? 'Buy me a coffee - Your support matters!' : '请我喝杯咖啡，您的支持是我持续优化的动力！';
+      adContainer.innerHTML = '<div class="quiz-ad" style="flex-direction:column;align-items:center;padding:1rem"><div class="quiz-ad-label" style="background:rgba(245,158,11,0.15);color:#f59e0b;border-radius:20px;padding:0.2rem 0.8rem;font-size:0.75rem;margin-bottom:0.5rem">' + (isEnglish ? 'Support the project' : '请我喝杯咖啡') + '</div><div style="text-align:center;font-size:0.8rem;color:#94a3b8;margin-bottom:0.6rem">' + (isEnglish ? 'Your support keeps this free!' : '您的支持是我持续优化的动力') + '</div><img src="wechat-qr.png?v=2" alt="WeChat" style="max-width:150px;border-radius:10px;border:1px solid #333;margin-bottom:0.5rem" /><div style="font-size:0.7rem;color:#64748b">1 / 3 / 6 / 9.9</div></div>';
+
     } else {
       adContainer.innerHTML = '';
     }

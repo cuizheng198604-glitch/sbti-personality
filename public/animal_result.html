@@ -94,6 +94,7 @@ body{font-family:Segoe UI,PingFang SC,Microsoft YaHei,sans-serif;background:var(
 .sc-traits-lg{display:flex;gap:0.4rem;justify-content:center;flex-wrap:wrap;margin-bottom:0.8rem}
 .sc-trait-lg{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:20px;padding:0.2rem 0.6rem;font-size:0.7rem;color:rgba(255,255,255,0.85);backdrop-filter:blur(4px)}
 .sc-desc-lg{font-size:0.72rem;color:rgba(255,255,255,0.6);line-height:1.6;text-align:center;max-width:280px;margin:0 auto 0.8rem}
+.sc-hook{font-size:0.75rem;color:#fde68a;font-weight:600;text-align:center;margin:0 auto 0.6rem;max-width:280px;line-height:1.4}
 .sc-bottom{display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.2);border-radius:8px;padding:0.5rem 0.8rem}
 .sc-url-text{font-size:0.7rem;color:rgba(255,255,255,0.6);font-weight:600}
 .sc-cta-text{font-size:0.65rem;color:rgba(255,255,255,0.4)}
@@ -238,6 +239,7 @@ body{font-family:Segoe UI,PingFang SC,Microsoft YaHei,sans-serif;background:var(
 </div>
 
 <script src="animal_config.js"></script>
+<script>window.shareHooks = window.ANIMAL_CONFIG && window.ANIMAL_CONFIG.shareHooks;</script>
 <script src="lang.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 
@@ -427,6 +429,7 @@ function renderResult(result) {
               </div>
               <div class="sc-traits-lg">${animal.traits.map(t => `<span class="sc-trait-lg">${t}</span>`).join('')}</div>
               <div class="sc-desc-lg">${(animal.description||'').substring(0, 60)}...</div>
+              <div class="sc-hook">${(window.shareHooks&&window.shareHooks[animal.id]?'炫耀句：'+window.shareHooks[animal.id][Math.floor(Math.random()*3)]:'')}</div>
               <div class="sc-bottom">
                 <div class="sc-url-text">🔗 fbti.net</div>
                 <div class="sc-cta-text">${lang==='en'?'Scan to test →':'长按识别二维码 →'}</div>

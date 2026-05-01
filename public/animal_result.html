@@ -276,7 +276,14 @@ function getResultFromURL() {
 // ── 分享解锁：预览版结果函数 ─────────────────────
 function renderResultLocked(result) {
   var animal = result.animalObj || result.animal || {};
-  var rarity = result.rarityObj || result.rarity || {};
+  // Normalize rarity: if it's a string key, resolve to full object (same as renderResult)
+  var _r = result.rarity;
+  if (!_r || typeof _r === 'string') {
+    var rKey = (typeof _r === 'string') ? _r : ((result.animal && result.animal.rarity) || 'common');
+    var rarity = cfg.rarities[rKey] || cfg.rarities.common || { name: '普通', stars: 1, color: '#888', gradient: 'linear-gradient(135deg, #64748b, #94a3b8)', emoji: '✨' };
+  } else {
+    var rarity = _r;
+  }
   var mbti = result.mbti;
   var matchPercent = result.matchPercent || 0;
   var stars = rarity.stars || 1;

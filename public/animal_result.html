@@ -518,6 +518,20 @@ function renderResult(result) {
   }
 }
 
+
+function getShareUrl(type) {
+  var base = cfg.share ? cfg.share.quizUrl : window.location.href;
+  // Remove any existing UTM params to avoid duplicates
+  base = base.split('?')[0];
+  var utm_source = 'wechat';
+  var utm_medium = 'share';
+  var utm_campaign = 'viral_test';
+  if (type === 'save') { utm_source = 'moments'; utm_medium = 'save_image'; }
+  else if (type === 'qr') { utm_source = 'qr_scan'; utm_medium = 'qr'; }
+  else if (type === 'card') { utm_source = 'share_card'; utm_medium = 'card_cta'; }
+  return base + '?utm_source=' + encodeURIComponent(utm_source) + '&utm_medium=' + encodeURIComponent(utm_medium) + '&utm_campaign=' + encodeURIComponent(utm_campaign);
+}
+
 function showAdOverlay(type) {
   const overlay = document.getElementById('adOverlay');
   const content = document.getElementById('adOverlayContent');
@@ -540,7 +554,7 @@ function showAdOverlay(type) {
     overlay.classList.add('show');
     setTimeout(function() {
       var target = document.getElementById('qrTarget');
-      var quizUrl = cfg.share ? cfg.share.quizUrl : window.location.href;
+      var quizUrl = getShareUrl(type);
       if (target && typeof QRCode !== 'undefined') { target.innerHTML = ''; new QRCode(target, { text: quizUrl, width: 160, height: 160, colorDark: "#000000", colorLight: "#ffffff" }); }
     }, 50);
   } else if (type === 'save') {
@@ -555,7 +569,7 @@ function showAdOverlay(type) {
     content.innerHTML = `
       <div class="ad-overlay-title">💬 ${lang==='en'?'Share with Friends':'分享给好友'}</div>
       <div class="ad-overlay-desc">${lang==='en'?'Copy link and send to friends':'复制链接发给好友'}</div>
-      <div class="ad-overlay-url" id="shareUrlText">${cfg.share ? cfg.share.quizUrl : window.location.href}</div>
+      <div class="ad-overlay-url" id="shareUrlText"></div>
       <button class="ad-overlay-btn" onclick="copyShareUrl()">📋 ${lang==='en'?'Copy Link':'复制链接'}</button>
       <div style="margin-top:0.8rem">
         <div class="ad-overlay-qr" id="qrTarget2"></div>
@@ -564,10 +578,11 @@ function showAdOverlay(type) {
     `;
     overlay.classList.add('show');
     setTimeout(function() {
+      document.getElementById('shareUrlText').textContent = getShareUrl('wechat');
       var target = document.getElementById('qrTarget2');
-      var quizUrl = cfg.share ? cfg.share.quizUrl : window.location.href;
+      var quizUrl = getShareUrl(type);
       if (target && typeof QRCode !== 'undefined') { target.innerHTML = ''; new QRCode(target, { text: quizUrl, width: 140, height: 140, colorDark: "#000000", colorLight: "#ffffff" }); }
-    }, 50);
+    }, 0);
   }
 }
 
@@ -577,7 +592,7 @@ function closeAdOverlay() {
 
 function copyShareUrl() {
   var lang = I18N ? I18N.getLang() : 'zh';
-  var url = cfg.share ? cfg.share.quizUrl : document.getElementById('shareUrlText') ? document.getElementById('shareUrlText').textContent : window.location.href;
+  var url = document.getElementById('shareUrlText') ? document.getElementById('shareUrlText').textContent : getShareUrl('wechat');
   if (navigator.clipboard) {
     navigator.clipboard.writeText(url).then(function() {
       alert(lang==='en' ? 'Link copied! Paste and send to friends.' : '链接已复制！粘贴发送给好友');

@@ -1,337 +1,1128 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>后台管理 - SBTI 人格数据</title>
+<title>管理后台 - 动物性格测试</title>
 <style>
-:root{--bg:#0f0f1a;--panel:#13132a;--card:#1a1a2e;--border:#2d2d4a;--text:#e2e8f0;--muted:#64748b;--dim:#94a3b8;--c:#8a8a8a;--r:#3b82f6;--s:#9333ea;--l:#f59e0b;}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-header{background:linear-gradient(135deg,#1a1a2e,#16213e);border-bottom:1px solid var(--border);padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.8rem}
-h1{font-size:1.2rem;font-weight:700;color:var(--text)}
-.login-wrap{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:3rem 2rem;max-width:400px;margin:4rem auto;text-align:center}
-.login-wrap h2{font-size:1.1rem;margin-bottom:1.5rem;color:var(--muted)}
-.login-wrap input{width:100%;padding:0.7rem 1rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;margin-bottom:1rem;outline:none}
-.login-wrap input:focus{border-color:#3b82f6}
-.login-wrap button{width:100%;padding:0.7rem;background:linear-gradient(135deg,#3b82f6,#6366f1);border:none;border-radius:8px;color:#fff;font-size:0.9rem;font-weight:700;cursor:pointer}
-.login-wrap .err{color:#f87171;font-size:0.8rem;margin-top:0.5rem;min-height:1.2em}
-.admin-wrap{display:none;padding:1.5rem;max-width:1200px;margin:0 auto}
-/* 统计卡片 */
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0.8rem;margin-bottom:1.5rem}
-.stat-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center}
-.stat-card .sc-n{font-size:2rem;font-weight:900;color:#60a5fa}
-.stat-card .sc-l{font-size:0.72rem;color:var(--muted);margin-top:0.2rem}
-/* 稀有度分布 */
-.rarity-bar-section{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.2rem}
-.rbar{display:flex;height:28px;border-radius:6px;overflow:hidden;gap:2px;margin-top:0.6rem}
-.rbar-seg{border-radius:4px;transition:width 0.5s;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:#fff;min-width:30px}
-.rbar-legend{display:flex;gap:1rem;flex-wrap:wrap;margin-top:0.5rem;font-size:0.75rem;color:var(--muted)}
-.rbar-legend span::before{content:'';display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px}
-/* 过滤器 */
+:root{--bg:#0f1117;--card:#1a1d27;--border:#2a2d3a;--text:#e2e4ea;--muted:#6b7280;--primary:#f97316;--danger:#ef4444}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+header{display:flex;justify-content:space-between;align-items:center;padding:1rem 2rem;background:var(--card);border-bottom:1px solid var(--border)}
+h1{font-size:1.2rem;color:var(--primary)}
+.wrap{max-width:1200px;margin:2rem auto;padding:0 1rem}
+.login-wrap{max-width:400px;margin:4rem auto;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:2rem;text-align:center}
+.login-wrap h2{margin-bottom:1.5rem;font-size:1.1rem;color:var(--primary)}
+.login-wrap input{width:100%;padding:0.7rem 1rem;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:1rem;margin-bottom:0.8rem;outline:none}
+.login-wrap input:focus{border-color:var(--primary)}
+.login-btn{width:100%;padding:0.8rem;background:var(--primary);color:#fff;border:none;border-radius:8px;font-size:1rem;cursor:pointer}
+.login-btn:hover{opacity:0.9}
+.login-err{color:var(--danger);font-size:0.85rem;margin:0.8rem 0;min-height:1.2rem}
+.login-hint{font-size:0.8rem;color:var(--muted);margin-top:1rem}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:2rem}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.2rem;text-align:center}
+.stat-n{font-size:2rem;font-weight:700;color:var(--primary)}
+.stat-l{font-size:0.85rem;color:var(--muted);margin-top:0.3rem}
+.tab-nav{display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.tab-btn{padding:0.5rem 1.2rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);cursor:pointer;font-size:0.9rem}
+.tab-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.panel-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.5rem;margin-bottom:1rem}
+table{width:100%;border-collapse:collapse;font-size:0.85rem}
+th,td{padding:0.5rem 0.8rem;text-align:left;border-bottom:1px solid var(--border)}
+th{color:var(--muted);font-weight:500;font-size:0.8rem}
+tr:hover{background:rgba(255,255,255,0.03)}
 .filter-row{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem;align-items:center}
-.filter-row select{padding:0.4rem 0.8rem;background:var(--card);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:0.8rem;outline:none}
-.filter-row input{padding:0.4rem 0.8rem;background:var(--card);border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:0.8rem;outline:none}
-.filter-btn{padding:0.4rem 1rem;background:#1e293b;border:1px solid var(--border);border-radius:7px;color:var(--muted);font-size:0.78rem;cursor:pointer}
-.filter-btn:hover{background:#2d3a4f;color:var(--text)}
-/* 结果表格 */
-.results-table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-.results-table th{background:#0f0f1a;padding:0.7rem 0.8rem;text-align:left;font-size:0.72rem;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
-.results-table td{padding:0.6rem 0.8rem;font-size:0.82rem;border-bottom:1px solid rgba(45,45,74,0.5);vertical-align:middle}
-.results-table tr:last-child td{border-bottom:none}
-.results-table tr:hover td{background:rgba(59,130,246,0.04)}
-.results-table .type-cell{font-weight:800;font-size:0.95rem;letter-spacing:0.05em}
-.results-table .rarity-cell{}
-.results-table .rarity-tag{display:inline-block;padding:0.15rem 0.5rem;border-radius:12px;font-size:0.68rem;font-weight:700}
-.rt-common{background:rgba(138,138,138,0.12);color:var(--c);border:1px solid var(--c)}
-.rt-rare{background:rgba(59,130,246,0.12);color:var(--r);border:1px solid var(--r)}
-.rt-special{background:rgba(147,51,234,0.12);color:var(--s);border:1px solid var(--s)}
-.rt-legendary{background:rgba(245,158,11,0.12);color:var(--l);border:1px solid var(--l)}
-.results-table .skills-cell{font-size:0.7rem;color:var(--muted);max-width:200px;line-height:1.5}
-.results-table .time-cell{font-size:0.72rem;color:var(--muted);white-space:nowrap}
-.results-table .del-btn{background:none;border:none;color:#f87171;font-size:0.75rem;cursor:pointer;padding:0.2rem 0.4rem;border-radius:4px}
-.results-table .del-btn:hover{background:rgba(248,113,113,0.1)}
-/* 分页 */
-.pagination{display:flex;gap:0.4rem;justify-content:center;margin-top:1rem;flex-wrap:wrap}
-.page-btn{padding:0.35rem 0.8rem;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:0.78rem;cursor:pointer}
-.page-btn:hover{background:#2d3a4f;color:var(--text)}
-.page-btn.active{background:rgba(59,130,246,0.15);border-color:#3b82f6;color:#60a5fa}
-.empty-state{text-align:center;padding:3rem;color:var(--muted);font-size:0.9rem}
-/* 清空按钮 */
-.danger-btn{background:rgba(248,113,113,0.1)!important;border-color:#f87171!important;color:#f87171!important}
-::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
-@media(max-width:768px){.results-table{font-size:0.75rem}.results-table th,.results-table td{padding:0.5rem}}
+.filter-row select,.filter-row input{padding:0.4rem 0.8rem;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-size:0.85rem}
+.filter-btn{padding:0.4rem 1rem;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);cursor:pointer;font-size:0.85rem}
+.danger-btn{color:var(--danger);border-color:var(--danger)}
+.alert-bar{display:none;padding:0.8rem 1rem;background:#fef3c7;color:#92400e;border-radius:8px;margin-bottom:1rem;font-size:0.9rem}
+.alert-bar.show{display:block}
+.alert-bar.error{background:#fee2e2;color:#991b1b}
+.rbar{display:flex;height:24px;border-radius:6px;overflow:hidden;gap:2px;margin-bottom:0.5rem}
+.rbar-segment{height:100%;transition:width 0.3s}
+.rbar-legend{display:flex;gap:1rem;font-size:0.8rem;color:var(--muted);flex-wrap:wrap}
+.loading{text-align:center;padding:2rem;color:var(--muted)}
+.badge{display:inline-block;padding:0.1rem 0.5rem;border-radius:4px;font-size:0.75rem}
+.badge-legendary{background:rgba(245,158,11,0.2);color:#f59e0b}
+.badge-epic{background:rgba(139,92,246,0.2);color:#8b5cf6}
+.badge-rare{background:rgba(59,130,246,0.2);color:#3b82f6}
+.badge-common{background:rgba(100,116,139,0.2);color:#64748b}
+.animal-bar{margin-bottom:0.5rem}
+.animal-bar-label{font-size:0.85rem;margin-bottom:0.2rem;display:flex;justify-content:space-between}
+.animal-bar-track{background:var(--border);height:8px;border-radius:4px}
+.animal-bar-fill{height:8px;border-radius:4px;background:var(--primary);transition:width 0.3s}
+.pagination{display:flex;gap:0.3rem;margin-top:1rem;flex-wrap:wrap}
 </style>
 </head>
 <body>
+<header><h1>🐾 动物性格测试 · 管理后台</h1><span id="totalCount" style="font-size:0.8rem;color:var(--muted)">--</span><span id="sbStatus" style="font-size:0.75rem;color:var(--muted);margin-left:1rem"></span></header>
 
-<header>
-  <h1>📊 SBTI 人格数据后台</h1>
-  <div style="display:flex;align-items:center;gap:0.8rem">
-    <span id="totalCount" style="font-size:0.8rem;color:var(--muted)">--</span>
-    <button class="filter-btn" onclick="logout()">退出登录</button>
-  </div>
-</header>
-
-<!-- 登录页 -->
-<div id="loginPage" class="login-wrap">
-  <h2>🔐 后台管理入口</h2>
-  <input type="password" id="passwordInput" placeholder="请输入管理密码" onkeydown="if(event.key==='Enter')doLogin()">
-  <button onclick="doLogin()">登录</button>
-  <div class="err" id="loginErr"></div>
-  <div style="margin-top:1.5rem;font-size:0.72rem;color:#334155;text-align:center">
-    默认密码: sbti-admin-2026<br>（可在环境变量 ADMIN_PASSWORD 设置）
-  </div>
-</div>
-
-<!-- 管理后台 -->
-<div id="adminPage" class="admin-wrap">
-
-  <!-- 统计卡片 -->
-  <div class="stats-grid">
-    <div class="stat-card"><div class="sc-n" id="statTotal">0</div><div class="sc-l">总提交数</div></div>
-    <div class="stat-card"><div class="sc-n" id="statLegendary">0</div><div class="sc-l">传奇 (SSR)</div></div>
-    <div class="stat-card"><div class="sc-n" id="statSpecial">0</div><div class="sc-l">稀有 (SR)</div></div>
-    <div class="stat-card"><div class="sc-n" id="statRare">0</div><div class="sc-l">稀有 (R)</div></div>
-    <div class="stat-card"><div class="sc-n" id="statCommon">0</div><div class="sc-l">普通 (N)</div></div>
-    <div class="stat-card"><div class="sc-n" id="statAvg">0</div><div class="sc-l">平均大五总分</div></div>
+<div class="wrap">
+  <div class="login-wrap" id="loginPage">
+    <h2>🔐 管理后台入口</h2>
+    <input type="password" id="passwordInput" placeholder="请输入管理密码" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">登录</button>
+    <div class="login-err" id="loginErr"></div>
+    <div class="login-hint">密码: <strong>sbti-admin-2026</strong></div>
   </div>
 
-  <!-- 稀有度分布条 -->
-  <div class="rarity-bar-section">
-    <div style="font-size:0.78rem;color:var(--muted);font-weight:600">稀有度分布</div>
-    <div class="rbar" id="rbar"></div>
-    <div class="rbar-legend" id="rbarLegend"></div>
-  </div>
+  <div id="adminPage" style="display:none">
+    <div class="alert-bar" id="alertBar"></div>
 
-  <!-- Top 类型 -->
-  <div class="rarity-bar-section">
-    <div style="font-size:0.78rem;color:var(--muted);font-weight:600;margin-bottom:0.5rem">类型分布 TOP</div>
-    <div id="topTypes" style="display:flex;gap:0.5rem;flex-wrap:wrap"></div>
-  </div>
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card"><div class="stat-n" id="sTotal">0</div><div class="stat-l">总提交数</div></div>
+      <div class="stat-card"><div class="stat-n" id="sLegend" style="color:#f59e0b">0</div><div class="stat-l">🌟 传说</div></div>
+      <div class="stat-card"><div class="stat-n" id="sEpic" style="color:#8b5cf6">0</div><div class="stat-l">💜 史诗</div></div>
+      <div class="stat-card"><div class="stat-n" id="sRare" style="color:#3b82f6">0</div><div class="stat-l">💎 稀有</div></div>
+      <div class="stat-card"><div class="stat-n" id="sCommon" style="color:#64748b">0</div><div class="stat-l">✨ 普通</div></div>
+    </div>
 
-  <!-- 过滤 & 操作 -->
-  <div class="filter-row">
-    <select id="filterRarity"><option value="">全部稀有度</option><option value="Legendary">SSR 传奇</option><option value="Special">SR 稀有</option><option value="Rare">R 少见</option><option value="Common">N 普通</option></select>
-    <select id="filterType"><option value="">全部类型</option></select>
-    <input type="text" id="filterKeyword" placeholder="搜索关键词" style="width:140px">
-    <button class="filter-btn" onclick="loadResults(1)">🔍 筛选</button>
-    <button class="filter-btn" onclick="resetFilters()">重置</button>
-    <button class="filter-btn danger-btn" onclick="clearAll()">🗑 清空全部</button>
-  </div>
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="switchTab('overview')">📊 数据概览</button>
+      <button class="tab-btn" onclick="switchTab('results')">📋 提交记录</button>
+      <button class="tab-btn" onclick="switchTab('export')">📤 导出</button>
+      <button class="tab-btn" onclick="switchTab('debug')">🔧 调试</button>
+      <button class="tab-btn" onclick="switchTab('users')">👥 用户管理</button>
+    </div>
 
-  <!-- 表格 -->
-  <div style="overflow-x:auto">
-    <table class="results-table">
-      <thead>
-        <tr>
-          <th>类型</th>
-          <th>稀有度</th>
-          <th>角色</th>
-          <th>大五总分</th>
-          <th>天赋技能</th>
-          <th>提交时间</th>
-          <th>操作</th>
-        </tr>
-      </thead>
-      <tbody id="resultsBody"><tr><td colspan="7" class="empty-state">加载中...</td></tr></tbody>
-    </table>
-  </div>
+    <div class="tab-panel active" id="tab-overview">
+      <div class="panel-card">
+        <h3 style="margin-bottom:1rem;font-size:0.95rem;color:var(--muted)">稀有度分布</h3>
+        <div class="rbar" id="rbar"></div>
+        <div class="rbar-legend" id="rbarLegend"></div>
+      </div>
+      <div class="panel-card">
+        <h3 style="margin-bottom:1rem;font-size:0.95rem;color:var(--muted)">���物类型分布</h3>
+        <div id="animalDist"></div>
+      </div>
+    </div>
 
-  <div class="pagination" id="pagination"></div>
+    <div class="tab-panel" id="tab-results">
+      <div class="filter-row">
+        <select id="fType"><option value="">全部类型</option><option value="animal">🐾 动物</option><option value="personality">🎯 人格</option></select>
+        <select id="fRarity"><option value="">全部稀有度</option><option value="legendary">🌟 传说</option><option value="epic">💜 史诗</option><option value="rare">💎 稀有</option><option value="common">✨ 普通</option></select>
+        <select id="fAnimal"><option value="">全部动物</option></select>
+        <input id="fKeyword" placeholder="搜索姓名/城市/动物" style="width:140px">
+        <button class="filter-btn" onclick="loadPage(1)">🔍 筛选</button>
+        <button class="filter-btn" onclick="resetFilters()">重置</button>
+        <button class="filter-btn danger-btn" onclick="clearAll()">🗑 清空</button>
+      </div>
+      <div class="panel-card" style="overflow-x:auto">
+        <div id="tableArea">加载中...</div>
+      </div>
+      <div class="pagination" id="pagination"></div>
+    </div>
+
+    <div class="tab-panel" id="tab-export">
+      <div class="panel-card">
+        <h3 style="margin-bottom:1rem">📤 数据导出</h3>
+        <div style="display:flex;gap:0.8rem;flex-wrap:wrap;margin-bottom:1rem">
+          <button class="filter-btn" onclick="doExport('csv')">📊 导出 CSV</button>
+          <button class="filter-btn" onclick="doExport('json')">📋 导出 JSON</button>
+          <button class="filter-btn" onclick="doExport('txt')">📝 导出 TXT</button>
+        </div>
+        <div id="exportInfo" style="font-size:0.85rem;color:var(--muted)"></div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="tab-users">
+      <div class="panel-card">
+        <h3 style="margin-bottom:1rem">👥 注册用户管理</h3>
+        <div id="usersStats" style="margin-bottom:1rem;font-size:0.9rem;color:var(--muted)"></div>
+        <div id="usersArea" style="max-height:400px;overflow:auto">点击按钮加载用户</div>
+        <div style="margin-top:1rem"><button class="filter-btn" onclick="loadUsers()">🔄 刷新用户列表</button></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="tab-debug">
+      <div class="panel-card">
+        <h3 style="margin-bottom:1rem">🔧 Supabase 调试面板</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem">
+            <div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.3rem">API 服务</div>
+            <div style="font-size:0.85rem;word-break:break-all" id="dbgApiBase">https://fbti-new.onrender.com</div>
+          </div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem">
+            <div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.3rem">Supabase 项目</div>
+            <div style="font-size:0.85rem;word-break:break-all" id="dbgSbProject">fcivevgxynpbsomosxmc</div>
+          </div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem">
+            <div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.3rem">数据库表</div>
+            <div style="font-size:0.85rem">public.animal_results</div>
+          </div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem">
+            <div style="font-size:0.75rem;color:var(--muted);margin-bottom:0.3rem">REST API</div>
+            <div style="font-size:0.85rem;word-break:break-all">https://fcivevgxynpbsomosxmc.supabase.co/rest/v1/</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:0.8rem;flex-wrap:wrap;margin-bottom:1rem">
+          <button class="filter-btn" onclick="testHealth()">🔄 测试 /health</button>
+          <button class="filter-btn" onclick="testSupabase()">🗄 测试 Supabase 直连</button>
+          <button class="filter-btn" onclick="testAdminApi()">📡 测试 /api/admin/results</button>
+        </div>
+        <div id="dbgOutput" style="background:#0a0d14;border:1px solid var(--border);border-radius:8px;padding:1rem;font-size:0.8rem;font-family:monospace;max-height:300px;overflow:auto;white-space:pre-wrap;word-break:break-all;color:#a3e635"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
-const API = window.location.origin;
-let password = '';
-let allResults = [];
-let currentPage = 1;
-const PAGE_SIZE = 20;
+var BASE = 'https://fbti-new.onrender.com';
+var adminPassword = '';
+var ANIMALS = {
+  fox:    { name: '\u72d0\u72f8',    emoji: '\ud83e\udd8a', color: '#ff6b35' },
+  wolf:   { name: '\u72fc',          emoji: '\ud83e\udda1', color: '#6b7fd7' },
+  owl:    { name: '\u732b\u5934\u9e70', emoji: '\ud83e\udd89', color: '#9b59b6' },
+  dolphin:{ name: '\u6d77\u8102',   emoji: '\ud83d\udc2c', color: '#3498db' },
+  rabbit: { name: '\u5154\u5b50',   emoji: '\ud83d\udc30', color: '#ffc0cb' },
+  tiger:  { name: '\u8001\u864e',   emoji: '\ud83d\udc2f', color: '#e74c3c' },
+  panda:  { name: '\u718a\u732b',   emoji: '\ud83d\udc3c', color: '#2c3e50' },
+  eagle:  { name: '\u8001\u9e70',   emoji: '\ud83e\udd85', color: '#27ae60' },
+  bear:   { name: '\u718a',          emoji: '\ud83d\udc3b', color: '#8b4513' },
+  lion:   { name: '\u72ee\u5b50',   emoji: '\ud83e\udd81', color: '#f39c12' },
+  phoenix:{ name: '\u51e4\u51f0',   emoji: '\ud83e\udd76', color: '#e67e22' },
+  dragon: { name: '\u9f99',          emoji: '\ud83d\udc09', color: '#9b59b6' },
+  peacock:{ name: '\u5b54\u96c0',   emoji: '\ud83e\udd82', color: '#e91e63' },
+  cat:    { name: '\u732b',          emoji: '\ud83d\udc31', color: '#ff9f43' },
+  dog:    { name: '\u72d7',          emoji: '\ud83d\udc36', color: '#cd6133' },
+  elephant:{ name: '\u5927\u8c61',  emoji: '\ud83d\udc18', color: '#95a5a6' },
+  horse:  { name: '\u9a6c',          emoji: '\ud83d\udc34', color: '#c0392b' },
+  monkey: { name: '\u7334\u5b50',   emoji: '\ud83d\udc35', color: '#d35400' },
+  deer:   { name: '\u9e7f',          emoji: '\ud83e\udd84', color: '#b5651d' },
+  foxhq:  { name: '\u72d0\u72f8(\u597d\u5947\u578b)', emoji: '\ud83e\udd8a', color: '#ff6b35' }
+};
+
+var ANIMAL_PROFILES = {
+  "dragon": {
+    "name": "龙",
+    "emoji": "🐉",
+    "rarity": "legendary",
+    "traits": [
+      "威严",
+      "掌控",
+      "领袖"
+    ],
+    "description": "你是人群中的绝对领袖，天生具有吸引他人追随的气场。充满野心与决断力，敢于冒险，渴望站在最高点。你的意志如钢铁，行动如疾风，是天生的改变者。",
+    "strength": "战略思维极强，决策果断，敢想敢做",
+    "weakness": "有时过于强势，容易忽略他人感受",
+    "bestMatch": [
+      "凤凰",
+      "白虎"
+    ],
+    "worstMatch": [
+      "猫",
+      "考拉"
+    ],
+    "keyword": "王者归来",
+    "profile": {
+      "Extraversion": 80,
+      "Agreeableness": 60,
+      "Conscientiousness": 85,
+      "Openness": 75,
+      "Neuroticism": 25
+    }
+  },
+  "phoenix": {
+    "name": "凤凰",
+    "emoji": "🔥",
+    "rarity": "legendary",
+    "traits": [
+      "重生",
+      "激情",
+      "魅力"
+    ],
+    "description": "你拥有在逆境中重生的惊人力量。无论遭遇多大挫折，都能浴火重生。你的热情具有强大的感染力，是朋友圈中的精神领袖，总能激励他人。",
+    "strength": "抗压能力极强，热情洋溢，感染力惊人",
+    "weakness": "有时过度付出，燃烧自己照亮他人",
+    "bestMatch": [
+      "龙",
+      "狼"
+    ],
+    "worstMatch": [
+      "乌龟",
+      "考拉"
+    ],
+    "keyword": "浴火重生",
+    "profile": {
+      "Extraversion": 75,
+      "Agreeableness": 80,
+      "Conscientiousness": 50,
+      "Openness": 80,
+      "Neuroticism": 60
+    }
+  },
+  "unicorn": {
+    "name": "独角兽",
+    "emoji": "🦄",
+    "rarity": "legendary",
+    "traits": [
+      "梦幻",
+      "纯真",
+      "独特"
+    ],
+    "description": "你是独一无二的存在，拥有童话般的纯净心灵。充满创意与想象力，在人群中总是那个最特别的存在。你的出现让周围的一切都变得美好。",
+    "strength": "创意无限，思维独特，审美出众",
+    "weakness": "活在理想世界，现实感稍弱",
+    "bestMatch": [
+      "白狐",
+      "猫"
+    ],
+    "worstMatch": [
+      "狼",
+      "熊"
+    ],
+    "keyword": "梦幻纯粹",
+    "profile": {
+      "Openness": 95,
+      "Agreeableness": 75,
+      "Conscientiousness": 40,
+      "Extraversion": 35,
+      "Neuroticism": 50
+    }
+  },
+  "tiger": {
+    "name": "白虎",
+    "emoji": "🐯",
+    "rarity": "epic",
+    "traits": [
+      "勇猛",
+      "正义",
+      "守护"
+    ],
+    "description": "你是正义的化身，身上流淌着战士的血液。勇敢无畏，面对不公会毫不犹豫地站出来。你的保护欲极强，是朋友眼中最可靠的后盾。",
+    "strength": "勇敢无畏，正义感强，守护心重",
+    "weakness": "有时过于冲动，缺乏耐心",
+    "bestMatch": [
+      "狼",
+      "凤凰"
+    ],
+    "worstMatch": [
+      "蛇",
+      "狐狸"
+    ],
+    "keyword": "正义守护",
+    "profile": {
+      "Extraversion": 70,
+      "Conscientiousness": 80,
+      "Agreeableness": 65,
+      "Openness": 60,
+      "Neuroticism": 30
+    }
+  },
+  "kirin": {
+    "name": "麒麟",
+    "emoji": "🦒",
+    "rarity": "epic",
+    "traits": [
+      "祥瑞",
+      "智慧",
+      "仁慈"
+    ],
+    "description": "你是吉祥与福气的象征，待人温和，心地善良到极致。智慧与同理心并存，是朋友倾诉时的最佳听众。你的存在本身就能给人带来平静与安心。",
+    "strength": "情商极高，同理心强，温和而有原则",
+    "weakness": "过度包容，缺乏边界感",
+    "bestMatch": [
+      "猫",
+      "考拉"
+    ],
+    "worstMatch": [
+      "狼",
+      "豹"
+    ],
+    "keyword": "祥瑞仁心",
+    "profile": {
+      "Agreeableness": 95,
+      "Conscientiousness": 60,
+      "Openness": 70,
+      "Extraversion": 40,
+      "Neuroticism": 20
+    }
+  },
+  "whale": {
+    "name": "鲸鱼",
+    "emoji": "🐋",
+    "rarity": "epic",
+    "traits": [
+      "深邃",
+      "包容",
+      "沉稳"
+    ],
+    "description": "你是深沉与包容的化身，内心有着丰富的情感世界。安静却充满力量，不张扬却让人无法忽视。你的情绪稳定，是朋友们的定心丸。",
+    "strength": "情绪稳定，胸襟宽广，沉着冷静",
+    "weakness": "不善于表达情感，有时显得疏离",
+    "bestMatch": [
+      "海豚",
+      "猫头鹰"
+    ],
+    "worstMatch": [
+      "猴子",
+      "兔子"
+    ],
+    "keyword": "深沉如海",
+    "profile": {
+      "Neuroticism": 20,
+      "Agreeableness": 80,
+      "Conscientiousness": 70,
+      "Openness": 65,
+      "Extraversion": 30
+    }
+  },
+  "wolf": {
+    "name": "狼",
+    "emoji": "🐺",
+    "rarity": "rare",
+    "traits": [
+      "忠诚",
+      "团队",
+      "敏锐"
+    ],
+    "description": "你是天生的团队协作大师，忠诚是你最闪耀的品质。对家人和朋友绝对忠诚，在群体中总是默默承担，却从不计较回报。直觉敏锐，能第一时间察觉危险。",
+    "strength": "忠诚度高，团队意识强，直觉敏锐",
+    "weakness": "过度依赖群体，社交圈固定",
+    "bestMatch": [
+      "狼",
+      "凤凰"
+    ],
+    "worstMatch": [
+      "猫",
+      "独角兽"
+    ],
+    "keyword": "狼性忠诚",
+    "profile": {
+      "Extraversion": 65,
+      "Agreeableness": 55,
+      "Conscientiousness": 80,
+      "Openness": 55,
+      "Neuroticism": 35
+    }
+  },
+  "eagle": {
+    "name": "鹰",
+    "emoji": "🦅",
+    "rarity": "rare",
+    "traits": [
+      "视野",
+      "自由",
+      "洞察"
+    ],
+    "description": "你拥有超越常人的视野与洞察力，能看到别人看不到的机会与危险。追求自由，不愿被束缚，一旦确定目标便如离弦之箭。你是天生的战略家。",
+    "strength": "战略眼光极高，执行力强，看透本质",
+    "weakness": "有时过于挑剔，缺乏耐心",
+    "bestMatch": [
+      "龙",
+      "白虎"
+    ],
+    "worstMatch": [
+      "考拉",
+      "乌龟"
+    ],
+    "keyword": "鹰击长空",
+    "profile": {
+      "Openness": 85,
+      "Conscientiousness": 80,
+      "Extraversion": 55,
+      "Agreeableness": 45,
+      "Neuroticism": 25
+    }
+  },
+  "leopard": {
+    "name": "豹",
+    "emoji": "🐆",
+    "rarity": "rare",
+    "traits": [
+      "敏捷",
+      "优雅",
+      "独立"
+    ],
+    "description": "你是速度与优雅的完美结合，做事干净利落，从不拖泥带水。独立自主，不依赖他人，同时保持着优雅的气质和生活品味。是个优雅的现实主义者。",
+    "strength": "行动效率高，独立自信，品味出众",
+    "weakness": "有时冷漠，不善于求助他人",
+    "bestMatch": [
+      "豹",
+      "猫"
+    ],
+    "worstMatch": [
+      "考拉",
+      "猪"
+    ],
+    "keyword": "优雅猎手",
+    "profile": {
+      "Conscientiousness": 75,
+      "Extraversion": 50,
+      "Openness": 65,
+      "Agreeableness": 40,
+      "Neuroticism": 30
+    }
+  },
+  "dolphin": {
+    "name": "海豚",
+    "emoji": "🐬",
+    "rarity": "rare",
+    "traits": [
+      "智慧",
+      "友善",
+      "快乐"
+    ],
+    "description": "你是快乐与智慧的结合体，总能在社交中找到平衡点。善于沟通，是朋友圈中的开心果和氛围制造者。同时拥有高情商和高智商。",
+    "strength": "社交能力强，情商高，适应力强",
+    "weakness": "有时为了讨好他人而失去自我",
+    "bestMatch": [
+      "鲸鱼",
+      "猴子"
+    ],
+    "worstMatch": [
+      "狼",
+      "蛇"
+    ],
+    "keyword": "快乐使者",
+    "profile": {
+      "Extraversion": 90,
+      "Agreeableness": 85,
+      "Openness": 70,
+      "Conscientiousness": 55,
+      "Neuroticism": 30
+    }
+  },
+  "owl": {
+    "name": "猫头鹰",
+    "emoji": "🦉",
+    "rarity": "rare",
+    "traits": [
+      "智慧",
+      "冷静",
+      "洞察"
+    ],
+    "description": "你是深沉的思考者，追求知识与智慧。冷静理性，善于分析问题，能在混乱中保持清醒的头脑。话不多但每一句都有分量。",
+    "strength": "逻辑清晰，洞察力强，冷静沉着",
+    "weakness": "过于理性，有时缺乏行动力",
+    "bestMatch": [
+      "狐狸",
+      "猫头鹰"
+    ],
+    "worstMatch": [
+      "猴子",
+      "兔子"
+    ],
+    "keyword": "智慧之光",
+    "profile": {
+      "Openness": 80,
+      "Conscientiousness": 75,
+      "Neuroticism": 25,
+      "Extraversion": 30,
+      "Agreeableness": 60
+    }
+  },
+  "cat": {
+    "name": "猫",
+    "emoji": "🐱",
+    "rarity": "common",
+    "traits": [
+      "独立",
+      "傲娇",
+      "好奇"
+    ],
+    "description": "你是独立自主的化身，喜欢按自己的节奏生活。表面高冷，���心温暖，只对真正在乎的人展现柔软的一面。充满好奇心，总是对世界保持探索欲。",
+    "strength": "独立自主，适应力强，温柔而有趣",
+    "weakness": "有时显得冷漠，不善表达感情",
+    "bestMatch": [
+      "猫",
+      "兔子"
+    ],
+    "worstMatch": [
+      "狼",
+      "狗"
+    ],
+    "keyword": "傲娇独立",
+    "profile": {
+      "Openness": 70,
+      "Extraversion": 35,
+      "Conscientiousness": 50,
+      "Agreeableness": 55,
+      "Neuroticism": 45
+    }
+  },
+  "dog": {
+    "name": "狗",
+    "emoji": "🐶",
+    "rarity": "common",
+    "traits": [
+      "忠诚",
+      "热情",
+      "开朗"
+    ],
+    "description": "你是忠诚与热情的代名词，对在乎的人毫无保留。开朗乐观，总能在朋友需要时带来温暖。直觉敏锐，能第一时间感知你的情绪变化。",
+    "strength": "忠诚度极高，热情开朗，感知力强",
+    "weakness": "过度依赖认可，有时过于讨好",
+    "bestMatch": [
+      "狗",
+      "兔子"
+    ],
+    "worstMatch": [
+      "猫",
+      "蛇"
+    ],
+    "keyword": "忠诚伙伴",
+    "profile": {
+      "Extraversion": 80,
+      "Agreeableness": 90,
+      "Conscientiousness": 60,
+      "Openness": 50,
+      "Neuroticism": 40
+    }
+  },
+  "rabbit": {
+    "name": "兔子",
+    "emoji": "🐰",
+    "rarity": "common",
+    "traits": [
+      "温柔",
+      "敏捷",
+      "警觉"
+    ],
+    "description": "你是温柔与敏感的结合体，心思细腻，能敏锐地察觉周围人的情绪变化。外表柔弱，内心敏捷，适应力极强。是你朋友圈里的情绪调节师。",
+    "strength": "感知力强，善解人意，适应力好",
+    "weakness": "敏感多疑，容易焦虑",
+    "bestMatch": [
+      "兔子",
+      "考拉"
+    ],
+    "worstMatch": [
+      "狼",
+      "老虎"
+    ],
+    "keyword": "温柔敏锐",
+    "profile": {
+      "Agreeableness": 85,
+      "Neuroticism": 65,
+      "Extraversion": 45,
+      "Openness": 55,
+      "Conscientiousness": 40
+    }
+  },
+  "panda": {
+    "name": "熊猫",
+    "emoji": "🐼",
+    "rarity": "common",
+    "traits": [
+      "治愈",
+      "淡定",
+      "萌趣"
+    ],
+    "description": "你是天生的治愈系存在，和你在一起会感到莫名的安心。外表呆萌，内心淡定从容，无论外界多喧嚣，你总能保持自己的节奏。",
+    "strength": "情绪稳定，治愈力强，心态平和",
+    "weakness": "缺乏危机意识，竞争意识弱",
+    "bestMatch": [
+      "熊猫",
+      "考拉"
+    ],
+    "worstMatch": [
+      "豹",
+      "狼"
+    ],
+    "keyword": "治愈萌物",
+    "profile": {
+      "Neuroticism": 20,
+      "Agreeableness": 80,
+      "Conscientiousness": 40,
+      "Extraversion": 35,
+      "Openness": 55
+    }
+  },
+  "koala": {
+    "name": "考拉",
+    "emoji": "🐨",
+    "rarity": "common",
+    "traits": [
+      "慢活",
+      "淡定",
+      "陪伴"
+    ],
+    "description": "你是慢生活的代言人，看似慵懒实则有大智慧。懂得在快节奏中保持自我，不争不抢却让人无法忽视你的存在。是个可靠的陪伴者。",
+    "strength": "心态平和，相处轻松，压力低",
+    "weakness": "缺乏紧迫感，适应变化较慢",
+    "bestMatch": [
+      "考拉",
+      "熊猫"
+    ],
+    "worstMatch": [
+      "豹",
+      "鹰"
+    ],
+    "keyword": "慢享生活",
+    "profile": {
+      "Neuroticism": 15,
+      "Agreeableness": 75,
+      "Conscientiousness": 30,
+      "Extraversion": 25,
+      "Openness": 45
+    }
+  },
+  "fox": {
+    "name": "狐狸",
+    "emoji": "🦊",
+    "rarity": "common",
+    "traits": [
+      "机智",
+      "灵活",
+      "魅力"
+    ],
+    "description": "你是机智与魅力的结合体，反应快，社交能力强。善于察言观色，总能在复杂局面中找到最优解。外表与内在同样精彩，让人捉摸不透。",
+    "strength": "机智灵活，社交能力强，魅力十足",
+    "weakness": "有时过于算计，缺乏真诚",
+    "bestMatch": [
+      "猫头鹰",
+      "狐狸"
+    ],
+    "worstMatch": [
+      "狼",
+      "老虎"
+    ],
+    "keyword": "机敏狡黠",
+    "profile": {
+      "Openness": 75,
+      "Extraversion": 60,
+      "Conscientiousness": 55,
+      "Agreeableness": 50,
+      "Neuroticism": 40
+    }
+  }
+};
+var allResults = [];
+var _page = 1;
+var _limit = 20;
 
 function doLogin() {
-  password = document.getElementById('passwordInput').value;
-  if (!password) {
-    document.getElementById('loginErr').textContent = '请输入密码';
-    return;
-  }
-  document.getElementById('loginErr').textContent = '';
-  fetch(API + '/api/admin/results', { headers: { 'X-Admin-Password': password } })
-    .then(r => {
-      if (!r.ok) throw new Error('密码错误');
-      return r.json();
-    })
-    .then(data => {
-      allResults = data.results;
-      document.getElementById('loginPage').style.display = 'none';
-      document.getElementById('adminPage').style.display = 'block';
-      document.getElementById('totalCount').textContent = '共 ' + allResults.length + ' 条';
-      populateTypeFilter();
-      renderStats(data.stats);
-      loadResults(1);
-    })
-    .catch(e => {
-      document.getElementById('loginErr').textContent = '密码错误，请重试';
-    });
+  var pw = document.getElementById('passwordInput').value;
+  if (!pw) { document.getElementById('loginErr').textContent = '请输入密码'; return; }
+  document.getElementById('loginErr').textContent = '连接中...';
+  fetch(BASE + '/api/admin/results', { headers: { 'X-Admin-Password': pw } })
+  .then(function(r) { if (!r.ok) throw Error('密码错误 (' + r.status + ')'); return r.json(); })
+  .then(function(data) {
+    allResults = data.results || [];
+    adminPassword = pw;
+document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('adminPage').style.display = 'block';
+    document.getElementById('totalCount').textContent = '共 ' + allResults.length + ' 条';
+    document.getElementById('loginErr').textContent = '';
+    renderStats(calcStats());
+    renderAnimalDist();
+    populateAnimalFilter();
+    loadPage(1);
+    // 自动刷新 Supabase 状态
+    testHealth();
+  })
+  .catch(function(e) { document.getElementById('loginErr').textContent = e.message || '连接失败，请重试'; });
 }
 
-function logout() {
-  if (!confirm('确定退出登录？')) return;
-  document.getElementById('loginPage').style.display = 'block';
-  document.getElementById('adminPage').style.display = 'none';
-  document.getElementById('passwordInput').value = '';
-  allResults = [];
+function calcStats() {
+  var s = { total: allResults.length, legendary: 0, epic: 0, rare: 0, common: 0, by_animal: {}, by_rarity: { legendary: 0, epic: 0, rare: 0, common: 0 } };
+  allResults.forEach(function(r) {
+    var rar = getRarityKey(r);
+    if (rar === 'legendary') { s.legendary++; s.by_rarity.legendary++; }
+    else if (rar === 'epic') { s.epic++; s.by_rarity.epic++; }
+    else if (rar === 'rare') { s.rare++; s.by_rarity.rare++; }
+    else { s.common++; s.by_rarity.common++; }
+    var aname = getAnimalName(r);
+    if (aname) { s.by_animal[aname] = (s.by_animal[aname] || 0) + 1; }
+  });
+  return s;
+}
+
+function getRarityKey(r) {
+  var rar = (r.rarity || '').toLowerCase();
+  if (rar === 'legendary' || rar === '传说') return 'legendary';
+  if (rar === 'epic' || rar === '史诗') return 'epic';
+  if (rar === 'rare' || rar === '稀有') return 'rare';
+  return 'common';
+}
+
+function getAnimalName(r) {
+  if (typeof r.animal === 'object' && r.animal !== null) return r.animal.name || r.animal.id || '';
+  return r.animalName || r.animal || '';
+}
+
+function getAnimalEmoji(r) {
+  if (typeof r.animal === 'object' && r.animal !== null) return r.animal.emoji || '';
+  return r.animalEmoji || '';
+}
+
+function getRarityLabel(r) {
+  var rar = (r.rarityName || r.rarity || '').toLowerCase();
+  if (rar === 'legendary' || rar === '传说') return '🌟 传说';
+  if (rar === 'epic' || rar === '史诗') return '💜 史诗';
+  if (rar === 'rare' || rar === '稀有') return '💎 稀有';
+  return '✨ 普通';
+}
+
+function getRarityClass(r) {
+  var rar = getRarityKey(r);
+  return 'badge badge-' + rar;
 }
 
 function renderStats(stats) {
-  document.getElementById('statTotal').textContent = stats.total || 0;
-  document.getElementById('statLegendary').textContent = stats.by_rarity.Legendary || 0;
-  document.getElementById('statSpecial').textContent = stats.by_rarity.Special || 0;
-  document.getElementById('statRare').textContent = stats.by_rarity.Rare || 0;
-  document.getElementById('statCommon').textContent = stats.by_rarity.Common || 0;
-  document.getElementById('statAvg').textContent = stats.avg_bf_total || 0;
+  document.getElementById('sTotal').textContent = stats.total || 0;
+  document.getElementById('sLegend').textContent = (stats.by_rarity && stats.by_rarity.legendary) || stats.legendary || 0;
+  document.getElementById('sEpic').textContent = (stats.by_rarity && stats.by_rarity.epic) || stats.epic || 0;
+  document.getElementById('sRare').textContent = (stats.by_rarity && stats.by_rarity.rare) || stats.rare || 0;
+  document.getElementById('sCommon').textContent = (stats.by_rarity && stats.by_rarity.common) || stats.common || 0;
+  renderRarityBar(stats);
+}
 
-  // 稀有度分布条
-  const total = stats.total || 1;
-  const rarities = [
-    { key: 'Legendary', label: 'SSR 传奇', color: '#f59e0b' },
-    { key: 'Special',   label: 'SR 稀有',  color: '#9333ea' },
-    { key: 'Rare',      label: 'R 少见',   color: '#3b82f6' },
-    { key: 'Common',    label: 'N 普通',   color: '#8a8a8a' },
+function renderRarityBar(stats) {
+  var total = stats.total || 1;
+  var segs = [
+    { label: '🌟 传说', count: stats.legendary || 0, color: '#f59e0b' },
+    { label: '💜 史诗', count: stats.epic || 0, color: '#8b5cf6' },
+    { label: '💎 稀有', count: stats.rare || 0, color: '#3b82f6' },
+    { label: '✨ 普通', count: stats.common || 0, color: '#64748b' }
   ];
-  const rbar = document.getElementById('rbar');
-  const rleg = document.getElementById('rbarLegend');
-  rbar.innerHTML = '';
-  rleg.innerHTML = '';
-  rarities.forEach(r => {
-    const pct = Math.round((stats.by_rarity[r.key] || 0) / total * 100);
-    if (pct > 0) {
-      const seg = document.createElement('div');
-      seg.className = 'rbar-seg';
-      seg.style.background = r.color;
-      seg.style.width = pct + '%';
-      seg.textContent = pct >= 8 ? pct + '%' : '';
-      rbar.appendChild(seg);
+  document.getElementById('rbar').innerHTML = segs.map(function(s) {
+    var w = Math.round(s.count / total * 100);
+    return '<div class="rbar-segment" style="width:' + w + '%;background:' + s.color + '" title="' + s.label + ': ' + s.count + '"></div>';
+  }).join('');
+  document.getElementById('rbarLegend').innerHTML = segs.map(function(s) {
+    return '<span>' + s.label + ': ' + s.count + ' (' + Math.round(s.count / total * 100) + '%)</span>';
+  }).join('');
+}
+
+function renderAnimalDist() {
+  var stats = calcStats();
+  var arr = Object.keys(stats.by_animal).map(function(k) { return { name: k, count: stats.by_animal[k] }; });
+  arr.sort(function(a, b) { return b.count - a.count; });
+  var top = arr.slice(0, 10);
+  var total = stats.total || 1;
+  var el = document.getElementById('animalDist');
+  if (!top.length) { el.innerHTML = '<div class="loading">暂无数据</div>'; return; }
+  el.innerHTML = top.map(function(a) {
+    var w = Math.round(a.count / total * 100);
+    return '<div class="animal-bar"><div class="animal-bar-label"><span>' + escHtml(a.name) + '</span><span style="color:var(--primary)">' + a.count + ' (' + w + '%)</span></div><div class="animal-bar-track"><div class="animal-bar-fill" style="width:' + w + '%"></div></div></div>';
+  }).join('');
+}
+
+function loadPage(p) {
+  _page = p;
+  var type = document.getElementById('fType').value;
+  var rarity = document.getElementById('fRarity').value;
+  var animal = document.getElementById('fAnimal').value;
+  var kw = (document.getElementById('fKeyword').value || '').trim().toLowerCase();
+  var filtered = allResults.filter(function(r) {
+    if (type && (r.resultType || '') !== type) return false;
+    if (rarity) {
+      var rk = getRarityKey(r);
+      if (rk !== rarity) return false;
     }
-    rleg.innerHTML += `<span style="color:${r.color}">● ${r.label} ${stats.by_rarity[r.key]||0}人</span>`;
-  });
-
-  // Top类型
-  const topDiv = document.getElementById('topTypes');
-  topDiv.innerHTML = '';
-  (stats.top_types || []).forEach(t => {
-    const span = document.createElement('span');
-    span.style.cssText = 'background:#1a1a2e;border:1px solid #2d2d4a;padding:0.3rem 0.7rem;border-radius:20px;font-size:0.78rem;color:#60a5fa';
-    span.textContent = t.type + ' ×' + t.count;
-    topDiv.appendChild(span);
-  });
-}
-
-function populateTypeFilter() {
-  const types = [...new Set(allResults.map(r => r.sbti_type))].sort();
-  const sel = document.getElementById('filterType');
-  sel.innerHTML = '<option value="">全部类型</option>';
-  types.forEach(t => {
-    sel.innerHTML += `<option value="${t}">${t}</option>`;
-  });
-}
-
-function getFiltered() {
-  const rarity = document.getElementById('filterRarity').value;
-  const type = document.getElementById('filterType').value;
-  const kw = document.getElementById('filterKeyword').value.trim().toLowerCase();
-  return allResults.filter(r => {
-    if (rarity && r.rarity !== rarity) return false;
-    if (type && r.sbti_type !== type) return false;
+    if (animal) {
+      var aname = getAnimalName(r);
+      if (aname !== animal) return false;
+    }
     if (kw) {
-      const text = JSON.stringify(r).toLowerCase();
-      if (!text.includes(kw)) return false;
+      var rani = getAnimalName(r);
+      var hay = [r.name, rani, r.city, r.qq, r.wechat, r.ip, r.mbti, r.rarityName, r.rarity].join(' ').toLowerCase();
+      if (!hay.includes(kw)) return false;
     }
     return true;
   });
+  var start = (p - 1) * _limit;
+  var page = filtered.slice(start, start + _limit);
+  var area = document.getElementById('tableArea');
+  if (!page.length) { area.innerHTML = '<div class="loading">暂无记录</div>'; renderPagination(0, p); return; }
+  area.innerHTML = '<table><thead><tr><th>#</th><th>类型</th><th>动物</th><th>MBTI</th><th>稀有度</th><th>姓名</th><th>城市</th><th>性别</th><th>手机</th><th>QQ</th><th>微信</th><th>IP</th><th>时间</th><th>操作</th></tr></thead><tbody>' +
+    page.map(function(r, i) {
+      var idx = allResults.indexOf(r);
+      return '<tr>' +
+        '<td>' + (start + i + 1) + '</td>' +
+        '<td>' + (r.resultType === 'personality' ? '🎯' : '🐾') + '</td>' +
+        '<td>' + getAnimalEmoji(r) + ' ' + escHtml(getAnimalName(r)) + '</td>' +
+        '<td>' + (r.mbti || '-') + '</td>' +
+        '<td><span class="' + getRarityClass(r) + '">' + getRarityLabel(r) + '</span></td>' +
+        '<td>' + escHtml(r.name || '-') + '</td>' +
+        '<td>' + escHtml(r.city || '-') + '</td>' +
+        '<td>' + escHtml(r.gender || '-') + '</td>' +
+        '<td>' + escHtml(r.phone || '-') + '</td>' +
+        '<td>' + escHtml(r.qq || '-') + '</td>' +
+        '<td>' + escHtml(r.wechat || '-') + '</td>' +
+        '<td>' + escHtml(r.city || '-') + '</td>' +
+        '<td>' + (r.ip || '-') + '</td>' +
+        '<td>' + (r.submitted_at ? r.submitted_at.slice(0, 10) : '-') + '</td>' +
+        '<td><button class="filter-btn danger-btn" onclick="deleteR(' + idx + ')">删除</button></td>' +
+        '</tr>';
+    }).join('') + '</tbody></table>';
+  renderPagination(filtered.length, p);
 }
 
-function loadResults(page) {
-  currentPage = page;
-  const filtered = getFiltered();
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-  const start = (page - 1) * PAGE_SIZE;
-  const pageData = filtered.slice(start, start + PAGE_SIZE);
+function escHtml(s) { s = String(s || ''); return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-  const tbody = document.getElementById('resultsBody');
-  if (filtered.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" class="empty-state">暂无数据</td></tr>';
-    document.getElementById('pagination').innerHTML = '';
-    return;
+function renderPagination(total, cur) {
+  var totalPages = Math.ceil(total / _limit);
+  var el = document.getElementById('pagination');
+  if (totalPages <= 1) { el.innerHTML = ''; return; }
+  var html = '';
+  for (var p = 1; p <= totalPages; p++) {
+    if (p === cur) html += '<button class="filter-btn" style="background:var(--primary);color:#fff;border-color:var(--primary)">' + p + '</button>';
+    else html += '<button class="filter-btn" onclick="loadPage(' + p + ')">' + p + '</button>';
   }
-
-  tbody.innerHTML = pageData.map(r => {
-    const dt = new Date(r.submitted_at);
-    const timeStr = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
-    const skillsText = (r.skills || []).map(s => typeof s === 'string' ? s : (s[0] || '')).join(' / ');
-    const rarityCls = {Common:'rt-common',Rare:'rt-rare',Special:'rt-special',Legendary:'rt-legendary'}[r.rarity] || '';
-    return `<tr>
-      <td class="type-cell">${r.sbti_type}</td>
-      <td><span class="rarity-tag ${rarityCls}">${r.rarity}</span></td>
-      <td>${r.role || '-'}</td>
-      <td>${r.bigfive_total || '-'}</td>
-      <td class="skills-cell">${skillsText || '-'}</td>
-      <td class="time-cell">${timeStr}</td>
-      <td><button class="del-btn" onclick="deleteResult('${r.id}')">删除</button></td>
-    </tr>`;
-  }).join('');
-
-  // 分页
-  const pDiv = document.getElementById('pagination');
-  pDiv.innerHTML = '';
-  if (totalPages <= 1) return;
-  const prev = Math.max(1, currentPage - 2);
-  const next = Math.min(totalPages, currentPage + 2);
-  if (currentPage > 1) pDiv.innerHTML += `<button class="page-btn" onclick="loadResults(${currentPage-1})">← 上一页</button>`;
-  for (let i = prev; i <= next; i++) {
-    pDiv.innerHTML += `<button class="page-btn ${i===currentPage?'active':''}" onclick="loadResults(${i})">${i}</button>`;
-  }
-  if (currentPage < totalPages) pDiv.innerHTML += `<button class="page-btn" onclick="loadResults(${currentPage+1})">下一页 →</button>`;
+  el.innerHTML = html;
 }
 
 function resetFilters() {
-  document.getElementById('filterRarity').value = '';
-  document.getElementById('filterType').value = '';
-  document.getElementById('filterKeyword').value = '';
-  loadResults(1);
+  document.getElementById('fType').value = '';
+  document.getElementById('fRarity').value = '';
+  document.getElementById('fAnimal').value = '';
+  document.getElementById('fKeyword').value = '';
+  loadPage(1);
 }
 
-function deleteResult(id) {
+function deleteR(globalIdx) {
   if (!confirm('确定删除这条记录？')) return;
-  fetch(API + '/api/admin/results/' + id, {
-    method: 'DELETE',
-    headers: { 'X-Admin-Password': password }
-  })
-    .then(r => r.json())
-    .then(data => {
-      allResults = allResults.filter(r => r.id !== id);
-      document.getElementById('totalCount').textContent = '共 ' + allResults.length + ' 条';
-      loadResults(currentPage);
-    })
-    .catch(() => alert('删除失败'));
+  var pw = document.getElementById('passwordInput').value;
+  fetch(BASE + '/api/admin/results/' + allResults[globalIdx].id, { method: 'DELETE', headers: { 'X-Admin-Password': pw } })
+  .then(function(r) { if (!r.ok) throw Error('删除失败'); return r.json(); })
+  .then(function() { allResults.splice(globalIdx, 1); loadPage(_page); showAlert('已删除', 'info'); renderStats(calcStats()); renderAnimalDist(); populateAnimalFilter(); })
+  .catch(function(e) { showAlert(e.message, 'error'); });
 }
 
 function clearAll() {
-  if (!confirm('⚠️ 确定要清空全部 ' + allResults.length + ' 条数据？此操作不可恢复！')) return;
-  if (!confirm('再次确认：清空后数据无法恢复，确定继续？')) return;
-  fetch(API + '/api/admin/results', {
-    method: 'DELETE',
-    headers: { 'X-Admin-Password': password }
-  })
-    .then(r => r.json())
-    .then(() => {
-      allResults = [];
-      loadResults(1);
-      document.getElementById('totalCount').textContent = '共 0 条';
-      document.getElementById('rbar').innerHTML = '';
-      document.getElementById('rbarLegend').innerHTML = '';
-    })
-    .catch(() => alert('清空失败'));
+  if (!confirm('确定清空所有记录？此操作不可恢复！')) return;
+  var pw = document.getElementById('passwordInput').value;
+  fetch(BASE + '/api/admin/results', { method: 'DELETE', headers: { 'X-Admin-Password': pw } })
+  .then(function(r) { if (!r.ok) throw Error('清空失败'); return r.json(); })
+  .then(function() { allResults = []; loadPage(1); renderStats(calcStats()); renderAnimalDist(); showAlert('已清空全部 ' + allResults.length + ' 条记录', 'info'); })
+  .catch(function(e) { showAlert(e.message, 'error'); });
 }
+
+function doExport(fmt) {
+  if (!allResults.length) { showAlert('没有数据可导出', 'error'); return; }
+  document.getElementById('exportInfo').textContent = '正在生成...';
+  setTimeout(function() {
+    var text = '';
+    if (fmt === 'csv') {
+      var fields = ['id','resultType','name','gender','city','phone','qq','wechat','animalId','animalName','emoji','rarity','rarityName','mbti','matchPercent','ip','submitted_at','traits','description','strength','weakness','bestMatch','worstMatch','keyword','O','E','A','C','N'];
+      var rows = [fields.join(',')];
+      allResults.forEach(function(r) {
+        rows.push(fields.map(function(f) {
+          var v = r[f];
+          if (f === 'animalName') {
+            v = (r.animalId && ANIMAL_PROFILES && ANIMAL_PROFILES[r.animalId]) ? ANIMAL_PROFILES[r.animalId].name : (r.animalName || r.animalId || '');
+          }
+          else if (f === 'animal' || f === 'emoji') {
+            v = (r.animalId && ANIMAL_PROFILES && ANIMAL_PROFILES[r.animalId]) ? ANIMAL_PROFILES[r.animalId][f] : '';
+          }
+          else if (f === 'rarityName') {
+            v = r.rarityName || r.rarity || '';
+          }
+          else if (f === 'traits') {
+            v = (r.animalId && ANIMAL_PROFILES && ANIMAL_PROFILES[r.animalId]) ? ANIMAL_PROFILES[r.animalId].traits.join('|') : '';
+          }
+          else if (f === 'bestMatch' || f === 'worstMatch') {
+            v = (r.animalId && ANIMAL_PROFILES && ANIMAL_PROFILES[r.animalId]) ? ANIMAL_PROFILES[r.animalId][f].join('|') : '';
+          }
+          else if (f === 'description' || f === 'strength' || f === 'weakness' || f === 'keyword') {
+            v = (r.animalId && ANIMAL_PROFILES && ANIMAL_PROFILES[r.animalId]) ? ANIMAL_PROFILES[r.animalId][f] : '';
+          }
+          else if (f === 'O') { v = (r.animalId && ANIMAL_PROFILES && ANIMAL_PROFILES[r.animalId]) ? (ANIMAL_PROFILES[r.animalId].profile.Openness || '') : ''; }
+          else if (f === 'E') { v = (r.animalId && ANIMAL_PROFILES && ANIMAL_PROFILES[r.animalId]) ? (ANIMAL_PROFILES[r.animalId].profile.Extraversion || '') : ''; }
+          else if (f === 'A') { v = (r.animalId && ANIMAL_PROFILES && ANIMAL_PROFILES[r.animalId]) ? (ANIMAL_PROFILES[r.animalId].profile.Agreeableness || '') : ''; }
+          else if (f === 'C') { v = (r.animalId && ANIMAL_PROFILES && ANIMAL_PROFILES[r.animalId]) ? (ANIMAL_PROFILES[r.animalId].profile.Conscientiousness || '') : ''; }
+          else if (f === 'N') { v = (r.animalId && ANIMAL_PROFILES && ANIMAL_PROFILES[r.animalId]) ? (ANIMAL_PROFILES[r.animalId].profile.Neuroticism || '') : ''; }
+          if (v === undefined || v === null) v = '';
+          if (typeof v === 'object') v = JSON.stringify(v);
+          return '"' + String(v).replace(/"/g, '""') + '"';
+        }).join(','));
+      });
+      text = '\uFEFF' + rows.join('\n');
+    } else if (fmt === 'json') {
+      var clean = allResults.map(function(r) {
+        var c = {}; Object.keys(r).forEach(function(k) { c[k] = r[k]; });
+        return c;
+      });
+      text = JSON.stringify(clean, null, 2);
+    } else {
+      text = allResults.map(function(r) {
+        return ['ID: ' + r.id, 'Type: ' + (r.resultType||''), 'Animal: ' + getAnimalName(r) + ' ' + getAnimalEmoji(r), 'Rarity: ' + getRarityLabel(r), 'MBTI: ' + (r.mbti||''), 'Name: ' + (r.name||''), 'City: ' + (r.city||''), 'IP: ' + (r.ip||''), 'Time: ' + (r.submitted_at||'')].join(' | ');
+      }).join('\n');
+    }
+    var blob = new Blob(['\uFEFF' + text], { type: 'text/csv;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'results.' + fmt;
+    a.click();
+    URL.revokeObjectURL(url);
+    document.getElementById('exportInfo').textContent = '已导出 ' + allResults.length + ' 条记录';
+    showAlert('导出成功！', 'info');
+  }, 50);
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+  var btns = document.querySelectorAll('.tab-btn');
+  for (var i = 0; i < btns.length; i++) {
+    if (btns[i].getAttribute('onclick').indexOf(name) >= 0) btns[i].classList.add('active');
+  }
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'users') loadUsers();
+}
+
+function showAlert(msg, type) {
+  var el = document.getElementById('alertBar');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'alert-bar show ' + (type === 'error' ? 'error' : '');
+  clearTimeout(window._at);
+  window._at = setTimeout(function() { el.className = 'alert-bar'; }, 4000);
+}
+
+function populateAnimalFilter() {
+  var animals = {};
+  allResults.forEach(function(r) {
+    var aname = getAnimalName(r);
+    if (aname) animals[aname] = true;
+  });
+  var sel = document.getElementById('fAnimal');
+  var cur = sel.value;
+  var options = '<option value="">全部动物</option>' + Object.keys(animals).sort().map(function(a) {
+    return '<option value="' + escHtml(a) + '">' + escHtml(a) + '</option>';
+  }).join('');
+  sel.innerHTML = options;
+  sel.value = cur;
+}
+
+function dbgLog(msg, color) {
+  var el = document.getElementById('dbgOutput');
+  if (!el) return;
+  var colorStyle = color ? 'style="color:' + color + '"' : '';
+  var ts = new Date().toLocaleTimeString('zh-CN', {hour12:false});
+  el.innerHTML += '<span ' + colorStyle + '>[' + ts + '] ' + escHtml(msg) + '</span>\n';
+  el.scrollTop = el.scrollHeight;
+}
+
+function dbgClear() {
+  var el = document.getElementById('dbgOutput');
+  if (el) el.innerHTML = '';
+}
+
+function testHealth() {
+  dbgClear();
+  dbgLog('测试 /health...', '#60a5fa');
+  fetch(BASE + '/health')
+    .then(function(r) {
+      return r.json().then(function(j) { return { status: r.status, data: j }; });
+    })
+    .then(function(ret) {
+      dbgLog('HTTP ' + ret.status, ret.status === 200 ? '#22c55e' : '#ef4444');
+      dbgLog('db_ready: ' + ret.data.db_ready, ret.data.db_ready ? '#22c55e' : '#ef4444');
+      dbgLog('total (in-memory): ' + ret.data.total, '#22c55e');
+      dbgLog('uptime: ' + ret.data.uptime + 's', '#a3e635');
+      dbgLog('supabase_key_set: ' + ret.data.supabase_key_set, ret.data.supabase_key_set ? '#22c55e' : '#ef4444');
+      // Update header status bar
+      var sbEl = document.getElementById('sbStatus');
+      if (sbEl) {
+        var ok = ret.data.db_ready && ret.status === 200;
+        sbEl.textContent = ' | 🟢 API:ok | ' + (ok ? '🟢 db:就绪' : '🔴 db:未就绪') + ' | 内存:' + ret.data.total + '条 | ' + ret.data.uptime + 's';
+        sbEl.style.color = ok ? '#22c55e' : '#ef4444';
+      }
+    })
+    .catch(function(e) {
+      dbgLog('失败: ' + e.message, '#ef4444');
+      var sbEl = document.getElementById('sbStatus');
+      if (sbEl) { sbEl.textContent = ' | 🔴 API连接失败'; sbEl.style.color = '#ef4444'; }
+    });
+}
+
+function testSupabase() {
+  dbgClear();
+  dbgLog('直接查询 Supabase animal_results 表...', '#f97316');
+  var SB_URL = 'https://fcivevgxynpbsomosxmc.supabase.co';
+  var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZjaXZldmd4eW5wYnNvbW9zeG1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5MTE4MTEsImV4cCI6MjA5MjQ4NzgxMX0.4OEA-tuGBfi36ia20Pb2cmR48K-dkiKLkc0u2fOuP-g';
+  fetch(SB_URL + '/rest/v1/animal_results?select=id,animal_id,rarity,submitted_at&order=submitted_at.desc&limit=5', {
+    headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+  })
+    .then(function(r) {
+      dbgLog('HTTP ' + r.status, r.ok ? '#22c55e' : '#ef4444');
+      return r.json();
+    })
+    .then(function(data) {
+      if (Array.isArray(data)) {
+        dbgLog('Supabase 记录总数: ' + (data.total || data.length) + ' (显示最新5条)', '#22c55e');
+        data.slice(0, 5).forEach(function(r) {
+          dbgLog('  ' + r.id + ' | ' + r.animal_id + ' | ' + r.rarity + ' | ' + r.submitted_at, '#a3e635');
+        });
+      } else {
+        dbgLog('返回: ' + JSON.stringify(data).substring(0, 200), '#f59e0b');
+      }
+    })
+    .catch(function(e) { dbgLog('Supabase 查询失败: ' + e.message, '#ef4444'); });
+}
+
+function testAdminApi() {
+  dbgClear();
+  dbgLog('测试 /api/admin/results (当前内存数据)...', '#f97316');
+  var pw = document.getElementById('passwordInput') ? document.getElementById('passwordInput').value : '';
+  fetch(BASE + '/api/admin/results', {
+    headers: { 'X-Admin-Password': pw || 'sbti-admin-2026' }
+  })
+    .then(function(r) {
+      dbgLog('HTTP ' + r.status, r.ok ? '#22c55e' : '#ef4444');
+      return r.json();
+    })
+    .then(function(data) {
+      dbgLog('API 返回记录数: ' + (data.results ? data.results.length : 0), '#22c55e');
+      dbgLog('stats.total: ' + (data.stats ? data.stats.total : 'N/A'), '#a3e635');
+      dbgLog('rarity 分布: ' + JSON.stringify(data.stats ? data.stats.by_rarity : {}), '#a3e635');
+      dbgLog('top_types: ' + JSON.stringify((data.stats && data.stats.top_types) ? data.stats.top_types.slice(0,3) : []), '#a3e635');
+    })
+    .catch(function(e) { dbgLog('/api/admin/results 失败: ' + e.message, '#ef4444'); });
+}
+
+// ===== Users Management =====
+function loadUsers() {
+  if (!adminPassword) {
+    document.getElementById('usersArea').innerHTML = '<div style="color:var(--danger);padding:1rem">请先登录后再访问用户管理</div>';
+    return;
+  }
+  document.getElementById('usersArea').innerHTML = '<div class="loading">加载中...</div>';
+  fetch(BASE + '/api/admin/users', { headers: { 'X-Admin-Password': adminPassword } })
+    .then(function(r) { if (!r.ok) throw Error('获取失败 (' + r.status + ')'); return r.json(); })
+    .then(function(data) {
+      var users = data.users || [];
+      document.getElementById('usersStats').innerHTML = '共 <strong style="color:var(--primary)">' + users.length + '</strong> 个注册用户（持久化到 Supabase）';
+      if (users.length === 0) {
+        document.getElementById('usersArea').innerHTML = '<div style="color:var(--muted);padding:1rem">暂无注册用户</div>';
+        return;
+      }
+      var html = '<table><thead><tr><th>用户名</th><th>注册时间</th><th>操作</th></tr></thead><tbody>';
+      users.forEach(function(u) {
+        var ts = u.created_at ? new Date(u.created_at).toLocaleString('zh-CN') : '未知';
+        html += '<tr><td style="word-break:break-all;max-width:150px">' + escHtml(u.username || u.login || '?') + '</td>';
+        html += '<td style="white-space:nowrap;color:var(--muted)">' + ts + '</td>';
+        html += '<td><button class="filter-btn danger-btn" onclick="deleteUser(\'' + (u.username || u.login || '').replace(/'/g, "\\'") + '\')">🗑 删除</button></td></tr>';
+      });
+      html += '</tbody></table>';
+      document.getElementById('usersArea').innerHTML = html;
+    })
+    .catch(function(e) {
+      document.getElementById('usersArea').innerHTML = '<div style="color:var(--danger);padding:1rem">加载失败: ' + (e.message || '未知错误') + '</div>';
+    });
+}
+
+function deleteUser(username) {
+  if (!confirm('确定删除用户 [' + username + ']？此操作不可恢复。')) return;
+  fetch(BASE + '/api/admin/users?username=' + encodeURIComponent(username), {
+    method: 'DELETE',
+    headers: { 'X-Admin-Password': adminPassword }
+  })
+    .then(function(r) { if (!r.ok) throw Error('删除失败 (' + r.status + ')'); return r.json(); })
+    .then(function() { showAlert('已删除用户: ' + username); loadUsers(); })
+    .catch(function(e) { showAlert(e.message || '删除失败', true); });
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 </script>
 </body>
 </html>

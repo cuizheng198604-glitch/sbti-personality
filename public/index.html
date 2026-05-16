@@ -4,6 +4,10 @@
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-S29BGTFNLT"></script>
 <script>
+function showTab(name){document.querySelectorAll(".content-panel").forEach(function(p){p.classList.remove("active");});document.querySelectorAll(".tab-btn").forEach(function(b){b.classList.remove("active");});var panel=document.getElementById("content-"+name);var btn=document.getElementById("tab-"+name);if(panel)panel.classList.add("active");if(btn)btn.classList.add("active");if(name==="community")loadCommunity();}
+window.loadCommunity=function(){var el=document.getElementById("communityBars");if(el&&el.dataset.loaded)return;fetch("/api/stats").then(function(r){return r.json();}).then(function(d){var types=(d.top_types||[]).slice(0,8);if(!types.length)return;var total=types.reduce(function(s,i){return s+i.count},0);var tc=document.getElementById("totalCount");if(tc)tc.textContent=total;var barColors=['#f59e0b','#ef4444','#8b5cf6','#10b981','#3b82f6','#ec4899','#06b6d4','#84cc16','#f97316','#6366f1'];var nm={dragon:'龙',phoenix:'凤凰',unicorn:'独角兽',tiger:'白虋',kirin:'麟麗',whale:'鲜鱼',wolf:'狼',eagle:'鹰',leopard:'越',dolphin:'海腿',owl:'猫头鹰',cat:'猫',dog:'狗',rabbit:'児子',panda:'熊猫',koala:'考拉',fox:'狐狸'};var em={dragon:'🐉',phoenix:'🔥',unicorn:'🦄',tiger:'🐯',kirin:'🦒',whale:'🐋',wolf:'🐺',eagle:'🦅',leopard:'🐆',dolphin:'🐬',owl:'🦉',cat:'🐱',dog:'🐶',rabbit:'🐰',panda:'🐼',koala:'🐨',fox:'🦊'};var star="⭐";var html="";types.forEach(function(t,i){var pct=Math.round((t.count/total)*100);var color=barColors[i%barColors.length];var n=nm[t.type]||t.type;var e=em[t.type]||star;html+="<div class=stats-bar-wrap><span class=stats-bar-label>"+e+" "+n+"</span><div class=stats-bar-bg><div class=stats-bar-fill style=width:"+pct+"%;background:"+color+"></div></div><span class=stats-bar-pct>"+pct+"%</span></div>";});var cb=document.getElementById("communityBars");if(cb){cb.innerHTML=html;cb.dataset.loaded="1";}var top=types[0];if(top){var topN=nm[top.type]||top.type;var topE=em[top.type]||star;var topPct=Math.round(top.count/total*100);var ta=document.getElementById("topAnimal");if(ta)ta.innerHTML="<div style=text-align:center;padding:0.5rem><div style=font-size:3rem;line-height:1.2>"+topE+"</div><div style=font-size:1.2rem;font-weight:700;color:#fff;margin-top:0.5rem>"+topN+"</div><div style=color:#64748b;font-size:0.85rem;margin-top:0.3rem>\u5360\u5168\u90e8 "+topPct+"%</div><a href="+top.type+"-personality.html style='display:inline-block;margin-top:0.8rem;color:#f59e0b;font-size:0.85rem;text-decoration:none'>\u770b\u770b"+topN+"\u7684\u6027\u683c \u2192</a></div>";}}).catch(function(){});};
+</script>
+<script>
  window.dataLayer = window.dataLayer || [];
  function gtag(){dataLayer.push(arguments);}
  gtag('js', new Date());
@@ -60,6 +64,27 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 .stats-bar-bg{flex:1;height:20px;background:#2d2d4a;border-radius:10px;overflow:hidden}
 .stats-bar-fill{height:100%;border-radius:10px;transition:width 1s ease}
 .stats-bar-pct{font-size:0.75rem;color:#94a3b8;min-width:40px;text-align:left}
+
+.tab-bar{display:flex;gap:0.4rem;margin-bottom:1.2rem;flex-wrap:wrap;justify-content:center}
+.tab-btn{background:#1a1a2e;border:1px solid #2d2d4a;color:#64748b;padding:0.5rem 1rem;border-radius:10px;font-size:0.85rem;cursor:pointer;transition:all 0.2s;font-weight:600}
+.tab-btn:hover{border-color:#f59e0b;color:#f59e0b}
+.tab-btn.active{background:#f59e0b;color:#fff;border-color:#f59e0b}
+.content-panel{display:none}
+.content-panel.active{display:block}
+.community-panel{max-width:500px;width:100%;margin:0 auto;text-align:center}
+
+.tab-bar{display:flex;gap:0.4rem;margin-bottom:1.2rem;flex-wrap:wrap;justify-content:center}
+.tab-btn{background:#1a1a2e;border:1px solid #2d2d4a;color:#64748b;padding:0.5rem 1rem;border-radius:10px;font-size:0.85rem;cursor:pointer;transition:all 0.2s;font-weight:600}
+.tab-btn:hover{border-color:#f59e0b;color:#f59e0b}
+.tab-btn.active{background:#f59e0b;color:#fff;border-color:#f59e0b}
+.content-panel{display:none}
+.content-panel.active{display:block}
+.community-panel{max-width:500px;width:100%;margin:0 auto;text-align:center}
+.stats-bar-wrap{display:flex;align-items:center;gap:0.6rem;margin:0.4rem 0}
+.stats-bar-label{min-width:50px;text-align:right;font-size:0.85rem;color:#e2e8f0}
+.stats-bar-bg{flex:1;height:20px;background:#2d2d4a;border-radius:10px;overflow:hidden}
+.stats-bar-fill{height:100%;border-radius:10px;transition:width 1s ease}
+.stats-bar-pct{font-size:0.75rem;color:#94a3b8;min-width:40px;text-align:left}
 </style>
 </head>
 <body>
@@ -74,6 +99,23 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
  <p data-i18n="home_subtitle" id="main-subtitle">SBTI × Big Five · 发现你的动物人格</p>
 </div>
 
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="showTab('test')" id="tab-test">⛓ 测试</button>
+  <button class="tab-btn" onclick="showTab('personality')" id="tab-personality">🧠 人格</button>
+  <button class="tab-btn" onclick="showTab('eval')" id="tab-eval">📊 較估</button>
+  <button class="tab-btn" onclick="showTab('gacha')" id="tab-gacha">🎰 抽卡</button>
+  <button class="tab-btn" onclick="showTab('worldcup')" id="tab-worldcup">🏆 世界杯</button>
+  <button class="tab-btn" onclick="showTab('community')" id="tab-community">📊 看看大家</button>
+</div>
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="showTab('test')" id="tab-test">⛓ 测试</button>
+  <button class="tab-btn" onclick="showTab('personality')" id="tab-personality">🧠 人格</button>
+  <button class="tab-btn" onclick="showTab('eval')" id="tab-eval">📊 較估</button>
+  <button class="tab-btn" onclick="showTab('gacha')" id="tab-gacha">🎰 抽卡</button>
+  <button class="tab-btn" onclick="showTab('worldcup')" id="tab-worldcup">🏆 世界杯</button>
+  <button class="tab-btn" onclick="showTab('community')" id="tab-community">📊 看看大家</button>
+</div>
+<div id="content-test" class="content-panel active">
 <div class="cards">
 
  <!-- Card 1: Animal Quiz -->
@@ -127,15 +169,24 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
  </a>
 
 
-
-<!-- community stats section -->
-<div id="communitySection" style="max-width:500px;width:100%;margin:1.5rem auto 0;text-align:center">
-  <div style="color:#64748b;font-size:0.9rem;margin-bottom:0.8rem">🐾 看看大家都是什么动物</div>
-  <div id="communityBars" style="background:#1a1a2e;border-radius:14px;padding:1rem 1.2rem;border:1px solid #2d2d4a">
-    <div style="color:#475569;font-size:0.85rem">加载中...</div>
+</div
+</div>
+<div id="content-community" class="content-panel">
+  <div class="community-panel">
+    <div style="color:#e2e8f0;font-size:1.1rem;font-weight:700;margin-bottom:0.5rem">⛓ 看看大家都是什么动物</div>
+    <div style="color:#64748b;font-size:0.85rem;margin-bottom:1rem">已有 <span id="totalCount">--</span> 人测过\uff0c来看看分布</div>
+    <div id="communityBars" style="background:#1a1a2e;border-radius:14px;padding:1.2rem;border:1px solid #2d2d4a;text-align:left">
+      <div style="color:#475569;font-size:0.85rem">加载中...</div>
+    </div>
+    <a href="animal_quiz.html" style="display:inline-block;margin-top:1.2rem;background:linear-gradient(135deg,#f59e0b,#e97316);color:#fff;font-weight:700;padding:0.8rem 2rem;border-radius:50px;text-decoration:none;font-size:1rem;box-shadow:0 4px 20px #f59e0b40">🧩 测试我的动物人格</a>
+    <div style="margin-top:1.5rem">
+      <div style="color:#e2e8f0;font-size:1.1rem;font-weight:700;margin-bottom:0.8rem">👥 最热那个动物</div>
+      <div id="topAnimal" style="background:#1a1a2e;border-radius:14px;padding:1.2rem;border:1px solid #2d2d4a">
+        <div style="color:#475569;font-size:0.85rem">加载中...</div>
+      </div>
+    </div>
   </div>
-  <a href="animal_quiz.html" style="display:inline-block;margin-top:0.8rem;color:#f59e0b;font-size:0.85rem;text-decoration:none">测试你的动物人格 →</a>
-</div></div>
+</div>>
 
 <script>
 var _txt = {
@@ -232,7 +283,7 @@ document.addEventListener('DOMContentLoaded', function() {
     .catch(function(){});
 })();
 </script>
-</body>
+<script>function showTab(name){document.querySelectorAll(".content-panel").forEach(function(p){p.classList.remove("active");});document.querySelectorAll(".tab-btn").forEach(function(b){b.classList.remove("active");});var p=document.getElementById("content-"+name);var b=document.getElementById("tab-"+name);if(p)p.classList.add("active");if(b)b.classList.add("active");if(name==="community")loadCommunity();}window.loadCommunity=function(){var el=document.getElementById("communityBars");if(el&&el.dataset.loaded)return;fetch("/api/stats").then(function(r){return r.json();}).then(function(d){var types=(d.top_types||[]).slice(0,8);if(!types.length)return;var total=types.reduce(function(s,i){return s+i.count},0);var tc=document.getElementById("totalCount");if(tc)tc.textContent=total;var barColors=['#f59e0b','#ef4444','#8b5cf6','#10b981','#3b82f6','#ec4899','#06b6d4','#84cc16','#f97316','#6366f1'];var nm={dragon:'龙',phoenix:'凤凰',unicorn:'独角兽',tiger:'白虋',kirin:'麟麗',whale:'鲜鱼',wolf:'狼',eagle:'鹰',leopard:'越',dolphin:'海腿',owl:'猫头鹰',cat:'猫',dog:'狗',rabbit:'児子',panda:'熊猫',koala:'考拉',fox:'狐狸'};var em={dragon:'🐉',phoenix:'🔥',unicorn:'🦄',tiger:'🐯',kirin:'🦒',whale:'🐋',wolf:'🐺',eagle:'🦅',leopard:'🐆',dolphin:'🐬',owl:'🦉',cat:'🐱',dog:'🐶',rabbit:'🐰',panda:'🐼',koala:'🐨',fox:'🦊'};var star="⭐";var html="";types.forEach(function(t,i){var pct=Math.round((t.count/total)*100);var color=barColors[i%barColors.length];var n=nm[t.type]||t.type;var e=em[t.type]||star;html+="<div class=stats-bar-wrap><span class=stats-bar-label>"+e+" "+n+"</span><div class=stats-bar-bg><div class=stats-bar-fill style=width:"+pct+"%;background:"+color+"></div></div><span class=stats-bar-pct>"+pct+"%</span></div>";});var cb=document.getElementById("communityBars");if(cb){cb.innerHTML=html;cb.dataset.loaded="1";}var top=types[0];if(top){var topN=nm[top.type]||top.type;var topE=em[top.type]||star;var topPct=Math.round(top.count/total*100);var ta=document.getElementById("topAnimal");if(ta)ta.innerHTML="<div style=text-align:center;padding:0.5rem><div style=font-size:3rem;line-height:1.2>"+topE+"</div><div style=font-size:1.2rem;font-weight:700;color:#fff;margin-top:0.5rem>"+topN+"</div><div style=color:#64748b;font-size:0.85rem;margin-top:0.3rem>\u5360\u5168\u90e8 "+topPct+"%</div><a href="+top.type+"-personality.html style='display:inline-block;margin-top:0.8rem;color:#f59e0b;font-size:0.85rem;text-decoration:none'>\u770b\u770b"+topN+"\u7684\u6027\u683c \u2192</a></div>";}}).catch(function(){});};</script></body>
 </html>
 
 <!-- force-redeploy 1776848242 -->

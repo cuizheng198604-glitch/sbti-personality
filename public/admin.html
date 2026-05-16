@@ -1012,15 +1012,15 @@ function testHealth() {
     })
     .then(function(ret) {
       dbgLog('HTTP ' + ret.status, ret.status === 200 ? '#22c55e' : '#ef4444');
-      dbgLog('db_ready: ' + ret.data.db_ready, ret.data.db_ready ? '#22c55e' : '#ef4444');
-      dbgLog('total (in-memory): ' + ret.data.total, '#22c55e');
+      dbgLog('database: ' + ret.data.database, ret.data.database === 'connected' ? '#22c55e' : '#ef4444');
+      dbgLog('total_results (in-memory): ' + ret.data.total_results, '#22c55e');
       dbgLog('uptime: ' + ret.data.uptime + 's', '#a3e635');
       dbgLog('supabase_key_set: ' + ret.data.supabase_key_set, ret.data.supabase_key_set ? '#22c55e' : '#ef4444');
       // Update header status bar
       var sbEl = document.getElementById('sbStatus');
       if (sbEl) {
-        var ok = ret.data.db_ready && ret.status === 200;
-        sbEl.textContent = ' | 🟢 API:ok | ' + (ok ? '🟢 db:就绪' : '🔴 db:未就绪') + ' | 内存:' + ret.data.total + '条 | ' + ret.data.uptime + 's';
+        var ok = (ret.data.database === 'connected') && ret.status === 200;
+        sbEl.textContent = ' | 🟢 API:ok | ' + (ok ? '🟢 db:就绪' : '🔴 db:未就绪') + ' | 内存:' + ret.data.total_results + '条 | ' + ret.data.uptime + 's';
         sbEl.style.color = ok ? '#22c55e' : '#ef4444';
       }
     })

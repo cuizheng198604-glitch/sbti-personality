@@ -54,6 +54,12 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 .card.quiz:hover{border-color:#a855f7}
 .card.wc{background:linear-gradient(135deg,#1a1a2e,#1e3a5f);border-color:#2563eb}
 .card.wc:hover{border-color:#3b82f6}
+
+.stats-bar-wrap{display:flex;align-items:center;gap:0.6rem;margin:0.4rem 0}
+.stats-bar-label{min-width:50px;text-align:right;font-size:0.85rem;color:#e2e8f0}
+.stats-bar-bg{flex:1;height:20px;background:#2d2d4a;border-radius:10px;overflow:hidden}
+.stats-bar-fill{height:100%;border-radius:10px;transition:width 1s ease}
+.stats-bar-pct{font-size:0.75rem;color:#94a3b8;min-width:40px;text-align:left}
 </style>
 </head>
 <body>
@@ -120,7 +126,16 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
    </div>
  </a>
 
-</div>
+
+
+<!-- community stats section -->
+<div id="communitySection" style="max-width:500px;width:100%;margin:1.5rem auto 0;text-align:center">
+  <div style="color:#64748b;font-size:0.9rem;margin-bottom:0.8rem">🐾 看看大家都是什么动物</div>
+  <div id="communityBars" style="background:#1a1a2e;border-radius:14px;padding:1rem 1.2rem;border:1px solid #2d2d4a">
+    <div style="color:#475569;font-size:0.85rem">加载中...</div>
+  </div>
+  <a href="animal_quiz.html" style="display:inline-block;margin-top:0.8rem;color:#f59e0b;font-size:0.85rem;text-decoration:none">测试你的动物人格 →</a>
+</div></div>
 
 <script>
 var _txt = {
@@ -192,6 +207,30 @@ document.addEventListener('DOMContentLoaded', function() {
    }
  });
 });
+</script>
+<script>
+(function() {
+  var barColors = ['#f59e0b','#ef4444','#8b5cf6','#10b981','#3b82f6','#ec4899','#06b6d4','#84cc16','#f97316','#6366f1'];
+  var nameMap = {dragon:'龙',phoenix:'凤凰',unicorn:'独角兽',tiger:'白虋',kirin:'麟麗',whale:'鲜鱼',wolf:'狼',eagle:'鹰',leopard:'越',dolphin:'海腿',owl:'猫头鹰',cat:'猫',dog:'狗',rabbit:'児子',panda:'熊猫',koala:'考拉',fox:'狐狸'};
+  var emojiMap = {dragon:'🐉',phoenix:'🔥',unicorn:'🦄',tiger:'🐯',kirin:'🦒',whale:'🐋',wolf:'🐺',eagle:'🦅',leopard:'🐆',dolphin:'🐬',owl:'🦉',cat:'🐱',dog:'🐶',rabbit:'🐰',panda:'🐼',koala:'🐨',fox:'🦊'};
+  fetch('/api/stats')
+    .then(function(r){return r.json();})
+    .then(function(d){
+      var types = (d.top_types||[]).slice(0,8);
+      if(!types.length) return;
+      var total = types.reduce(function(s,i){return s+i.count},0);
+      var html = '';
+      types.forEach(function(t,i){
+        var pct = Math.round((t.count/total)*100);
+        var color = barColors[i%barColors.length];
+        var nm = nameMap[t.type]||t.type;
+        var em = emojiMap[t.type]||'🐾';
+        html += '<div class=stats-bar-wrap><span class=stats-bar-label>'+em+' '+nm+'</span><div class=stats-bar-bg><div class=stats-bar-fill style="width:'+pct+'%;background:'+color+'"></div></div><span class=stats-bar-pct>'+pct+'%</span></div>';
+      });
+      document.getElementById('communityBars').innerHTML = html;
+    })
+    .catch(function(){});
+})();
 </script>
 </body>
 </html>

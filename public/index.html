@@ -2,61 +2,133 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>SBTI × Big Five</title>
-<script src="lang.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>动物人格测试 · SBTI × Big Five 人格测试</title>
+<meta name="description" content="基于 MBTI + Big Five 双维度人格理论，结合东方动物哲学全新设计。38道题，揭开你内心最真实的动物面孔。测出你是哪种动物，查看你在人群中的稀有程度。">
+<meta name="keywords" content="动物人格测试, MBTI, Big Five, 人格测试, 性格测试, 16型人格, SBTI">
+<meta property="og:title" content="动物人格测试 · SBTI × Big Five">
+<meta property="og:description" content="38道题，揭开你内心最真实的动物面孔。测出你是哪种动物人格。">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://fbti.net/">
 <style>
-  body { font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #0f0f1a; color: #e2e8f0; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; flex-direction: column; gap: 1rem; }
-  .lang-switch { position: fixed; top: 1rem; right: 1rem; }
-  .lang-btn { background: #1a1a2e; border: 1px solid #2d2d4a; color: #64748b; border-radius: 8px; padding: 0.4rem 0.8rem; font-size: 0.78rem; cursor: pointer; }
-  .lang-btn:hover { border-color: #f59e0b; color: #f59e0b; }
-  a { color: #60a5fa; text-decoration: none; font-size: 1.1rem; }
-  .cards { display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap; justify-content: center; }
-  .card { background: #1a1a2e; border: 1px solid #2d2d4a; border-radius: 12px; padding: 1rem 1.5rem; text-align: center; transition: transform 0.2s; min-width: 160px; }
-  .card:hover { transform: translateY(-3px); }
-  .card-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.3rem; }
-  .card-desc { font-size: 0.8rem; color: #64748b; }
-  .card-link { display: block; margin-top: 0.5rem; color: #60a5fa; font-size: 0.85rem; }
+:root{--bg:#0f0f1a;--panel:#13132a;--card:#1a1a2e;--border:#2d2d4a;--text:#e2e8f0;--muted:#64748b;--dim:#94a3b8;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Segoe UI,PingFang SC,Microsoft YaHei,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+a{color:#60a5fa;text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* nav */
+nav{background:var(--panel);border-bottom:1px solid var(--border);padding:0.8rem 1.5rem;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-weight:900;font-size:1rem;background:linear-gradient(90deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-links{display:flex;gap:1.2rem}
+.nav-links a{color:var(--muted);font-size:0.82rem}
+
+/* hero */
+.hero{text-align:center;padding:3rem 1.5rem 2rem;background:var(--panel);border-bottom:1px solid var(--border)}
+.hero h1{font-size:2.2rem;font-weight:900;background:linear-gradient(90deg,#60a5fa,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:0.5rem}
+.hero-sub{color:var(--muted);font-size:0.95rem;max-width:520px;margin:0.5rem auto 1.5rem;line-height:1.8}
+.btn-primary{display:inline-block;background:linear-gradient(135deg,#3b82f6,#6366f1);border:none;border-radius:12px;color:#fff;font-size:1rem;font-weight:700;cursor:pointer;padding:0.8rem 2.5rem;letter-spacing:0.05em;transition:opacity 0.2s}
+.btn-primary:hover{opacity:0.85;text-decoration:none}
+
+/* stats */
+.stats-bar{display:flex;gap:2rem;justify-content:center;padding:1rem 1.5rem;border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)}
+.stats-item{text-align:center}
+.stats-n{font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em}
+.stats-v{font-size:1.1rem;font-weight:700;color:#60a5fa}
+
+/* type grid */
+.container{max-width:960px;margin:0 auto;padding:2rem 1.5rem}
+.section-title{font-size:0.68rem;font-weight:700;color:var(--muted);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border)}
+.type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0.8rem}
+@media(max-width:768px){.type-grid{grid-template-columns:repeat(2,1fr)}}
+.type-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:1rem 0.8rem;text-align:center;transition:all 0.2s}
+.type-card:hover{border-color:#3b82f6;transform:translateY(-2px)}
+.type-code{font-size:1.5rem;font-weight:900;margin-bottom:0.2rem}
+.type-role{font-size:0.72rem;color:var(--muted)}
+.type-link{display:block;margin-top:0.5rem;font-size:0.72rem;color:#60a5fa}
+
+/* Analysts */
+.analyst{color:#818cf8}.analyst .type-card:hover{border-color:#818cf8}
+/* Diplomats */
+.diplomat{color:#a78bfa}.diplomat .type-card:hover{border-color:#a78bfa}
+/* Sentinels */
+.sentinel{color:#4ade80}.sentinel .type-card:hover{border-color:#4ade80}
+/* Explorers */
+.explorer{color:#fb923c}.explorer .type-card:hover{border-color:#fb923c}
+
+footer{text-align:center;padding:2rem;color:var(--muted);font-size:0.75rem;border-top:1px solid var(--border);margin-top:2rem}
 </style>
 </head>
 <body>
 
-<div class="lang-switch">
-  <button class="lang-btn" onclick="switchLang('zh')">中文</button>
-  <button class="lang-btn" onclick="switchLang('en')">EN</button>
+<nav>
+  <div class="nav-logo">动物人格测试</div>
+  <div class="nav-links">
+    <a href="/">首页</a>
+    <a href="/personality_test.html">开始测试</a>
+    <a href="/api/stats">统计数据</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <h1>🦋 动物人格测试</h1>
+  <p class="hero-sub">基于 MBTI + Big Five 双维度人格理论，结合东方动物哲学全新设计。<br>38道题，揭开你内心最真实的动物面孔。</p>
+  <a href="/personality_test.html" class="btn-primary">开始测试 · 探索你的性格 →</a>
+</section>
+
+<div class="stats-bar">
+  <div class="stats-item"><div class="stats-n">测试人次</div><div class="stats-v" id="totalCount">--</div></div>
+  <div class="stats-item"><div class="stats-n">今日新增</div><div class="stats-v" id="todayCount">--</div></div>
+  <div class="stats-item"><div class="stats-n">最常见类型</div><div class="stats-v" id="topType">--</div></div>
 </div>
 
-<div style="text-align:center">
-  <div style="font-size:1.5rem;font-weight:700;margin-bottom:0.3rem" data-i18n="home_title">SBTI × Big Five</div>
-  <div style="color:#64748b;font-size:0.9rem" data-i18n="home_subtitle">人格测试系统</div>
+<div class="container">
+  <div class="section-title">探索 16 种人格类型</div>
+
+  <div class="type-grid analyst">
+    <div class="type-card"><div class="type-code">INTJ</div><div class="type-role">策划者</div><a class="type-link" href="/intj-personality.html">了解 →</a></div>
+    <div class="type-card"><div class="type-code">INTP</div><div class="type-role">建筑师</div><a class="type-link" href="/intp-personality.html">了解 →</a></div>
+    <div class="type-card"><div class="type-code">ENTJ</div><div class="type-role">指挥官</div><a class="type-link" href="/entj-personality.html">了解 →</a></div>
+    <div class="type-card"><div class="type-code">ENTP</div><div class="type-role">发明家</div><a class="type-link" href="/entp-personality.html">了解 →</a></div>
+  </div>
+
+  <div class="type-grid diplomat" style="margin-top:0.8rem">
+    <div class="type-card"><div class="type-code">INFJ</div><div class="type-role">预言家</div><a class="type-link" href="/infj-personality.html">了解 →</a></div>
+    <div class="type-card"><div class="type-code">INFP</div><div class="type-role">理想者</div><a class="type-link" href="/infp-personality.html">了解 →</a></div>
+    <div class="type-card"><div class="type-code">ENFJ</div><div class="type-role">导师</div><a class="type-link" href="/enfj-personality.html">了解 →</a></div>
+    <div class="type-card"><div class="type-code">ENFP</div><div class="type-role">冒险家</div><a class="type-link" href="/enfp-personality.html">了解 →</a></div>
+  </div>
+
+  <div class="type-grid sentinel" style="margin-top:0.8rem">
+    <div class="type-card"><div class="type-code">ISTJ</div><div class="type-role">审计官</div><a class="type-link" href="/istj-personality.html">了解 →</a></div>
+    <div class="type-card"><div class="type-code">ISFJ</div><div class="type-role">守护者</div><a class="type-link" href="/isfj-personality.html">了解 →</a></div>
+    <div class="type-card"><div class="type-code">ESTJ</div><div class="type-role">管理者</div><a class="type-link" href="/estj-personality.html">了解 →</a></div>
+    <div class="type-card"><div class="type-code">ESFJ</div><div class="type-role">执政官</div><a class="type-link" href="/esfj-personality.html">了解 →</a></div>
+  </div>
+
+  <div class="type-grid explorer" style="margin-top:0.8rem">
+    <div class="type-card"><div class="type-code">ISTP</div><div class="type-role">匠人</div><a class="type-link" href="/istp-personality.html">了解 →</a></div>
+    <div class="type-card"><div class="type-code">ISFP</div><div class="type-role">艺术家</div><a class="type-link" href="/isfp-personality.html">了解 →</a></div>
+    <div class="type-card"><div class="type-code">ESTP</div><div class="type-role">企业家</div><a class="type-link" href="/estp-personality.html">了解 →</a></div>
+    <div class="type-card"><div class="type-code">ESFP</div><div class="type-role">表演者</div><a class="type-link" href="/esfp-personality.html">了解 →</a></div>
+  </div>
+
 </div>
 
-<div class="cards">
-  <div class="card">
-    <div class="card-title" data-i18n="home_card1_title">人格测试</div>
-    <div class="card-desc" data-i18n="home_card1_desc">36题情境问卷</div>
-    <a class="card-link" href="personality_test.html" data-i18n="home_card1_link">开始测试 →</a>
-  </div>
-  <div class="card">
-    <div class="card-title" data-i18n="home_card2_title">手动评估</div>
-    <div class="card-desc" data-i18n="home_card2_desc">滑块输入 + 报告</div>
-    <a class="card-link" href="personality_eval.html" data-i18n="home_card2_link">立即体验 →</a>
-  </div>
-  <div class="card">
-    <div class="card-title" data-i18n="home_card3_title">抽卡模拟</div>
-    <div class="card-desc" data-i18n="home_card3_desc">Gacha 风格</div>
-    <a class="card-link" href="gacha_frontend.html" data-i18n="home_card3_link">开始抽卡 →</a>
-  </div>
-</div>
+<footer>
+  <p>©2026 动物人格测试 · 基于 SBTI × Big Five 双体系 · fbti.net</p>
+</footer>
 
 <script>
-function switchLang(lang) {
-  I18N.setLang(lang);
-  // 更新 URL 参数
-  var url = new URL(window.location.href);
-  url.searchParams.set('lang', lang);
-  window.history.replaceState({}, '', url);
-}
-I18N.applyLang();
+fetch('/api/stats')
+  .then(function(r){return r.json();})
+  .then(function(d){
+    document.getElementById('totalCount').textContent = d.total || 0;
+    var top = d.top_types && d.top_types[0];
+    document.getElementById('topType').textContent = top ? top.type : '--';
+  })
+  .catch(function(){});
 </script>
+
 </body>
 </html>

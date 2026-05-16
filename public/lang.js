@@ -95,6 +95,7 @@
     'result_traffic_2_title': { zh: 'MBTI + BigFive 详细报告', en: 'MBTI + BigFive Detailed Report' },
     'result_traffic_2_desc': { zh: '深度解读你的性格', en: 'Deep dive into your personality' },
     'result_share_card_title': { zh: '我的动物人格', en: 'My Animal Personality' },
+    'result_cta': { zh: '测一测', en: 'Take the Test' },
     'result_url_label': { zh: '长按识别二维码 → 测测你的动物人格', en: 'Scan the QR code → Test your animal personality' },
 
     // ── BigFive 维度名 ──

@@ -4,10 +4,6 @@
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-S29BGTFNLT"></script>
 <script>
-function showTab(name){document.querySelectorAll(".content-panel").forEach(function(p){p.classList.remove("active");});document.querySelectorAll(".tab-btn").forEach(function(b){b.classList.remove("active");});var panel=document.getElementById("content-"+name);var btn=document.getElementById("tab-"+name);if(panel)panel.classList.add("active");if(btn)btn.classList.add("active");if(name==="community")loadCommunity();}
-window.loadCommunity=function(){var el=document.getElementById("communityBars");if(el&&el.dataset.loaded)return;fetch("/api/stats").then(function(r){return r.json();}).then(function(d){var types=(d.top_types||[]).slice(0,8);if(!types.length)return;var total=types.reduce(function(s,i){return s+i.count},0);var tc=document.getElementById("totalCount");if(tc)tc.textContent=total;var barColors=['#f59e0b','#ef4444','#8b5cf6','#10b981','#3b82f6','#ec4899','#06b6d4','#84cc16','#f97316','#6366f1'];var nm={dragon:'龙',phoenix:'凤凰',unicorn:'独角兽',tiger:'白虋',kirin:'麟麗',whale:'鲜鱼',wolf:'狼',eagle:'鹰',leopard:'越',dolphin:'海腿',owl:'猫头鹰',cat:'猫',dog:'狗',rabbit:'児子',panda:'熊猫',koala:'考拉',fox:'狐狸'};var em={dragon:'🐉',phoenix:'🔥',unicorn:'🦄',tiger:'🐯',kirin:'🦒',whale:'🐋',wolf:'🐺',eagle:'🦅',leopard:'🐆',dolphin:'🐬',owl:'🦉',cat:'🐱',dog:'🐶',rabbit:'🐰',panda:'🐼',koala:'🐨',fox:'🦊'};var star="⭐";var html="";types.forEach(function(t,i){var pct=Math.round((t.count/total)*100);var color=barColors[i%barColors.length];var n=nm[t.type]||t.type;var e=em[t.type]||star;html+="<div class=stats-bar-wrap><span class=stats-bar-label>"+e+" "+n+"</span><div class=stats-bar-bg><div class=stats-bar-fill style=width:"+pct+"%;background:"+color+"></div></div><span class=stats-bar-pct>"+pct+"%</span></div>";});var cb=document.getElementById("communityBars");if(cb){cb.innerHTML=html;cb.dataset.loaded="1";}var top=types[0];if(top){var topN=nm[top.type]||top.type;var topE=em[top.type]||star;var topPct=Math.round(top.count/total*100);var ta=document.getElementById("topAnimal");if(ta)ta.innerHTML="<div style=text-align:center;padding:0.5rem><div style=font-size:3rem;line-height:1.2>"+topE+"</div><div style=font-size:1.2rem;font-weight:700;color:#fff;margin-top:0.5rem>"+topN+"</div><div style=color:#64748b;font-size:0.85rem;margin-top:0.3rem>\u5360\u5168\u90e8 "+topPct+"%</div><a href="+top.type+"-personality.html style='display:inline-block;margin-top:0.8rem;color:#f59e0b;font-size:0.85rem;text-decoration:none'>\u770b\u770b"+topN+"\u7684\u6027\u683c \u2192</a></div>";}}).catch(function(){});};
-</script>
-<script>
  window.dataLayer = window.dataLayer || [];
  function gtag(){dataLayer.push(arguments);}
  gtag('js', new Date());
@@ -64,14 +60,7 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 .stats-bar-bg{flex:1;height:20px;background:#2d2d4a;border-radius:10px;overflow:hidden}
 .stats-bar-fill{height:100%;border-radius:10px;transition:width 1s ease}
 .stats-bar-pct{font-size:0.75rem;color:#94a3b8;min-width:40px;text-align:left}
-
-.tab-bar{display:flex;gap:0.4rem;margin-bottom:1.2rem;flex-wrap:wrap;justify-content:center}
-.tab-btn{background:#1a1a2e;border:1px solid #2d2d4a;color:#64748b;padding:0.5rem 1rem;border-radius:10px;font-size:0.85rem;cursor:pointer;transition:all 0.2s;font-weight:600}
-.tab-btn:hover{border-color:#f59e0b;color:#f59e0b}
-.tab-btn.active{background:#f59e0b;color:#fff;border-color:#f59e0b}
-.content-panel{display:none}
-.content-panel.active{display:block}
-.community-panel{max-width:500px;width:100%;margin:0 auto;text-align:center}
+<style>
 
 .tab-bar{display:flex;gap:0.4rem;margin-bottom:1.2rem;flex-wrap:wrap;justify-content:center}
 .tab-btn{background:#1a1a2e;border:1px solid #2d2d4a;color:#64748b;padding:0.5rem 1rem;border-radius:10px;font-size:0.85rem;cursor:pointer;transition:all 0.2s;font-weight:600}
@@ -86,6 +75,7 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 .stats-bar-fill{height:100%;border-radius:10px;transition:width 1s ease}
 .stats-bar-pct{font-size:0.75rem;color:#94a3b8;min-width:40px;text-align:left}
 </style>
+</style>
 </head>
 <body>
 
@@ -99,23 +89,6 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
  <p data-i18n="home_subtitle" id="main-subtitle">SBTI × Big Five · 发现你的动物人格</p>
 </div>
 
-<div class="tab-bar">
-  <button class="tab-btn active" onclick="showTab('test')" id="tab-test">⛓ 测试</button>
-  <button class="tab-btn" onclick="showTab('personality')" id="tab-personality">🧠 人格</button>
-  <button class="tab-btn" onclick="showTab('eval')" id="tab-eval">📊 較估</button>
-  <button class="tab-btn" onclick="showTab('gacha')" id="tab-gacha">🎰 抽卡</button>
-  <button class="tab-btn" onclick="showTab('worldcup')" id="tab-worldcup">🏆 世界杯</button>
-  <button class="tab-btn" onclick="showTab('community')" id="tab-community">📊 看看大家</button>
-</div>
-<div class="tab-bar">
-  <button class="tab-btn active" onclick="showTab('test')" id="tab-test">⛓ 测试</button>
-  <button class="tab-btn" onclick="showTab('personality')" id="tab-personality">🧠 人格</button>
-  <button class="tab-btn" onclick="showTab('eval')" id="tab-eval">📊 較估</button>
-  <button class="tab-btn" onclick="showTab('gacha')" id="tab-gacha">🎰 抽卡</button>
-  <button class="tab-btn" onclick="showTab('worldcup')" id="tab-worldcup">🏆 世界杯</button>
-  <button class="tab-btn" onclick="showTab('community')" id="tab-community">📊 看看大家</button>
-</div>
-<div id="content-test" class="content-panel active">
 <div class="cards">
 
  <!-- Card 1: Animal Quiz -->
@@ -145,48 +118,95 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
      <div class="card-title" id="card3-title">手动评估</div>
      <div class="card-desc" id="card3-desc">滑块输入 + 报告</div>
      <span class="card-link" id="card3-link">立即体验 →</span>
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="showTab('test')" id="tab-test">&#x1F3BE; 测试</button>
+  <button class="tab-btn" onclick="showTab('personality')" id="tab-personality">&#x1F9E0; 人格</button>
+  <button class="tab-btn" onclick="showTab('eval')" id="tab-eval">&#x1F4CA; 评估</button>
+  <button class="tab-btn" onclick="showTab('gacha')" id="tab-gacha">&#x1F3B0; 抽卡</button>
+  <button class="tab-btn" onclick="showTab('worldcup')" id="tab-worldcup">&#x1F3C6; 世界杯</button>
+  <button class="tab-btn" onclick="showTab('community')" id="tab-community">&#x1F4DA; 看看大家</button>
+</div>
+<div id="content-test" class="content-panel active">
+<div class="cards">
+
+ <a class="card quiz" href="animal_quiz.html" data-lang-preserve>
+   <div class="card-emoji">&#x1F98A;</div>
+   <div class="card-info">
+     <div class="card-title" id="card1-title">动物性格测试</div>
+     <div class="card-desc" id="card1-desc">38题测出你的动物人格</div>
+     <span class="card-link" id="card1-link">立即测试 &#x2192;</span>
    </div>
  </a>
 
- <!-- Card 4: Gacha -->
+ <a class="card" href="personality_test.html" data-lang-preserve>
+   <div class="card-emoji">&#x1F9E0;</div>
+   <div class="card-info">
+     <div class="card-title" id="card2-title">人格测试</div>
+     <div class="card-desc" id="card2-desc">36题情境问卷</div>
+     <span class="card-link" id="card2-link">开始测试 &#x2192;</span>
+   </div>
+ </a>
+
+ <a class="card" href="personality_eval.html" data-lang-preserve>
+   <div class="card-emoji">&#x1F4CA;</div>
+   <div class="card-info">
+     <div class="card-title" id="card3-title">手动评估</div>
+     <div class="card-desc" id="card3-desc">滑块输入 + 报告</div>
+     <span class="card-link" id="card3-link">立即体验 &#x2192;</span>
+   </div>
+ </a>
+
  <a class="card" href="gacha_frontend.html" data-lang-preserve>
-   <div class="card-emoji">🎰</div>
+   <div class="card-emoji">&#x1F3B0;</div>
    <div class="card-info">
      <div class="card-title" id="card4-title">抽卡模拟</div>
      <div class="card-desc" id="card4-desc">Gacha 风格</div>
-     <span class="card-link" id="card4-link">开始抽卡 →</span>
+     <span class="card-link" id="card4-link">开始抽卡 &#x2192;</span>
    </div>
  </a>
 
- <!-- Card 5: World Cup -->
  <a class="card wc" href="worldcup.html" data-lang-preserve>
-   <div class="card-emoji">🏆</div>
+   <div class="card-emoji">&#x1F3C6;</div>
    <div class="card-info">
      <div class="card-title" id="card5-title">世界杯球队 × 动物人格</div>
-     <div class="card-desc" id="card5-desc">每支球队有独特的动物人格 🐾</div>
-     <span class="card-link" id="card5-link">立即查看 →</span>
+     <div class="card-desc" id="card5-desc">每支球队有独特的动物人格 &#x1F43E;</div>
+     <span class="card-link" id="card5-link">立即查看 &#x2192;</span>
    </div>
  </a>
 
-
-</div
+</div>
 </div>
 <div id="content-community" class="content-panel">
   <div class="community-panel">
-    <div style="color:#e2e8f0;font-size:1.1rem;font-weight:700;margin-bottom:0.5rem">⛓ 看看大家都是什么动物</div>
-    <div style="color:#64748b;font-size:0.85rem;margin-bottom:1rem">已有 <span id="totalCount">--</span> 人测过\uff0c来看看分布</div>
+    <div style="color:#e2e8f0;font-size:1.1rem;font-weight:700;margin-bottom:0.5rem">&#x1F3BE; 看看大家都是什么动物</div>
+    <div style="color:#64748b;font-size:0.85rem;margin-bottom:1rem">已有 <span id="totalCount">--</span> 人测试过，来看看分布</div>
     <div id="communityBars" style="background:#1a1a2e;border-radius:14px;padding:1.2rem;border:1px solid #2d2d4a;text-align:left">
       <div style="color:#475569;font-size:0.85rem">加载中...</div>
     </div>
-    <a href="animal_quiz.html" style="display:inline-block;margin-top:1.2rem;background:linear-gradient(135deg,#f59e0b,#e97316);color:#fff;font-weight:700;padding:0.8rem 2rem;border-radius:50px;text-decoration:none;font-size:1rem;box-shadow:0 4px 20px #f59e0b40">🧩 测试我的动物人格</a>
+    <a href="animal_quiz.html" style="display:inline-block;margin-top:1.2rem;background:linear-gradient(135deg,#f59e0b,#e97316);color:#fff;font-weight:700;padding:0.8rem 2rem;border-radius:50px;text-decoration:none;font-size:1rem;box-shadow:0 4px 20px #f59e0b40">&#x1F999; 测试我的动物人格</a>
     <div style="margin-top:1.5rem">
-      <div style="color:#e2e8f0;font-size:1.1rem;font-weight:700;margin-bottom:0.8rem">👥 最热那个动物</div>
+      <div style="color:#e2e8f0;font-size:1.1rem;font-weight:700;margin-bottom:0.8rem">&#x1F4A5; 最热那个动物</div>
       <div id="topAnimal" style="background:#1a1a2e;border-radius:14px;padding:1.2rem;border:1px solid #2d2d4a">
         <div style="color:#475569;font-size:0.85rem">加载中...</div>
       </div>
     </div>
   </div>
-</div>>
+</div>
+desc">每支球队有独特的动物人格 🐾</div>
+     <span class="card-link" id="card5-link">立即查看 →</span>
+   </div>
+ </a>
+
+
+
+<!-- community stats section -->
+<div id="communitySection" style="max-width:500px;width:100%;margin:1.5rem auto 0;text-align:center">
+  <div style="color:#64748b;font-size:0.9rem;margin-bottom:0.8rem">🐾 看看大家都是什么动物</div>
+  <div id="communityBars" style="background:#1a1a2e;border-radius:14px;padding:1rem 1.2rem;border:1px solid #2d2d4a">
+    <div style="color:#475569;font-size:0.85rem">加载中...</div>
+  </div>
+  <a href="animal_quiz.html" style="display:inline-block;margin-top:0.8rem;color:#f59e0b;font-size:0.85rem;text-decoration:none">测试你的动物人格 →</a>
+</div></div>
 
 <script>
 var _txt = {
@@ -259,31 +279,54 @@ document.addEventListener('DOMContentLoaded', function() {
  });
 });
 </script>
+
 <script>
-(function() {
-  var barColors = ['#f59e0b','#ef4444','#8b5cf6','#10b981','#3b82f6','#ec4899','#06b6d4','#84cc16','#f97316','#6366f1'];
-  var nameMap = {dragon:'龙',phoenix:'凤凰',unicorn:'独角兽',tiger:'白虋',kirin:'麟麗',whale:'鲜鱼',wolf:'狼',eagle:'鹰',leopard:'越',dolphin:'海腿',owl:'猫头鹰',cat:'猫',dog:'狗',rabbit:'児子',panda:'熊猫',koala:'考拉',fox:'狐狸'};
-  var emojiMap = {dragon:'🐉',phoenix:'🔥',unicorn:'🦄',tiger:'🐯',kirin:'🦒',whale:'🐋',wolf:'🐺',eagle:'🦅',leopard:'🐆',dolphin:'🐬',owl:'🦉',cat:'🐱',dog:'🐶',rabbit:'🐰',panda:'🐼',koala:'🐨',fox:'🦊'};
+function showTab(name){
+  document.querySelectorAll('.content-panel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
+  var panel=document.getElementById('content-'+name);
+  var btn=document.getElementById('tab-'+name);
+  if(panel)panel.classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(name==='community')loadCommunity();
+}
+window.loadCommunity=function(){
+  var el=document.getElementById('communityBars');
+  if(el&&el.dataset.loaded)return;
   fetch('/api/stats')
-    .then(function(r){return r.json();})
-    .then(function(d){
-      var types = (d.top_types||[]).slice(0,8);
-      if(!types.length) return;
-      var total = types.reduce(function(s,i){return s+i.count},0);
-      var html = '';
-      types.forEach(function(t,i){
-        var pct = Math.round((t.count/total)*100);
-        var color = barColors[i%barColors.length];
-        var nm = nameMap[t.type]||t.type;
-        var em = emojiMap[t.type]||'🐾';
-        html += '<div class=stats-bar-wrap><span class=stats-bar-label>'+em+' '+nm+'</span><div class=stats-bar-bg><div class=stats-bar-fill style="width:'+pct+'%;background:'+color+'"></div></div><span class=stats-bar-pct>'+pct+'%</span></div>';
-      });
-      document.getElementById('communityBars').innerHTML = html;
-    })
-    .catch(function(){});
-})();
+  .then(function(r){return r.json();})
+  .then(function(d){
+    var types=(d.top_types||[]).slice(0,8);
+    if(!types.length)return;
+    var total=types.reduce(function(s,i){return s+i.count},0);
+    var tc=document.getElementById('totalCount');
+    if(tc)tc.textContent=total;
+    var barColors=['#f59e0b','#ef4444','#8b5cf6','#10b981','#3b82f6','#ec4899','#06b6d4','#84cc16','#f97316','#6366f1'];
+    var nm={dragon:'龙',phoenix:'凤凰',unicorn:'独角兽',tiger:'老虎',kirin:'麒麟',whale:'鲸鱼',wolf:'狼',eagle:'鹰',leopard:'豹',dolphin:'海豚',owl:'猫头鹰',cat:'猫',dog:'狗',rabbit:'兔子',panda:'熊猫',koala:'考拉',fox:'狐狸'};龙',phoenix:'凤凰',unicorn:'独角兽',tiger:'白虎',kirin:'麒麟',whale:'鲸鱼',wolf:'狼',eagle:'鹰',leopard:'豹',dolphin:'海豚',owl:'猫头鹰',cat:'猫',dog:'狗',rabbit:'兔子',panda:'熊猫',koala:'考拉',fox:'狐狸'};
+    var em={dragon:'&#x1F409;',phoenix:'&#x1F525;',unicorn:'&#x1F984;',tiger:'&#x1F42F;',kirin:'&#x1F992;',whale:'&#x1F40B;',wolf:'&#x1F43A;',eagle:'&#x1F985;',leopard:'&#x1F406;',dolphin:'&#x1F42C;',owl:'&#x1F989;',cat:'&#x1F431;',dog:'&#x1F436;',rabbit:'&#x1F430;',panda:'&#x1F43C;',koala:'&#x1F428;',fox:'&#x1F98A;'};
+    var html='';
+    types.forEach(function(t,i){
+      var pct=Math.round((t.count/total)*100);
+      var color=barColors[i%barColors.length];
+      var n=nm[t.type]||t.type;
+      var e=em[t.type]||'&#x2B50;';
+      html+='<div class="stats-bar-wrap"><span class="stats-bar-label">'+e+' '+n+'</span><div class="stats-bar-bg"><div class="stats-bar-fill" style="width:'+pct+'%;background:'+color+'"></div></div><span class="stats-bar-pct">'+pct+'%</span></div>';
+    });
+    var cb=document.getElementById('communityBars');
+    if(cb){cb.innerHTML=html;cb.dataset.loaded='1';}
+    var top=types[0];
+    if(top){
+      var topN=nm[top.type]||top.type;
+      var topE=em[top.type]||'&#x2B50;';
+      var topPct=Math.round(top.count/total*100);
+      var ta=document.getElementById('topAnimal');
+      if(ta)ta.innerHTML='<div style="text-align:center;padding:0.5rem"><div style="font-size:3rem;line-height:1.2">'+topE+'</div><div style="font-size:1.2rem;font-weight:700;color:#fff;margin-top:0.5rem">'+topN+'</div><div style="color:#64748b;font-size:0.85rem;margin-top:0.3rem">占全部 '+topPct+'%</div><a href="'+top.type+'-personality.html" style="display:inline-block;margin-top:0.8rem;color:#f59e0b;font-size:0.85rem;text-decoration:none">看看'+topN+'的性格 &#x2192;</a></div>';
+    }
+  })
+  .catch(function(){});
+};
 </script>
-<script>function showTab(name){document.querySelectorAll(".content-panel").forEach(function(p){p.classList.remove("active");});document.querySelectorAll(".tab-btn").forEach(function(b){b.classList.remove("active");});var p=document.getElementById("content-"+name);var b=document.getElementById("tab-"+name);if(p)p.classList.add("active");if(b)b.classList.add("active");if(name==="community")loadCommunity();}window.loadCommunity=function(){var el=document.getElementById("communityBars");if(el&&el.dataset.loaded)return;fetch("/api/stats").then(function(r){return r.json();}).then(function(d){var types=(d.top_types||[]).slice(0,8);if(!types.length)return;var total=types.reduce(function(s,i){return s+i.count},0);var tc=document.getElementById("totalCount");if(tc)tc.textContent=total;var barColors=['#f59e0b','#ef4444','#8b5cf6','#10b981','#3b82f6','#ec4899','#06b6d4','#84cc16','#f97316','#6366f1'];var nm={dragon:'龙',phoenix:'凤凰',unicorn:'独角兽',tiger:'白虋',kirin:'麟麗',whale:'鲜鱼',wolf:'狼',eagle:'鹰',leopard:'越',dolphin:'海腿',owl:'猫头鹰',cat:'猫',dog:'狗',rabbit:'児子',panda:'熊猫',koala:'考拉',fox:'狐狸'};var em={dragon:'🐉',phoenix:'🔥',unicorn:'🦄',tiger:'🐯',kirin:'🦒',whale:'🐋',wolf:'🐺',eagle:'🦅',leopard:'🐆',dolphin:'🐬',owl:'🦉',cat:'🐱',dog:'🐶',rabbit:'🐰',panda:'🐼',koala:'🐨',fox:'🦊'};var star="⭐";var html="";types.forEach(function(t,i){var pct=Math.round((t.count/total)*100);var color=barColors[i%barColors.length];var n=nm[t.type]||t.type;var e=em[t.type]||star;html+="<div class=stats-bar-wrap><span class=stats-bar-label>"+e+" "+n+"</span><div class=stats-bar-bg><div class=stats-bar-fill style=width:"+pct+"%;background:"+color+"></div></div><span class=stats-bar-pct>"+pct+"%</span></div>";});var cb=document.getElementById("communityBars");if(cb){cb.innerHTML=html;cb.dataset.loaded="1";}var top=types[0];if(top){var topN=nm[top.type]||top.type;var topE=em[top.type]||star;var topPct=Math.round(top.count/total*100);var ta=document.getElementById("topAnimal");if(ta)ta.innerHTML="<div style=text-align:center;padding:0.5rem><div style=font-size:3rem;line-height:1.2>"+topE+"</div><div style=font-size:1.2rem;font-weight:700;color:#fff;margin-top:0.5rem>"+topN+"</div><div style=color:#64748b;font-size:0.85rem;margin-top:0.3rem>\u5360\u5168\u90e8 "+topPct+"%</div><a href="+top.type+"-personality.html style='display:inline-block;margin-top:0.8rem;color:#f59e0b;font-size:0.85rem;text-decoration:none'>\u770b\u770b"+topN+"\u7684\u6027\u683c \u2192</a></div>";}}).catch(function(){});};</script></body>
+</body>
 </html>
 
 <!-- force-redeploy 1776848242 -->

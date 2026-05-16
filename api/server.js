@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -377,6 +378,186 @@ app.get('/health', async function(req, res) {
 
 app.get('/', function(req, res) {
   res.redirect('/animal_quiz.html');
+});
+
+
+// ── Auth & Comments ──────────────────────────────────────────────
+function makeToken() {
+  return crypto.randomBytes(32).toString('hex');
+}
+function hashPassword(password) {
+  return crypto.createHash('sha256').update(password + 'fbti_salt_2024').digest('hex');
+}
+function getCallerIP(req) {
+  return req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
+}
+
+// POST /api/auth/register
+app.post('/api/auth/register', async function(req, res) {
+  try {
+    var body = req.body || {};
+    var username = (body.username || '').trim();
+    var password = body.password || '';
+    if (!username || !password) return res.json({ success: false, error: '用户名和密码不能为空' });
+    if (password.length < 6) return res.json({ success: false, error: '密码至少6位' });
+    var name = body.name || '';
+    var city = body.city || '';
+    var gender = body.gender || '';
+    var phone = body.phone || '';
+    var qq = body.qq || '';
+    var wechat = body.wechat || '';
+    var passwordHash = hashPassword(password);
+    var token = makeToken();
+    // Check if username exists
+    var checkUrl = SUPABASE_URL + '/rest/v1/users?username=eq.' + encodeURIComponent(username) + '&select=id';
+    var checkRes = await fetch(checkUrl, { headers: sbHeaders });
+    if (checkRes.ok) {
+      var existing = await checkRes.json();
+      if (existing && existing.length > 0) return res.json({ success: false, error: '用户名已存在' });
+    }
+    var insertData = {
+      username: username,
+      password_hash: passwordHash,
+      name: name,
+      city: city,
+      gender: gender,
+      phone: phone,
+      qq: qq,
+      wechat: wechat,
+      token: token,
+      created_at: new Date().toISOString()
+    };
+    var insRes = await fetch(SUPABASE_URL + '/rest/v1/users', {
+      method: 'POST',
+      headers: Object.assign({}, sbHeaders, { 'Prefer': 'return=representation' }),
+      body: JSON.stringify(insertData)
+    });
+    if (!insRes.ok) {
+      var errText = await insRes.text();
+      console.log('Register error:', errText);
+      return res.json({ success: false, error: '注册失败，请稍后重试' });
+    }
+    var newUser = await insRes.json();
+    var user = Array.isArray(newUser) ? newUser[0] : newUser;
+    delete user.password_hash;
+    res.json({ success: true, user: user, token: token });
+  } catch(e) {
+    console.log('Register error:', e.message);
+    res.json({ success: false, error: '服务器错误' });
+  }
+});
+
+// POST /api/auth/login
+app.post('/api/auth/login', async function(req, res) {
+  try {
+    var body = req.body || {};
+    var username = (body.username || '').trim();
+    var password = body.password || '';
+    if (!username || !password) return res.json({ success: false, error: '用户名和密码不能为空' });
+    var passwordHash = hashPassword(password);
+    var url = SUPABASE_URL + '/rest/v1/users?username=eq.' + encodeURIComponent(username) + '&select=*';
+    var r = await fetch(url, { headers: sbHeaders });
+    if (!r.ok) return res.json({ success: false, error: '登录失败' });
+    var users = await r.json();
+    if (!users || users.length === 0) return res.json({ success: false, error: '用户名或密码错误' });
+    var user = users[0];
+    if (user.password_hash !== passwordHash) return res.json({ success: false, error: '用户名或密码错误' });
+    var newToken = makeToken();
+    await fetch(SUPABASE_URL + '/rest/v1/users?id=eq.' + user.id, {
+      method: 'PATCH',
+      headers: Object.assign({}, sbHeaders, { 'Prefer': 'return=representation' }),
+      body: JSON.stringify({ token: newToken })
+    });
+    delete user.password_hash;
+    res.json({ success: true, user: user, token: newToken });
+  } catch(e) {
+    console.log('Login error:', e.message);
+    res.json({ success: false, error: '服务器错误' });
+  }
+});
+
+// GET /api/auth/me
+app.get('/api/auth/me', async function(req, res) {
+  try {
+    var token = req.headers['x-user-token'] || '';
+    if (!token) return res.json({ user: null });
+    var url = SUPABASE_URL + '/rest/v1/users?token=eq.' + encodeURIComponent(token) + '&select=*';
+    var r = await fetch(url, { headers: sbHeaders });
+    if (!r.ok) return res.json({ user: null });
+    var users = await r.json();
+    if (!users || users.length === 0) return res.json({ user: null });
+    var user = users[0];
+    delete user.password_hash;
+    res.json({ user: user });
+  } catch(e) {
+    res.json({ user: null });
+  }
+});
+
+// GET /api/comments
+app.get('/api/comments', async function(req, res) {
+  try {
+    var url = SUPABASE_URL + '/rest/v1/comments?select=*&order=created_at.desc&limit=100';
+    var r = await fetch(url, { headers: sbHeaders });
+    if (!r.ok) return res.json({ comments: [] });
+    var comments = await r.json();
+    // Enrich with username from users table
+    var enriched = await Promise.all((comments || []).map(async function(c) {
+      if (c.user_id) {
+        try {
+          var uRes = await fetch(SUPABASE_URL + '/rest/v1/users?id=eq.' + c.user_id + '&select=username,name', { headers: sbHeaders });
+          if (uRes.ok) {
+            var u = await uRes.json();
+            if (u && u.length > 0) {
+              c.username = u[0].username;
+              c.name = u[0].name || u[0].username;
+            }
+          }
+        } catch(e) {}
+      }
+      c.name = c.name || c.username || '匿名用户';
+      return c;
+    }));
+    res.json({ comments: enriched });
+  } catch(e) {
+    console.log('Comments error:', e.message);
+    res.json({ comments: [] });
+  }
+});
+
+// POST /api/comments
+app.post('/api/comments', async function(req, res) {
+  try {
+    var token = req.headers['x-user-token'] || '';
+    var body = req.body || {};
+    var text = (body.text || '').trim();
+    if (!text || text.length < 2) return res.json({ success: false, error: '留言内容至少2个字' });
+    if (!token) return res.json({ success: false, error: '请先登录' });
+    // Find user by token
+    var url = SUPABASE_URL + '/rest/v1/users?token=eq.' + encodeURIComponent(token) + '&select=id';
+    var r = await fetch(url, { headers: sbHeaders });
+    if (!r.ok) return res.json({ success: false, error: '验证失败' });
+    var users = await r.json();
+    if (!users || users.length === 0) return res.json({ success: false, error: '无效的登录状态' });
+    var userId = users[0].id;
+    var insRes = await fetch(SUPABASE_URL + '/rest/v1/comments', {
+      method: 'POST',
+      headers: Object.assign({}, sbHeaders, { 'Prefer': 'return=representation' }),
+      body: JSON.stringify({
+        user_id: userId,
+        text: text,
+        created_at: new Date().toISOString()
+      })
+    });
+    if (!insRes.ok) {
+      var errText = await insRes.text();
+      return res.json({ success: false, error: '留言失败: ' + errText });
+    }
+    res.json({ success: true });
+  } catch(e) {
+    console.log('Comment post error:', e.message);
+    res.json({ success: false, error: '服务器错误' });
+  }
 });
 
 loadResults().then(function() {

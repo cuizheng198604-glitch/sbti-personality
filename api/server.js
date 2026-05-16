@@ -6,6 +6,8 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'sbti-admin-2026';
+const SUPABASE_URL = process.env.SUPABASE_URL || '';
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || '';
 const STATIC_DIR = process.env.STATIC_DIR || path.join(process.cwd(), 'public');
 const DATA_DIR = process.env.RENDER_DISK_PATH || '/tmp';
 const DATA_FILE = path.join(DATA_DIR, 'animal_results.json');
@@ -192,8 +194,30 @@ app.delete('/api/admin/results', function(req, res) {
   res.json({ success: true, deleted: count });
 });
 
-app.get('/health', function(req, res) {
-  res.json({ status: 'ok', total: results.length, uptime: Math.floor(process.uptime()) });
+app.get('/health', async function(req, res) {
+  var sbUsers = 0, sbComments = 0, sbAnimals = 0, dbStatus = 'disconnected';
+  if (SUPABASE_SERVICE_KEY && SUPABASE_URL) {
+    try {
+      var sbHeaders = { 'apikey': SUPABASE_SERVICE_KEY, 'Authorization': 'Bearer ' + SUPABASE_SERVICE_KEY };
+      var uRes = await fetch(SUPABASE_URL + '/rest/v1/users?select=id', { headers: sbHeaders });
+      if (uRes.ok) { var ud = await uRes.json(); sbUsers = ud.length || 0; }
+      var cRes = await fetch(SUPABASE_URL + '/rest/v1/comments?select=id', { headers: sbHeaders });
+      if (cRes.ok) { var cd = await cRes.json(); sbComments = cd.length || 0; }
+      var aRes = await fetch(SUPABASE_URL + '/rest/v1/animal_results?select=id', { headers: sbHeaders });
+      if (aRes.ok) { var ad = await aRes.json(); sbAnimals = ad.length || 0; }
+      dbStatus = 'connected';
+    } catch(e) { dbStatus = 'error: ' + e.message; }
+  }
+  res.json({
+    status: 'ok',
+    database: dbStatus,
+    total_results: results.length,
+    total_users: sbUsers,
+    total_comments: sbComments,
+    total_animal_results: sbAnimals,
+    supabase_key_set: !!(SUPABASE_SERVICE_KEY && SUPABASE_URL),
+    uptime: Math.floor(process.uptime())
+  });
 });
 
 app.get('/', function(req, res) {

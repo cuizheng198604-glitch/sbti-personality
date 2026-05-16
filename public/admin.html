@@ -730,7 +730,10 @@ function calcStats() {
 }
 
 function getRarityKey(r) {
-  var rar = (r.rarity || '').toLowerCase();
+  var rar = r.rarity;
+  if (typeof rar === 'string') rar = rar.toLowerCase();
+  else if (typeof rar === 'object' && rar !== null) rar = (rar.name || 'common').toLowerCase();
+  else rar = 'common';
   if (rar === 'legendary' || rar === '传说') return 'legendary';
   if (rar === 'epic' || rar === '史诗') return 'epic';
   if (rar === 'rare' || rar === '稀有') return 'rare';

@@ -422,8 +422,19 @@ function showAdOverlay(type) {
     overlay.classList.add('show');
     setTimeout(function() {
       var target = document.getElementById('qrTarget');
-      var quizUrl = cfg.share ? cfg.share.quizUrl : window.location.href;
-      if (target && typeof QRCode !== 'undefined') { target.innerHTML = ''; new QRCode(target, { text: quizUrl, width: 160, height: 160, colorDark: "#000000", colorLight: "#ffffff" }); }
+      // 优先用完整 URL，fallback 到当前页面
+      var rawUrl = (cfg && cfg.share && cfg.share.quizUrl) ? cfg.share.quizUrl : window.location.href;
+      var quizUrl = (rawUrl && rawUrl.length > 10) ? rawUrl : window.location.href;
+      if (target && typeof QRCode !== 'undefined') {
+        try {
+          target.innerHTML = '';
+          new QRCode(target, { text: quizUrl, width: 160, height: 160, colorDark: "#000000", colorLight: "#ffffff" });
+        } catch(e) {
+          target.innerHTML = '<div style="color:#f59e0b;font-size:12px;text-align:center;padding:10px">二维码生成失败<br><span style="font-size:10px;color:#64748b">URL: ' + quizUrl + '</span></div>';
+        }
+      } else {
+        target.innerHTML = '<div style="color:#f87171;font-size:12px;text-align:center;padding:10px">二维码组件加载失败</div>';
+      }
     }, 50);
   } else if (type === 'save') {
     content.innerHTML = `
@@ -447,8 +458,18 @@ function showAdOverlay(type) {
     overlay.classList.add('show');
     setTimeout(function() {
       var target = document.getElementById('qrTarget2');
-      var quizUrl = cfg.share ? cfg.share.quizUrl : window.location.href;
-      if (target && typeof QRCode !== 'undefined') { target.innerHTML = ''; new QRCode(target, { text: quizUrl, width: 140, height: 140, colorDark: "#000000", colorLight: "#ffffff" }); }
+      var rawUrl = (cfg && cfg.share && cfg.share.quizUrl) ? cfg.share.quizUrl : window.location.href;
+      var quizUrl = (rawUrl && rawUrl.length > 10) ? rawUrl : window.location.href;
+      if (target && typeof QRCode !== 'undefined') {
+        try {
+          target.innerHTML = '';
+          new QRCode(target, { text: quizUrl, width: 140, height: 140, colorDark: "#000000", colorLight: "#ffffff" });
+        } catch(e) {
+          target.innerHTML = '<div style="color:#f59e0b;font-size:12px;text-align:center;padding:10px">二维码生成失败</div>';
+        }
+      } else {
+        target.innerHTML = '<div style="color:#f87171;font-size:12px;text-align:center;padding:10px">二维码组件加载失败</div>';
+      }
     }, 50);
   }
 }

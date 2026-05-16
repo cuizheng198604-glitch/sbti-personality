@@ -37,7 +37,7 @@ async function loadResultsFromSupabase() {
       if (page > 50) break;
     }
     console.log('Supabase loaded: ' + allResults.length + ' records');
-    return allResults;
+    return allResults.map(normalizeRecord);
   } catch(e) {
     console.log('Supabase load error: ' + e.message);
     return [];
@@ -102,6 +102,117 @@ function getRarityKey(r) {
   if (typeof rar === 'string') return rar.toLowerCase();
   if (typeof rar === 'object' && rar !== null) return (rar.name || 'common').toLowerCase();
   return 'common';
+}
+
+// ANIMALS lookup for normalizing animal data (matches public/admin.html ANIMALS map)
+var ANIMALS_MAP = {
+  fox:    { name: '\u72d0\u72f8',     emoji: '\ud83e\udd8a' },
+  wolf:   { name: '\u72fc',           emoji: '\ud83e\udda1' },
+  owl:    { name: '\u732b\u5934\u9e70', emoji: '\ud83e\udd89' },
+  dolphin:{ name: '\u6d77\u8102',    emoji: '\ud83d\udc2c' },
+  rabbit: { name: '\u5154\u5b50',    emoji: '\ud83d\udc30' },
+  tiger:  { name: '\u8001\u864e',    emoji: '\ud83d\udc2f' },
+  panda:  { name: '\u718a\u732b',    emoji: '\ud83d\udc3c' },
+  eagle:  { name: '\u8001\u9e70',    emoji: '\ud83e\udd85' },
+  bear:   { name: '\u718a',           emoji: '\ud83d\udc3b' },
+  lion:   { name: '\u72ee\u5b50',    emoji: '\ud83e\udd81' },
+  phoenix:{ name: '\u51e4\u51f0',    emoji: '\ud83e\udd76' },
+  dragon: { name: '\u9f99',          emoji: '\ud83d\udc09' },
+  peacock:{ name: '\u5b54\u96c0',    emoji: '\ud83e\udd82' },
+  cat:    { name: '\u732b',           emoji: '\ud83d\udc31' },
+  dog:    { name: '\u72d7',           emoji: '\ud83d\udc36' },
+  elephant:{ name: '\u5927\u8c61',  emoji: '\ud83d\udc18' },
+  horse:  { name: '\u9a6c',           emoji: '\ud83d\udc34' },
+  monkey: { name: '\u7334\u5b50',   emoji: '\ud83d\udc35' },
+  deer:   { name: '\u9e7f',           emoji: '\ud83e\udd84' },
+  foxhq:  { name: '\u72d0\u72f8(\u597d\u5947\u578b)', emoji: '\ud83e\udd8a' }
+};
+
+// Normalize a record from Supabase (snake_case) or memory (camelCase) to a consistent format
+function normalizeRecord(r) {
+  if (!r) return r;
+  var nr = {
+    id: r.id || r.id,
+    resultType: r.resultType || r.result_type || 'animal',
+    ip: r.ip || '',
+    submitted_at: r.submitted_at || r.submittedAt || ''
+  };
+  // animalId: prefer camelCase, fallback to snake_case
+  nr.animalId = r.animalId || r.animal_id || '';
+  // animal: derived lookup from ANIMALS_MAP
+  var animalKey = (nr.animalId || '').toLowerCase();
+  if (animalKey && ANIMALS_MAP[animalKey]) {
+    nr.animal = { id: animalKey, name: ANIMALS_MAP[animalKey].name, emoji: ANIMALS_MAP[animalKey].emoji };
+  } else {
+    nr.animal = { id: animalKey, name: animalKey, emoji: '' };
+  }
+  // rarity
+  if (typeof r.rarity === 'object' && r.rarity !== null) {
+    nr.rarity = r.rarity.name || 'common';
+    nr.rarityName = r.rarity.label || r.rarity.name || '';
+  } else {
+    nr.rarity = r.rarity || r.rarity_name || 'common';
+    nr.rarityName = r.rarityName || r.rarity_name || '';
+  }
+  // matchPercent
+  nr.matchPercent = r.matchPercent || r.match_percent || 0;
+  // mbti
+  nr.mbti = r.mbti || '';
+  // bfScores
+  nr.bfScores = r.bfScores || r.bf_scores || {};
+  // secondAnimal / thirdAnimal (deep copy + normalize)
+  if (r.second_animal || r.secondAnimal) {
+    var sa = r.second_animal || r.secondAnimal;
+    nr.secondAnimal = {
+      id: sa.id || '',
+      name: sa.name || '',
+      emoji: sa.emoji || '',
+      rarity: sa.rarity || '',
+      traits: sa.traits || [],
+      keyword: sa.keyword || '',
+      profile: sa.profile || {},
+      description: sa.description || '',
+      strength: sa.strength || '',
+      weakness: sa.weakness || '',
+      bestMatch: sa.bestMatch || sa.best_match || [],
+      worstMatch: sa.worstMatch || sa.worst_match || []
+    };
+  } else {
+    nr.secondAnimal = null;
+  }
+  if (r.third_animal || r.thirdAnimal) {
+    var ta = r.third_animal || r.thirdAnimal;
+    nr.thirdAnimal = {
+      id: ta.id || '',
+      name: ta.name || '',
+      emoji: ta.emoji || '',
+      rarity: ta.rarity || '',
+      traits: ta.traits || [],
+      keyword: ta.keyword || '',
+      profile: ta.profile || {},
+      description: ta.description || '',
+      strength: ta.strength || '',
+      weakness: ta.weakness || '',
+      bestMatch: ta.bestMatch || ta.best_match || [],
+      worstMatch: ta.worstMatch || ta.worst_match || []
+    };
+  } else {
+    nr.thirdAnimal = null;
+  }
+  // allDimensions
+  nr.allDimensions = r.allDimensions || r.all_dimensions || {};
+  // personality-specific fields
+  if (nr.resultType === 'personality') {
+    nr.sbti_type = r.sbti_type || r.sbtiType || '';
+    nr.role = r.role || '';
+    nr.element = r.element || '';
+    nr.keywords = r.keywords || [];
+    nr.stats = r.stats || {};
+    nr.bigfive_total = r.bigfive_total || 0;
+    nr.description = r.description || '';
+    nr.sbti_scores = r.sbti_scores || {};
+  }
+  return nr;
 }
 
 app.post('/api/results', function(req, res) {
@@ -209,7 +320,7 @@ app.get('/api/admin/results', function(req, res) {
     var entries2 = Object.keys(byAnimalMap).map(function(k) { return [k, byAnimalMap[k]]; });
     entries2.sort(function(a, b) { return b[1] - a[1]; });
     res.json({
-      results: results.slice(0, 2000),
+      results: results.slice(0, 2000).map(normalizeRecord),
       stats: {
         total: results.length,
         by_rarity: byRarity,

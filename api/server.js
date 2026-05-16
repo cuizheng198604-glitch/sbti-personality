@@ -17,16 +17,60 @@ console.log('DATA_FILE:', DATA_FILE);
 
 var results = [];
 
-function loadResults() {
+async function loadResultsFromSupabase() {
+  if (!SUPABASE_SERVICE_KEY || !SUPABASE_URL) return [];
+  try {
+    var sbHeaders = { 'apikey': SUPABASE_SERVICE_KEY, 'Authorization': 'Bearer ' + SUPABASE_SERVICE_KEY };
+    var allResults = [];
+    var page = 0;
+    var pageSize = 1000;
+    while (true) {
+      var offset = page * pageSize;
+      var url = SUPABASE_URL + '/rest/v1/animal_results?select=*&order=submitted_at.desc&limit=' + pageSize + '&offset=' + offset;
+      var res = await fetch(url, { headers: sbHeaders });
+      if (!res.ok) break;
+      var data = await res.json();
+      if (!data || data.length === 0) break;
+      allResults = allResults.concat(data);
+      if (data.length < pageSize) break;
+      page++;
+      if (page > 50) break;
+    }
+    console.log('Supabase loaded: ' + allResults.length + ' records');
+    return allResults;
+  } catch(e) {
+    console.log('Supabase load error: ' + e.message);
+    return [];
+  }
+}
+
+async function loadResults() {
   try {
     if (fs.existsSync(DATA_FILE)) {
       results = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
-      console.log('Loaded: ' + results.length + ' records');
+      console.log('File loaded: ' + results.length + ' records');
     }
   } catch (e) {
-    console.log('Load error: ' + e.message);
-    results = [];
+    console.log('File load error: ' + e.message);
   }
+  var sbResults = await loadResultsFromSupabase();
+  if (sbResults.length > 0) {
+    var existingIds = {};
+    for (var i = 0; i < results.length; i++) existingIds[results[i].id] = true;
+    var newRecords = sbResults.filter(function(r) { return !existingIds[r.id]; });
+    console.log('Merging ' + newRecords.length + ' new records from Supabase');
+    results = sbResults.concat(newRecords);
+    results.sort(function(a, b) {
+      var ta = new Date(a.submitted_at || 0).getTime();
+      var tb = new Date(b.submitted_at || 0).getTime();
+      return tb - ta;
+    });
+    saveResults();
+  }
+  if (results.length === 0) {
+    results = sbResults;
+  }
+  console.log('Total results: ' + results.length);
 }
 
 function saveResults() {
@@ -224,8 +268,16 @@ app.get('/', function(req, res) {
   res.redirect('/animal_quiz.html');
 });
 
-app.listen(PORT, '0.0.0.0', function() {
-  console.log('Server running on port: ' + PORT);
-  console.log('Admin password: ' + ADMIN_PASSWORD);
-  console.log('Data file: ' + DATA_FILE);
+loadResults().then(function() {
+  app.listen(PORT, '0.0.0.0', function() {
+    console.log('Server running on port: ' + PORT);
+    console.log('Admin password: ' + ADMIN_PASSWORD);
+    console.log('Data file: ' + DATA_FILE);
+    console.log('Total results loaded: ' + results.length);
+  });
+}).catch(function(e) {
+  console.log('Startup error: ' + e.message);
+  app.listen(PORT, '0.0.0.0', function() {
+    console.log('Server running (load error) on port: ' + PORT);
+  });
 });

@@ -17,11 +17,12 @@ console.log('STATIC_DIR:', STATIC_DIR);
 console.log('DATA_FILE:', DATA_FILE);
 
 var results = [];
+var sbHeaders = null;
 
 async function loadResultsFromSupabase() {
   if (!SUPABASE_SERVICE_KEY || !SUPABASE_URL) return [];
   try {
-    var sbHeaders = { 'apikey': SUPABASE_SERVICE_KEY, 'Authorization': 'Bearer ' + SUPABASE_SERVICE_KEY };
+    sbHeaders = { 'apikey': SUPABASE_SERVICE_KEY, 'Authorization': 'Bearer ' + SUPABASE_SERVICE_KEY };
     var allResults = [];
     var page = 0;
     var pageSize = 1000;

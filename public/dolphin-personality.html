@@ -3,143 +3,254 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>海豚🐬 性格分析 | 动物人格测试</title>
-<meta name="description" content="你是海豚！你是天生的人际高手，聪明友善，走到哪都能带来欢乐。极高的情商让你在社交中如鱼得水，你总能轻松化解尴尬，是朋友中的开心果和... 测试你的动物人格，发现最真实的自己。">
-<meta property="og:title" content="海豚🐬 性格分析 | 动物人格测试">
-<meta property="og:description" content="你是天生的人际高手，聪明友善，走到哪都能带来欢乐。极高的情商让你在社交中如鱼得水，你总能轻松化解尴尬，是朋友中的开心果和调解者。">
+<title>海豚性格分析：情商智商双高的社交达人</title>
+<meta name="description" content="海豚人格全解析：高情商特质、理想职业、社交攻略与完美配对">
 <link rel="canonical" href="https://fbti.net/dolphin-personality.html">
+<script src="animal_config.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#0f0f1a;color:#e2e8f0}
-.hero{text-align:center;padding:3rem 1rem 2rem;background:linear-gradient(180deg,#1a1a2e 0%,#0f0f1a 100%)}
-.hero-emoji{font-size:5rem;margin-bottom:1rem}
-.hero-name{font-size:2.5rem;font-weight:900;color:#fff;margin-bottom:0.3rem}
-.hero-traits{color:#f59e0b;font-size:1rem;margin-bottom:1rem}
-.hero-desc{color:#94a3b8;max-width:600px;margin:0 auto;font-size:1rem;line-height:1.7}
-.hero-rarity{display:inline-block;background:#7c3aed20;border:1px solid #7c3aed;color:#a78bfa;border-radius:20px;padding:0.3rem 1rem;font-size:0.85rem;margin-top:1rem}
-.section{max-width:700px;margin:2rem auto;padding:0 1.5rem}
-.section-title{font-size:1.3rem;font-weight:700;color:#fff;margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem}
-.section-title span{font-size:1.5rem}
-.card{background:#1a1a2e;border:1px solid #2d2d4a;border-radius:16px;padding:1.5rem;margin-bottom:1rem}
-.card p{color:#cbd5e1;line-height:1.8;font-size:0.95rem}
-.tag-list{display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.8rem}
-.tag{background:#2d2d4a;color:#e2e8f0;padding:0.3rem 0.8rem;border-radius:20px;font-size:0.85rem}
-.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:0.8rem}
-.match-best{background:#10b98115;border:1px solid #10b98140;border-radius:12px;padding:1rem}
-.match-worst{background:#ef444415;border:1px solid #ef444140;border-radius:12px;padding:1rem}
-.match-best h4{color:#10b981;font-size:0.9rem;margin-bottom:0.5rem}
-.match-worst h4{color:#ef4444;font-size:0.9rem;margin-bottom:0.5rem}
-.match-item{color:#94a3b8;font-size:0.85rem;padding:0.3rem 0}
-.cta{text-align:center;padding:2rem 1rem 3rem}
-.cta-btn{display:inline-block;background:linear-gradient(135deg,#f59e0b,#e97316);color:#fff;font-weight:700;font-size:1.1rem;padding:1rem 2.5rem;border-radius:50px;text-decoration:none;box-shadow:0 4px 20px #f59e0b40}
-.cta-btn:hover{transform:translateY(-2px);box-shadow:0 6px 30px #f59e0b60}
-.back{text-align:center;padding:1rem}
-.back a{color:#60a5fa;font-size:0.9rem;text-decoration:none}
-.other-animals{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:0.8rem;margin-top:1rem}
-.animal-chip{background:#1a1a2e;border:1px solid #2d2d4a;border-radius:12px;padding:0.8rem;text-align:center;text-decoration:none;color:#e2e8f0;transition:all 0.2s}
-.animal-chip:hover{border-color:#f59e0b;transform:translateY(-2px)}
-.animal-chip .emoji{font-size:2rem;display:block}
-.animal-chip .name{font-size:0.8rem;margin-top:0.3rem;display:block}
-.strengths{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:0.8rem}
-.str-box{background:#1a1a2e;border-radius:12px;padding:1rem}
-.str-box h4{font-size:0.85rem;margin-bottom:0.4rem}
-.str-box.good h4{color:#10b981}
-.str-box.bad h4{color:#ef4444}
-.str-box p{color:#94a3b8;font-size:0.85rem;line-height:1.6}
-footer{text-align:center;padding:2rem;color:#475569;font-size:0.8rem}
+body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:#0a0f1a;color:#e8edf5;min-height:100vh;line-height:1.6}
+.hero{background:linear-gradient(135deg,#06b6d4,#22d3ee);padding:4rem 2rem 3rem;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:rgba(0,0,0,0.3)}
+.hero-content{position:relative;z-index:1;max-width:700px;margin:0 auto}
+.hero-emoji{font-size:5rem;margin-bottom:1rem;display:block;filter:drop-shadow(0 4px 20px rgba(0,0,0,0.3)}
+.hero h1{font-size:2.4rem;font-weight:900;color:#fff;margin-bottom:0.5rem;text-shadow:0 2px 10px rgba(0,0,0,0.3)}
+.hero-traits{display:inline-flex;gap:0.5rem;margin-top:0.8rem;flex-wrap:wrap;justify-content:center}
+.hero-trait{background:rgba(255,255,255,0.2);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.3);border-radius:20px;padding:0.3rem 0.8rem;font-size:0.85rem;color:#fff}
+.rarity-badge{display:inline-block;padding:0.25rem 0.8rem;border-radius:20px;font-size:0.75rem;font-weight:700;text-transform:uppercase;margin-bottom:0.5rem;background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.3);color:#fff}
+.container{max-width:800px;margin:0 auto;padding:2rem 1.5rem}
+.section{background:#111d32;border:1px solid #1e3050;border-radius:16px;padding:1.8rem;margin-bottom:1.5rem}
+.section h2{font-size:1.3rem;font-weight:700;margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem}
+.section h2 span{font-size:1.5rem}
+.section-title-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.trait-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem}
+.trait-box{background:#0a0f1a;border-radius:12px;padding:1rem;border:1px solid #1e3050}
+.trait-box strong{display:block;font-size:0.85rem;color:#06b6d4;margin-bottom:0.3rem;font-weight:700}
+.trait-box p{font-size:0.9rem;color:#94a3b8;line-height:1.5}
+.career-tags{display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.5rem}
+.career-tag{background:linear-gradient(135deg,#06b6d4,#22d3ee);border-radius:20px;padding:0.4rem 0.9rem;font-size:0.8rem;color:#fff;font-weight:600}
+.match-section{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem}
+.match-box{border-radius:12px;padding:1rem;text-align:center;border:2px solid}
+.match-box.good{border-color:#22c55e;background:rgba(34,197,94,0.1)}
+.match-box.bad{border-color:#ef4444;background:rgba(239,68,68,0.1)}
+.match-box .emoji{font-size:2rem;display:block;margin-bottom:0.3rem}
+.match-box .label{font-size:0.75rem;font-weight:700;text-transform:uppercase;border-radius:10px;padding:0.2rem 0.5rem;display:inline-block;margin-bottom:0.3rem}
+.match-box.good .label{background:#22c55e;color:#fff}
+.match-box.bad .label{background:#ef4444;color:#fff}
+.match-box .animals{font-size:0.9rem;color:#94a3b8;margin-top:0.3rem}
+.cta-section{text-align:center;padding:2rem;background:linear-gradient(135deg,#06b6d4,#22d3ee);border-radius:16px;margin-bottom:1.5rem}
+.cta-section h3{color:#fff;font-size:1.3rem;margin-bottom:0.5rem}
+.cta-section p{color:rgba(255,255,255,0.8);margin-bottom:1.2rem;font-size:0.95rem}
+.btn{display:inline-block;background:#fff;color:#06b6d4;font-weight:700;padding:0.8rem 2rem;border-radius:50px;text-decoration:none;font-size:1rem;box-shadow:0 4px 15px rgba(0,0,0,0.2);transition:transform 0.2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.3)}
+.back-link{text-align:center;margin-top:2rem;padding-top:1.5rem;border-top:1px solid #1e3050}
+.back-link a{color:#06b6d4;text-decoration:none;font-weight:600;font-size:0.9rem}
+.share-strip{display:flex;justify-content:center;gap:1rem;margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)}
+.share-btn{display:flex;align-items:center;gap:0.4rem;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:0.5rem 1rem;color:#fff;text-decoration:none;font-size:0.85rem;cursor:pointer;transition:all 0.2s}
+.share-btn:hover{background:rgba(255,255,255,0.2);transform:translateY(-1px)}
+.related-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-top:1rem}
+.related-card{background:#0a0f1a;border:1px solid #1e3050;border-radius:12px;padding:1rem;display:flex;align-items:center;gap:0.8rem;text-decoration:none;transition:all 0.2s}
+.related-card:hover{border-color:#06b6d4;transform:translateY(-2px)}
+.related-emoji{font-size:1.8rem;flex-shrink:0}
+.related-info{flex:1}
+.related-info .name{font-weight:700;color:#fff;font-size:0.95rem}
+.related-info .trait{font-size:0.75rem;color:#64748b;margin-top:0.15rem}
+@media(max-width:600px){
+ .hero h1{font-size:1.8rem}
+ .trait-grid{grid-template-columns:1fr}
+ .match-section{grid-template-columns:1fr}
+ .related-grid{grid-template-columns:1fr}
+ .hero-emoji{font-size:3.5rem}
+}
 </style>
 </head>
 <body>
 
 <div class="hero">
-  <div class="hero-emoji">🐬</div>
-  <div class="hero-name">海豚</div>
-  <div class="hero-traits">聪明 · 友善 · 快乐</div>
-  <div class="hero-rarity">⭐ 稀有</div>
-  <p class="hero-desc">你是天生的人际高手，聪明友善，走到哪都能带来欢乐。极高的情商让你在社交中如鱼得水，你总能轻松化解尴尬，是朋友中的开心果和调解者。</p>
-</div>
-
-<div class="section">
-  <div class="section-title"><span>💪</span>性格优势</div>
-  <div class="card">
-    <div class="strengths">
-      <div class="str-box good">
-        <h4>最大优点</h4>
-        <p>情商极高，人际高手，乐观开朗</p>
-      </div>
-      <div class="str-box bad">
-        <h4>需要注意</h4>
-        <p>有时过于在意他人看法，难说"不"</p>
-      </div>
-    </div>
+ <div class="hero-content">
+  <span class="hero-emoji">🐬</span>
+  <span class="rarity-badge">稀有 · 25%%</span>
+  <h1>海豚性格分析</h1>
+  <p style="color:rgba(255,255,255,0.85);font-size:1.05rem;margin-top:0.5rem">你是快乐与智慧的结合体，总能在社交中找到平衡点。善于沟通，是朋友圈中的开心果和氛围制造者。同时拥有高情商和高智商。</p>
+  <div class="hero-traits">
+   <span class="hero-trait">智慧</span><span class="hero-trait">友善</span><span class="hero-trait">快乐</span>
   </div>
+ </div>
 </div>
 
-<div class="section">
-  <div class="section-title"><span>💼</span>适合职业</div>
-  <div class="card">
-    <div class="tag-list">
-      <span class="tag">销售</span>
-      <span class="tag">主持人</span>
-      <span class="tag">HR</span>
-      <span class="tag">公关</span>
-      <span class="tag">教师</span>
-      <span class="tag">心理咨询师</span>
-      <span class="tag">社群运营</span>
-    </div>
+<div class="container">
+
+ <!-- 性格优势与弱点 -->
+ <div class="section">
+  <h2><span class="section-title-icon" style="background:rgba(34,197,94,0.2)">💪</span>性格优势与成长建议</h2>
+  <div class="trait-grid">
+   <div class="trait-box">
+    <strong style="color:#22c55e">✨ 最大优势</strong>
+    <p>社交能力强，情商高，适应力强</p>
+   </div>
+   <div class="trait-box">
+    <strong style="color:#ef4444">⚠️ 成长盲点</strong>
+    <p>有时为了讨好他人而失去自我</p>
+   </div>
   </div>
-</div>
+ </div>
 
-<div class="section">
-  <div class="section-title"><span>🤝</span>人际关系</div>
-  <div class="card">
-    <p>海豚是所有人的朋友，你的人缘极好，天生的社交达人。但你有时为了讨好别人而委屈自己。爱情中你是浪漫快乐的伴侣。</p>
+ <!-- 适合职业 -->
+ <div class="section">
+  <h2><span class="section-title-icon" style="background:rgba(59,130,246,0.2)">💼</span>适合的职业方向</h2>
+  <p style="color:#64748b;font-size:0.9rem;margin-bottom:0.8rem">基于你的性格特质，以下职业方向最匹配：</p>
+  <div class="career-tags">
+   <span class="career-tag">主持人、公关、销售、老师、心理咨询师、媒体人</span>
   </div>
-</div>
+ </div>
 
-<div class="section">
-  <div class="section-title"><span>💕</span>性格配对</div>
-  <div class="match-grid">
-    <div class="match-best">
-      <h4>✅ 最合拍</h4>
-      <div class="match-item">🔥 狼：海豚+狼，社交达人+团队核心</div>
-      <div class="match-item">🔥 兔子：海豚和兔子，快乐双人组</div>
-      <div class="match-item">🔥 凤凰：凤凰+海豚，温暖又快乐</div>
-      <div class="match-item">🔥 猫：猫+海豚，慵懒的快乐哲学</div>
-    </div>
-    <div class="match-worst">
-      <h4>❌ 慎选组合</h4>
-      <div class="match-item">⚠️ 蛇：蛇的阴暗面让海豚不舒服</div>
-      <div class="match-item">⚠️ 蝎子：蝎子的极端让海豚害怕</div>
-    </div>
+ <!-- 人际关系 -->
+ <div class="section">
+  <h2><span class="section-title-icon" style="background:rgba(168,85,247,0.2)">💕</span>人际关系与适配</h2>
+  <p style="color:#94a3b8;font-size:0.9rem;line-height:1.7">与鲸鱼是知心搭档，与猴子是快乐组合；与狼相处需注意保持自我。</p>
+  <div class="match-section">
+   <div class="match-box good">
+    <span class="emoji">💕</span>
+    <span class="label">最佳拍档</span>
+    <div class="animals">鲸鱼🐋、猴子🐵</div>
+   </div>
+   <div class="match-box bad">
+    <span class="emoji">⚡</span>
+    <span class="label">相处需注意</span>
+    <div class="animals">狼🐺、蛇🐍</div>
+   </div>
   </div>
-</div>
+ </div>
 
-<div class="cta">
-  <a class="cta-btn" href="/animal_quiz.html">🔮 测测我的动物人格</a>
-</div>
-
-<div class="section">
-  <div class="section-title"><span>🐾</span>其他动物人格</div>
-  <div class="other-animals">
-    <a class="animal-chip" href="/dragon-personality.html"><span class="emoji">🐉</span><span class="name">龙</span></a>
-    <a class="animal-chip" href="/phoenix-personality.html"><span class="emoji">🔥</span><span class="name">凤凰</span></a>
-    <a class="animal-chip" href="/unicorn-personality.html"><span class="emoji">🦄</span><span class="name">独角兽</span></a>
-    <a class="animal-chip" href="/tiger-personality.html"><span class="emoji">🐯</span><span class="name">白虎</span></a>
-    <a class="animal-chip" href="/wolf-personality.html"><span class="emoji">🐺</span><span class="name">狼</span></a>
-    <a class="animal-chip" href="/eagle-personality.html"><span class="emoji">🦅</span><span class="name">鹰</span></a>
-    <a class="animal-chip" href="/leopard-personality.html"><span class="emoji">🐆</span><span class="name">豹</span></a>
-    <a class="animal-chip" href="/cat-personality.html"><span class="emoji">🐱</span><span class="name">猫</span></a>
-    <a class="animal-chip" href="/dog-personality.html"><span class="emoji">🐶</span><span class="name">狗</span></a>
-    <a class="animal-chip" href="/rabbit-personality.html"><span class="emoji">🐰</span><span class="name">兔子</span></a>
-    <a class="animal-chip" href="/panda-personality.html"><span class="emoji">🐼</span><span class="name">熊猫</span></a>
+ <!-- 分享卡片 -->
+ <div class="section" style="background:#0a0f1a">
+  <h2><span class="section-title-icon" style="background:rgba(245,158,11,0.2)">🎨</span>生成分享卡片</h2>
+  <p style="color:#64748b;font-size:0.9rem;margin-bottom:1rem">保存图片，发朋友圈展示你的动物人格！</p>
+  <div style="display:flex;justify-content:center">
+   <button onclick="generateShareCard()" style="background:linear-gradient(135deg,#06b6d4,#22d3ee);color:#fff;border:none;border-radius:12px;padding:0.8rem 2rem;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 15px rgba(0,0,0,0.3);transition:all 0.2s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">🎨 一键生成分享图</button>
   </div>
+  <div id="share-card-preview" style="margin-top:1.5rem;display:none;text-align:center">
+   <canvas id="shareCanvas" width="430" height="540" style="border-radius:16px;max-width:100%;box-shadow:0 8px 32px rgba(0,0,0,0.4)"></canvas>
+   <p style="color:#64748b;font-size:0.8rem;margin-top:0.8rem">长按图片保存或截图分享</p>
+  </div>
+ </div>
+
+ <!-- CTA -->
+ <div class="cta-section">
+  <h3>想更精确地测出你的动物人格？</h3>
+  <p>38道题，基于BigFive大五人格模型科学计算</p>
+  <a href="animal_quiz.html" class="btn">🐾 开始测试 →</a>
+ </div>
+
+ <!-- 相关动物 -->
+ <div class="section">
+  <h2><span class="section-title-icon" style="background:rgba(245,158,11,0.2)">🔗</span>探索其他动物人格</h2>
+  <div class="related-grid">
+   <a href="dragon-personality.html" class="related-card"><span class="related-emoji">🐉</span><div class="related-info"><div class="name">龙性格</div><div class="trait">威严·掌控·领袖</div></div></a><a href="phoenix-personality.html" class="related-card"><span class="related-emoji">🔥</span><div class="related-info"><div class="name">凤凰性格</div><div class="trait">重生·激情·魅力</div></div></a><a href="tiger-personality.html" class="related-card"><span class="related-emoji">🐯</span><div class="related-info"><div class="name">白虎性格</div><div class="trait">勇猛·正义·守护</div></div></a><a href="unicorn-personality.html" class="related-card"><span class="related-emoji">🦄</span><div class="related-info"><div class="name">独角兽性格</div><div class="trait">梦幻·纯真·独特</div></div></a>
+  </div>
+ </div>
+
+ <div class="back-link">
+  <a href="index.html">← 返回首页</a>
+ </div>
+
 </div>
 
-<div class="back">
-  <a href="/">← 返回首页</a>
-</div>
+<canvas id="bgCanvas" width="430" height="540" style="display:none"></canvas>
 
-<footer>© 2026 动物人格测试 · fbti.net</footer>
+<script>
+// 分享卡片生成
+function generateShareCard() {
+  var canvas = document.getElementById('shareCanvas');
+  var ctx = canvas.getContext('2d');
+  var bg = document.getElementById('bgCanvas');
+  var bCtx = bg.getContext('2d');
+
+  // 背景渐变
+  var grad = bCtx.createLinearGradient(0, 0, 430, 540);
+  grad.addColorStop(0, '#0a0f1a');
+  grad.addColorStop(1, '#1e3050');
+  bCtx.fillStyle = grad;
+  bCtx.fillRect(0, 0, 430, 540);
+
+  // 顶部装饰
+  bCtx.fillStyle = '#06b6d4';
+  bCtx.globalAlpha = 0.15;
+  bCtx.beginPath();
+  bCtx.arc(350, 80, 120, 0, Math.PI * 2);
+  bCtx.fill();
+  bCtx.globalAlpha = 1;
+
+  // 边框
+  bCtx.strokeStyle = '#06b6d4';
+  bCtx.lineWidth = 3;
+  bCtx.strokeRect(15, 15, 400, 510);
+
+  // Emoji 大字
+  bCtx.font = '120px serif';
+  bCtx.textAlign = 'center';
+  bCtx.fillText('🐬', 215, 170);
+
+  // 动物名
+  bCtx.font = 'bold 48px "PingFang SC", sans-serif';
+  bCtx.fillStyle = '#fff';
+  bCtx.fillText('海豚性格', 215, 240);
+
+  // 特质
+  bCtx.font = '22px "PingFang SC", sans-serif';
+  bCtx.fillStyle = '#06b6d4';
+  bCtx.fillText('智慧·友善·快乐', 215, 285);
+
+  // 分隔线
+  bCtx.strokeStyle = '#06b6d4';
+  bCtx.lineWidth = 1;
+  bCtx.globalAlpha = 0.3;
+  bCtx.beginPath();
+  bCtx.moveTo(50, 310);
+  bCtx.lineTo(380, 310);
+  bCtx.stroke();
+  bCtx.globalAlpha = 1;
+
+  // 描述
+  bCtx.font = '16px "PingFang SC", sans-serif';
+  bCtx.fillStyle = '#94a3b8';
+  var desc = '你是快乐与智慧的结合体，总能在社交中找到平衡点。善于沟通，是朋友圈中的开心果和氛围制造者。同时拥有高情商和高智...';
+  var lines = desc.length > 50 ? [desc.substring(0, 50), desc.substring(50, 100)] : [desc];
+  lines.forEach(function(line, i) {
+    bCtx.fillText(line, 215, 350 + i * 26);
+  });
+
+  // 优势标签
+  bCtx.fillStyle = '#06b6d4';
+  bCtx.globalAlpha = 0.15;
+  bCtx.beginPath();
+  bCtx.roundRect(50, 420, 330, 38, 19);
+  bCtx.fill();
+  bCtx.globalAlpha = 1;
+  bCtx.font = 'bold 15px "PingFang SC", sans-serif';
+  bCtx.fillStyle = '#06b6d4';
+  bCtx.fillText('✨ 社交能力强，情商高，适应力强', 215, 446);
+
+  // 底部
+  bCtx.font = '13px "PingFang SC", sans-serif';
+  bCtx.fillStyle = '#475569';
+  bCtx.fillText('SBTI × Big Five | fbti.net', 215, 505);
+
+  // 水印
+  bCtx.font = '12px "PingFang SC", sans-serif';
+  bCtx.fillStyle = '#334155';
+  bCtx.fillText('🐾 测测你是哪种动物', 215, 525);
+
+  // 复制到展示canvas
+  ctx.drawImage(bg, 0, 0);
+  document.getElementById('share-card-preview').style.display = 'block';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  // 平滑显示
+  document.getElementById('bgCanvas').getContext('2d');
+});
+</script>
+
 </body>
 </html>

@@ -1,43 +1,33 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-S29BGTFNLT"></script>
-<script>
- window.dataLayer = window.dataLayer || [];
- function gtag(){dataLayer.push(arguments);}
- gtag('js', new Date());
- gtag('config', 'G-S29BGTFNLT', { send_page_view: true });
-
- function getUTM() {
-   var params = new URLSearchParams(window.location.search);
-   var utm = {};
-   ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'].forEach(function(k){
-     var v = params.get(k);
-     if (v) utm[k] = v;
-   });
-   if (Object.keys(utm).length > 0) {
-     sessionStorage.setItem('fb_utm', JSON.stringify(utm));
-   }
- }
- function tagEvent(name, params) {
-   var stored = sessionStorage.getItem('fb_utm');
-   var utm = stored ? JSON.parse(stored) : {};
-   gtag('event', name, Object.assign({}, utm, params || {}));
- }
- window.tagEvent = tagEvent;
- getUTM();
-</script>
-
 <meta charset="UTF-8">
 <title>Animal Personality Test | SBTI × Big Five</title>
 <!-- force-refresh-test-1776845489 -->
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-S29BGTFNLT');
+function getUTM(){
+  var params=new URLSearchParams(window.location.search);
+  var utm={};
+  ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'].forEach(function(k){
+    var v=params.get(k);if(v)utm[k]=v;
+  });
+  if(Object.keys(utm).length>0)sessionStorage.setItem('fb_utm',JSON.stringify(utm));
+}
+function tagEvent(n,p){var s=sessionStorage.getItem('fb_utm');var u=s?JSON.parse(s):{};gtag('event',n,Object.assign({},u,p||{}));}
+window.tagEvent=tagEvent;
+getUTM();
+</script>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:#0f0f1a;color:#e2e8f0;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:3rem 1rem 2rem}
-.lang-switch{position:fixed;top:1rem;right:1rem;display:flex;gap:0.3rem}
-.lang-btn{background:#1a1a2e;border:2px solid #2d2d4a;color:#64748b;border-radius:10px;padding:0.55rem 1.4rem;font-size:0.95rem;font-weight:700;cursor:pointer;transition:all 0.2s}.lang-btn.active,.lang-btn:hover{background:#fff;color:#0a0f1a;border-color:#fff}.lang-btn:hover{background:#f0f0f0;border-color:#e0e0e0}
+.lang-switch{position:fixed;top:1rem;right:1rem;display:flex;gap:0.3rem;z-index:100}
+.lang-btn{background:#1a1a2e;border:2px solid #2d2d4a;color:#64748b;border-radius:10px;padding:0.55rem 1.4rem;font-size:0.95rem;font-weight:700;cursor:pointer;transition:all 0.2s}
+.lang-btn.active,.lang-btn:hover{background:#fff;color:#0a0f1a;border-color:#fff}
 .lang-btn:hover{border-color:#f59e0b;color:#f59e0b}
 .main-title{text-align:center;margin-bottom:2rem}
 .main-title h1{font-size:1.8rem;font-weight:900;color:#fff;margin-bottom:0.3rem}
@@ -49,288 +39,136 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 .card-info{text-align:left;flex:1}
 .card-title{font-size:1rem;font-weight:700;color:#fff;margin-bottom:0.2rem}
 .card-desc{font-size:0.8rem;color:#64748b}
-.card-link{display:block;color:#60a5fa;font-size:0.8rem;margin-top:0.2rem}
+.card-link{color:#60a5fa;font-size:0.8rem;margin-top:0.2rem;display:block}
 .card.quiz{background:linear-gradient(135deg,#1a1a2e,#2d1b4e);border-color:#7c3aed}
 .card.quiz:hover{border-color:#a855f7}
 .card.wc{background:linear-gradient(135deg,#1a1a2e,#1e3a5f);border-color:#2563eb}
 .card.wc:hover{border-color:#3b82f6}
-
 .stats-bar-wrap{display:flex;align-items:center;gap:0.6rem;margin:0.4rem 0}
 .stats-bar-label{min-width:50px;text-align:right;font-size:0.85rem;color:#e2e8f0}
 .stats-bar-bg{flex:1;height:20px;background:#2d2d4a;border-radius:10px;overflow:hidden}
 .stats-bar-fill{height:100%;border-radius:10px;transition:width 1s ease}
 .stats-bar-pct{font-size:0.75rem;color:#94a3b8;min-width:40px;text-align:left}
-<style>
-
 .tab-bar{display:flex;gap:0.4rem;margin-bottom:1.2rem;flex-wrap:wrap;justify-content:center}
 .tab-btn{background:#1a1a2e;border:1px solid #2d2d4a;color:#64748b;padding:0.5rem 1rem;border-radius:10px;font-size:0.85rem;cursor:pointer;transition:all 0.2s;font-weight:600}
 .tab-btn:hover{border-color:#f59e0b;color:#f59e0b}
 .tab-btn.active{background:#f59e0b;color:#fff;border-color:#f59e0b}
 .content-panel{display:none}
 .content-panel.active{display:block}
-.community-panel{max-width:500px;width:100%;margin:0 auto;text-align:center}
-.stats-bar-wrap{display:flex;align-items:center;gap:0.6rem;margin:0.4rem 0}
-.stats-bar-label{min-width:50px;text-align:right;font-size:0.85rem;color:#e2e8f0}
-.stats-bar-bg{flex:1;height:20px;background:#2d2d4a;border-radius:10px;overflow:hidden}
-.stats-bar-fill{height:100%;border-radius:10px;transition:width 1s ease}
-.stats-bar-pct{font-size:0.75rem;color:#94a3b8;min-width:40px;text-align:left}
+#content-community{max-width:500px;width:100%;margin:0 auto;text-align:center}
+.community-loading{color:#475569;font-size:0.85rem;text-align:center;padding:1rem}
 </style>
 
 </head>
 <body>
 
 <div class="lang-switch">
- <button class="lang-btn" onclick="switchLang('zh')">中文</button>
- <button class="lang-btn" onclick="switchLang('en')">EN</button>
+ <button class="lang-btn active" id="btn-zh" onclick="switchLang('zh')">中文</button>
+ <button class="lang-btn" id="btn-en" onclick="switchLang('en')">EN</button>
 </div>
 
 <div class="main-title">
- <h1 data-i18n="home_title" id="main-h1">🐾 动物性格测试</h1>
- <p data-i18n="home_subtitle" id="main-subtitle">SBTI × Big Five · 发现你的动物人格</p>
+ <h1 id="h1-title">🐾 动物性格测试</h1>
+ <p id="h1-subtitle">SBTI × Big Five · 发现你的动物人格</p>
 </div>
 
-<div class="cards">
-
- <!-- Card 1: Animal Quiz -->
- <a class="card quiz" href="animal_quiz.html" data-lang-preserve>
-   <div class="card-emoji">🦊</div>
-   <div class="card-info">
-     <div class="card-title" id="card1-title">动物性格测试</div>
-     <div class="card-desc" id="card1-desc">38题测出你的动物人格</div>
-     <span class="card-link" id="card1-link">立即测试 →</span>
-   </div>
- </a>
-
- <!-- Card 2: Personality Test -->
- <a class="card" href="personality_test.html" data-lang-preserve>
-   <div class="card-emoji">🧠</div>
-   <div class="card-info">
-     <div class="card-title" id="card2-title">人格测试</div>
-     <div class="card-desc" id="card2-desc">36题情境问卷</div>
-     <span class="card-link" id="card2-link">开始测试 →</span>
-   </div>
- </a>
-
- <!-- Card 3: Manual Eval -->
- <a class="card" href="personality_eval.html" data-lang-preserve>
-   <div class="card-emoji">📊</div>
-   <div class="card-info">
-     <div class="card-title" id="card3-title">手动评估</div>
-     <div class="card-desc" id="card3-desc">滑块输入 + 报告</div>
-     <span class="card-link" id="card3-link">立即体验 →</span>
 <div class="tab-bar">
-  <button class="tab-btn active" onclick="showTab('test')" id="tab-test">&#x1F3BE; 测试</button>
-  <button class="tab-btn" onclick="showTab('personality')" id="tab-personality">&#x1F9E0; 人格</button>
-  <button class="tab-btn" onclick="showTab('eval')" id="tab-eval">&#x1F4CA; 评估</button>
-  <button class="tab-btn" onclick="showTab('gacha')" id="tab-gacha">&#x1F3B0; 抽卡</button>
-  <button class="tab-btn" onclick="showTab('worldcup')" id="tab-worldcup">&#x1F3C6; 世界杯</button>
-  <button class="tab-btn" onclick="showTab('community')" id="tab-community">&#x1F4DA; 看看大家</button>
+ <button class="tab-btn active" id="tab-test" onclick="showTab('test')">🐾 测试</button>
+ <button class="tab-btn" id="tab-personality" onclick="showTab('personality')">🧠 人格</button>
+ <button class="tab-btn" id="tab-eval" onclick="showTab('eval')">📊 评估</button>
+ <button class="tab-btn" id="tab-gacha" onclick="showTab('gacha')">🎰 抽卡</button>
+ <button class="tab-btn" id="tab-worldcup" onclick="showTab('worldcup')">🏆 世界杯</button>
+ <button class="tab-btn" id="tab-community" onclick="showTab('community')">📚 看看大家</button>
 </div>
+
 <div id="content-test" class="content-panel active">
 <div class="cards">
-
- <a class="card quiz" href="animal_quiz.html" data-lang-preserve>
-   <div class="card-emoji">&#x1F98A;</div>
-   <div class="card-info">
-     <div class="card-title" id="card1-title">动物性格测试</div>
-     <div class="card-desc" id="card1-desc">38题测出你的动物人格</div>
-     <span class="card-link" id="card1-link">立即测试 &#x2192;</span>
-   </div>
- </a>
-
- <a class="card" href="personality_test.html" data-lang-preserve>
-   <div class="card-emoji">&#x1F9E0;</div>
-   <div class="card-info">
-     <div class="card-title" id="card2-title">人格测试</div>
-     <div class="card-desc" id="card2-desc">36题情境问卷</div>
-     <span class="card-link" id="card2-link">开始测试 &#x2192;</span>
-   </div>
- </a>
-
- <a class="card" href="personality_eval.html" data-lang-preserve>
-   <div class="card-emoji">&#x1F4CA;</div>
-   <div class="card-info">
-     <div class="card-title" id="card3-title">手动评估</div>
-     <div class="card-desc" id="card3-desc">滑块输入 + 报告</div>
-     <span class="card-link" id="card3-link">立即体验 &#x2192;</span>
-   </div>
- </a>
-
- <a class="card" href="gacha_frontend.html" data-lang-preserve>
-   <div class="card-emoji">&#x1F3B0;</div>
-   <div class="card-info">
-     <div class="card-title" id="card4-title">抽卡模拟</div>
-     <div class="card-desc" id="card4-desc">Gacha 风格</div>
-     <span class="card-link" id="card4-link">开始抽卡 &#x2192;</span>
-   </div>
- </a>
-
- <a class="card wc" href="worldcup.html" data-lang-preserve>
-   <div class="card-emoji">&#x1F3C6;</div>
-   <div class="card-info">
-     <div class="card-title" id="card5-title">世界杯球队 × 动物人格</div>
-     <div class="card-desc" id="card5-desc">每支球队有独特的动物人格 &#x1F43E;</div>
-     <span class="card-link" id="card5-link">立即查看 &#x2192;</span>
-   </div>
- </a>
-
+ <a class="card quiz" href="animal_quiz.html"><div class="card-emoji">🦊</div><div class="card-info"><div class="card-title">动物性格测试</div><div class="card-desc">38题测出你的动物人格</div><span class="card-link">立即测试 →</span></div></a>
+ <a class="card" href="personality_test.html"><div class="card-emoji">🧠</div><div class="card-info"><div class="card-title">人格测试</div><div class="card-desc">36题情境问卷</div><span class="card-link">开始测试 →</span></div></a>
+ <a class="card" href="personality_eval.html"><div class="card-emoji">📊</div><div class="card-info"><div class="card-title">手动评估</div><div class="card-desc">滑块输入 + 报告</div><span class="card-link">立即体验 →</span></div></a>
+ <a class="card" href="gacha_frontend.html"><div class="card-emoji">🎰</div><div class="card-info"><div class="card-title">抽卡模拟</div><div class="card-desc">Gacha 风格</div><span class="card-link">开始抽卡 →</span></div></a>
+ <a class="card wc" href="worldcup.html"><div class="card-emoji">🏆</div><div class="card-info"><div class="card-title">世界杯球队 × 动物人格</div><div class="card-desc">每支球队有独特的动物人格 🐾</div><span class="card-link">立即查看 →</span></div></a>
 </div>
 </div>
+
+<div id="content-personality" class="content-panel"><div class="cards"><a class="card" href="personality_test.html"><div class="card-emoji">🧠</div><div class="card-info"><div class="card-title">人格测试</div><div class="card-desc">36题情境问卷</div><span class="card-link">开始测试 →</span></div></a></div></div>
+
+<div id="content-eval" class="content-panel"><div class="cards"><a class="card" href="personality_eval.html"><div class="card-emoji">📊</div><div class="card-info"><div class="card-title">手动评估</div><div class="card-desc">滑块输入 + 报告</div><span class="card-link">立即体验 →</span></div></a></div></div>
+
+<div id="content-gacha" class="content-panel"><div class="cards"><a class="card" href="gacha_frontend.html"><div class="card-emoji">🎰</div><div class="card-info"><div class="card-title">抽卡模拟</div><div class="card-desc">Gacha 风格</div><span class="card-link">开始抽卡 →</span></div></a></div></div>
+
+<div id="content-worldcup" class="content-panel"><div class="cards"><a class="card wc" href="worldcup.html"><div class="card-emoji">🏆</div><div class="card-info"><div class="card-title">世界杯球队 × 动物人格</div><div class="card-desc">每支球队有独特的动物人格 🐾</div><span class="card-link">立即查看 →</span></div></a></div></div>
+
 <div id="content-community" class="content-panel">
-  <div class="community-panel">
-    <div style="color:#e2e8f0;font-size:1.1rem;font-weight:700;margin-bottom:0.5rem">&#x1F3BE; 看看大家都是什么动物</div>
-    <div style="color:#64748b;font-size:0.85rem;margin-bottom:1rem">已有 <span id="totalCount">--</span> 人测试过，来看看分布</div>
-    <div id="communityBars" style="background:#1a1a2e;border-radius:14px;padding:1.2rem;border:1px solid #2d2d4a;text-align:left">
-      <div style="color:#475569;font-size:0.85rem">加载中...</div>
-    </div>
-    <a href="animal_quiz.html" style="display:inline-block;margin-top:1.2rem;background:linear-gradient(135deg,#f59e0b,#e97316);color:#fff;font-weight:700;padding:0.8rem 2rem;border-radius:50px;text-decoration:none;font-size:1rem;box-shadow:0 4px 20px #f59e0b40">&#x1F999; 测试我的动物人格</a>
-    <div style="margin-top:1.5rem">
-      <div style="color:#e2e8f0;font-size:1.1rem;font-weight:700;margin-bottom:0.8rem">&#x1F4A5; 最热那个动物</div>
-      <div id="topAnimal" style="background:#1a1a2e;border-radius:14px;padding:1.2rem;border:1px solid #2d2d4a">
-        <div style="color:#475569;font-size:0.85rem">加载中...</div>
-      </div>
-    </div>
-  </div>
+ <div style="color:#e2e8f0;font-size:1.1rem;font-weight:700;margin-bottom:0.5rem">🐾 看看大家都是什么动物</div>
+ <div style="color:#64748b;font-size:0.85rem;margin-bottom:1rem">已有 <span id="totalCount">--</span> 人测试过，来看看分布</div>
+ <div id="communityBars" style="background:#1a1a2e;border-radius:14px;padding:1.2rem;border:1px solid #2d2d4a;text-align:left"><div class="community-loading">加载中...</div></div>
+ <a href="animal_quiz.html" style="display:inline-block;margin-top:1.2rem;background:linear-gradient(135deg,#f59e0b,#e97316);color:#fff;font-weight:700;padding:0.8rem 2rem;border-radius:50px;text-decoration:none;font-size:1rem;box-shadow:0 4px 20px #f59e0b40">🦘 测试我的动物人格</a>
 </div>
-desc">每支球队有独特的动物人格 🐾</div>
-     <span class="card-link" id="card5-link">立即查看 →</span>
-   </div>
- </a>
-
-
-
-<!-- community stats section -->
-<div id="communitySection" style="max-width:500px;width:100%;margin:1.5rem auto 0;text-align:center">
-  <div style="color:#64748b;font-size:0.9rem;margin-bottom:0.8rem">🐾 看看大家都是什么动物</div>
-  <div id="communityBars" style="background:#1a1a2e;border-radius:14px;padding:1rem 1.2rem;border:1px solid #2d2d4a">
-    <div style="color:#475569;font-size:0.85rem">加载中...</div>
-  </div>
-  <a href="animal_quiz.html" style="display:inline-block;margin-top:0.8rem;color:#f59e0b;font-size:0.85rem;text-decoration:none">测试你的动物人格 →</a>
-</div></div>
 
 <script>
-var _txt = {
- zh: {
-   h1: '🐾 动物性格测试',
-   subtitle: 'SBTI × Big Five · 发现你的动物人格',
-   card1: ['动物性格测试','38题测出你的动物人格','立即测试 →'],
-   card2: ['人格测试','36题情境问卷','开始测试 →'],
-   card3: ['手动评估','滑块输入 + 报告','立即体验 →'],
-   card4: ['抽卡模拟','Gacha 风格','开始抽卡 →'],
-   card5: ['世界杯球队 × 动物人格','每支球队有独特的动物人格 🐾','立即查看 →']
- },
- en: {
-   h1: '🐾 Animal Personality Test',
-   subtitle: 'SBTI × Big Five · Discover Your Animal Archetype',
-   card1: ['Animal Personality Test','38 questions to find your animal','Take Test →'],
-   card2: ['Personality Test','36 situational questions','Start Test →'],
-   card3: ['Manual Assessment','Slider input + full report','Try Now →'],
-   card4: ['Gacha Simulator','Gacha-style experience','Draw Now →'],
-   card5: ['World Cup Teams × Animal Archetype','Every team has a unique animal personality','View Now →']
- }
-};
+var _txt={zh:{h1:'🐾 动物性格测试',sub:'SBTI × Big Five · 发现你的动物人格',c1:['动物性格测试','38题测出你的动物人格','立即测试 →'],c2:['人格测试','36题情境问卷','开始测试 →'],c3:['手动评估','滑块输入 + 报告','立即体验 →'],c4:['抽卡模拟','Gacha 风格','开始抽卡 →'],c5:['世界杯球队 × 动物人格','每支球队有独特的动物人格 🐾','立即查看 →']},en:{h1:'🐾 Animal Personality Test',sub:'SBTI × Big Five · Discover Your Animal Archetype',c1:['Animal Personality Test','38 questions to find your animal','Take Test →'],c2:['Personality Test','36 situational questions','Start Test →'],c3:['Manual Assessment','Slider input + full report','Try Now →'],c4:['Gacha Simulator','Gacha-style experience','Draw Now →'],c5:['World Cup Teams × Animal Archetype','Every team has a unique animal personality','View Now →']}};
 
-function switchLang(lang) {
- var url = new URL(window.location.href);
- url.searchParams.set('lang', lang);
- window.history.replaceState({}, '', url);
- applyLang(lang);
-  // Highlight active button
-  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.remove('active')});
-  var btn = document.querySelector('.lang-btn[onclick*="'+lang+'"]');
-  if(btn) btn.classList.add('active');
-}
-function applyLang(lang) {
- var t = _txt[lang] || _txt.zh;
- document.getElementById('main-h1').textContent = t.h1;
- document.getElementById('main-subtitle').textContent = t.subtitle;
- for (var i = 1; i <= 5; i++) {
-   var c = t['card' + i];
-   document.getElementById('card' + i + '-title').textContent = c[0];
-   document.getElementById('card' + i + '-desc').textContent = c[1];
-   document.getElementById('card' + i + '-link').textContent = c[2];
+function switchLang(lang){
+ document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.remove('active')});
+ var btn=document.getElementById('btn-'+lang);
+ if(btn)btn.classList.add('active');
+ var t=_txt[lang]||_txt.zh;
+ document.getElementById('h1-title').textContent=t.h1;
+ document.getElementById('h1-subtitle').textContent=t.sub;
+ for(var i=1;i<=5;i++){
+   var c=t['c'+i];
+   var te=document.getElementById('c'+i+'-t');var de=document.getElementById('c'+i+'-d');var le=document.getElementById('c'+i+'-l');
+   if(te)te.textContent=c[0];if(de)de.textContent=c[1];if(le)le.innerHTML=c[2];
  }
- document.querySelectorAll('[data-lang-preserve]').forEach(function(el) {
-   var href = el.getAttribute('href') || '';
-   var hash = href.indexOf('#');
-   var hashStr = hash >= 0 ? href.substring(hash) : '';
-   var baseAndQuery = hash >= 0 ? href.substring(0, hash) : href;
-   var qIdx = baseAndQuery.indexOf('?');
-   var base = qIdx >= 0 ? baseAndQuery.substring(0, qIdx) : baseAndQuery;
-   var query = qIdx >= 0 ? baseAndQuery.substring(qIdx + 1) : '';
-   // Remove existing lang= and utm_ params
-   query = query.split('&').filter(function(p) {
-     return p.indexOf('lang=') !== 0 && p.indexOf('utm_') !== 0 && p.length > 0;
-   }).join('&');
-   var newHref = base + (query.length > 0 ? '?' + query + '&' : '?') + 'lang=' + lang + hashStr;
-   el.setAttribute('href', newHref);
- });;
+ var url=new URL(window.location.href);url.searchParams.set('lang',lang);window.history.replaceState({},'',url);sessionStorage.setItem('lang',lang);
 }
-document.addEventListener('DOMContentLoaded', function() {
- var lang = new URL(window.location.href).searchParams.get('lang') || 'zh'; try { document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.remove('active')}); var lb = document.querySelector('.lang-btn[onclick*="'+lang+'"]'); if(lb) lb.classList.add('active'); } catch(e){};
- applyLang(lang);
- // Add lang param to data-lang-preserve links
- document.querySelectorAll('[data-lang-preserve]').forEach(function(el) {
-   var href = el.getAttribute('href');
-   if (href && !href.includes('lang=')) {
-     var sep = href.includes('?') ? '&' : '?';
-     el.setAttribute('href', href + sep + 'lang=' + lang);
-   }
- });
-});
-</script>
 
-<script>
 function showTab(name){
-  document.querySelectorAll('.content-panel').forEach(function(p){p.classList.remove('active');});
-  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
-  var panel=document.getElementById('content-'+name);
-  var btn=document.getElementById('tab-'+name);
-  if(panel)panel.classList.add('active');
-  if(btn)btn.classList.add('active');
-  if(name==='community')loadCommunity();
+ document.querySelectorAll('.content-panel').forEach(function(p){p.classList.remove('active')});
+ document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active')});
+ var panel=document.getElementById('content-'+name);var btn=document.getElementById('tab-'+name);
+ if(panel)panel.classList.add('active');if(btn)btn.classList.add('active');
+ if(name==='community')loadCommunity();
 }
+
 window.loadCommunity=function(){
-  var el=document.getElementById('communityBars');
-  if(el&&el.dataset.loaded)return;
-  fetch('/api/stats')
-  .then(function(r){return r.json();})
-  .then(function(d){
-    var types=(d.top_types||[]).slice(0,8);
-    if(!types.length)return;
-    var total=types.reduce(function(s,i){return s+i.count},0);
-    var tc=document.getElementById('totalCount');
-    if(tc)tc.textContent=total;
-    var barColors=['#f59e0b','#ef4444','#8b5cf6','#10b981','#3b82f6','#ec4899','#06b6d4','#84cc16','#f97316','#6366f1'];
-    var nm={dragon:'龙',phoenix:'凤凰',unicorn:'独角兽',tiger:'老虎',kirin:'麒麟',whale:'鲸鱼',wolf:'狼',eagle:'鹰',leopard:'豹',dolphin:'海豚',owl:'猫头鹰',cat:'猫',dog:'狗',rabbit:'兔子',panda:'熊猫',koala:'考拉',fox:'狐狸'};
-    var em={dragon:'&#x1F409;',phoenix:'&#x1F525;',unicorn:'&#x1F984;',tiger:'&#x1F42F;',kirin:'&#x1F992;',whale:'&#x1F40B;',wolf:'&#x1F43A;',eagle:'&#x1F985;',leopard:'&#x1F406;',dolphin:'&#x1F42C;',owl:'&#x1F989;',cat:'&#x1F431;',dog:'&#x1F436;',rabbit:'&#x1F430;',panda:'&#x1F43C;',koala:'&#x1F428;',fox:'&#x1F98A;'};
-    var html='';
-    types.forEach(function(t,i){
-      var pct=Math.round((t.count/total)*100);
-      var color=barColors[i%barColors.length];
-      var n=nm[t.type]||t.type;
-      var e=em[t.type]||'&#x2B50;';
-      html+='<div class="stats-bar-wrap"><span class="stats-bar-label">'+e+' '+n+'</span><div class="stats-bar-bg"><div class="stats-bar-fill" style="width:'+pct+'%;background:'+color+'"></div></div><span class="stats-bar-pct">'+pct+'%</span></div>';
-    });
-    var cb=document.getElementById('communityBars');
-    if(cb){cb.innerHTML=html;cb.dataset.loaded='1';}
-    var top=types[0];
-    if(top){
-      var topN=nm[top.type]||top.type;
-      var topE=em[top.type]||'&#x2B50;';
-      var topPct=Math.round(top.count/total*100);
-      var ta=document.getElementById('topAnimal');
-      if(ta)ta.innerHTML='<div style="text-align:center;padding:0.5rem"><div style="font-size:3rem;line-height:1.2">'+topE+'</div><div style="font-size:1.2rem;font-weight:700;color:#fff;margin-top:0.5rem">'+topN+'</div><div style="color:#64748b;font-size:0.85rem;margin-top:0.3rem">占全部 '+topPct+'%</div><a href="'+top.type+'-personality.html" style="display:inline-block;margin-top:0.8rem;color:#f59e0b;font-size:0.85rem;text-decoration:none">看看'+topN+'的性格 &#x2192;</a></div>';
-    }
-  })
-  .catch(function(){});
+ var el=document.getElementById('communityBars');
+ if(el&&el.dataset.loaded)return;
+ fetch('/api/stats').then(function(r){return r.json()}).then(function(d){
+  var types=(d.top_types||[]).slice(0,8);
+  if(!types.length)return;
+  var total=types.reduce(function(s,i){return s+i.count},0);
+  var tc=document.getElementById('totalCount');
+  if(tc)tc.textContent=total;
+  var barColors=['#f59e0b','#ef4444','#8b5cf6','#10b981','#3b82f6','#ec4899','#06b6d4','#84cc16','#f97316','#6366f1'];
+  var nm={dragon:'龙',phoenix:'凤凰',unicorn:'独角兽',tiger:'老虎',kirin:'麒麟',whale:'鲸鱼',wolf:'狼',eagle:'鹰',leopard:'豹',dolphin:'海豚',owl:'猫头鹰',cat:'猫',dog:'狗',rabbit:'兔子',panda:'熊猫',koala:'考拉',fox:'狐狸'};
+  var em={dragon:'🐉',phoenix:'🔥',unicorn:'🦄',tiger:'🐯',kirin:'🦒',whale:'🐋',wolf:'🐺',eagle:'🦅',leopard:'🐆',dolphin:'🐬',owl:'🦉',cat:'🐱',dog:'🐶',rabbit:'🐰',panda:'🐼',koala:'🐨',fox:'🦊'};
+  var html='';
+  types.forEach(function(t,i){
+   var pct=Math.round((t.count/total)*100);
+   var color=barColors[i%barColors.length];
+   var n=nm[t.type]||t.type;
+   var e=em[t.type]||'⭐';
+   html+='<div class="stats-bar-wrap"><span class="stats-bar-label">'+e+' '+n+'</span><div class="stats-bar-bg"><div class="stats-bar-fill" style="width:'+pct+'%;background:'+color+'"></div></div><span class="stats-bar-pct">'+pct+'%</span></div>';
+  });
+  var cb=document.getElementById('communityBars');
+  if(cb){cb.innerHTML=html;cb.dataset.loaded='1';}
+  var top=types[0];
+  if(top){
+   var topN=nm[top.type]||top.type;
+   var topE=em[top.type]||'⭐';
+   var topPct=Math.round(top.count/total*100);
+   var ta=document.getElementById('topAnimal');
+   if(ta)ta.innerHTML='<div style="text-align:center;padding:0.5rem"><div style="font-size:3rem;line-height:1.2">'+topE+'</div><div style="font-size:1.2rem;font-weight:700;color:#fff;margin-top:0.5rem">'+topN+'</div><div style="color:#64748b;font-size:0.85rem;margin-top:0.3rem">占全部 '+topPct+'%</div><a href="'+top.type+'-personality.html" style="display:inline-block;margin-top:0.8rem;color:#f59e0b;font-size:0.85rem;text-decoration:none">看看'+topN+'的性格 →</a></div>';
+  }
+ }).catch(function(){});
 };
+
+document.addEventListener('DOMContentLoaded',function(){
+ var lang=sessionStorage.getItem('lang')||'zh';
+ switchLang(lang);
+});
 </script>
 </body>
 </html>
-
-<!-- force-redeploy 1776848242 -->
-
-<!-- deploy-trigger 1776848686 -->
-
-<!-- redeploy 1776849717 -->
